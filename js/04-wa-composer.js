@@ -40,7 +40,6 @@ function updateWaComposerPreview() {
   const svc = document.getElementById('wa-comp-service')?.value || 'Produksi Musik Tari';
   const intent = document.getElementById('wa-comp-intent')?.value.trim() || '[Kebutuhan / Rencana Diskusi]';
 
-  // SAPAAN DIUBAH MENJADI HALO ADMIN PRANGART LAB
   const msg =
     `Halo Admin PrangArt Lab,\n` +
     `Perkenalkan saya *${name}*${org ? ` (${org})` : ''}.\n` +
@@ -56,7 +55,7 @@ function submitProducerWaMessage() {
   const name = document.getElementById('wa-comp-name')?.value.trim();
   const intent = document.getElementById('wa-comp-intent')?.value.trim();
   if (!name || !intent) {
-    showToast('Lengkapi Pesan', 'Mohon isi Nama Anda dan hal yang ingin didiskusikan sebelum membuka WhatsApp.', 'warning');
+    showToast('Lengkapi Pesan', 'Mohon isi Nama Anda dan hal yang ingin didiskusikan.', 'warning');
     return;
   }
   const text = updateWaComposerPreview();
@@ -68,10 +67,7 @@ function submitProducerWaMessage() {
 function launchWhatsAppProjectDiscussion(projId) {
   const proj = appState.projects.find(p => p.id === projId);
   if (!proj) return;
-  const intent =
-    `Diskusi Lanjutan Proyek (${proj.id}) - "${proj.judul}"\n` +
-    `Layanan: ${proj.serviceLineLabel} (${proj.packageName})\n` +
-    `Mohon konfirmasi hasil pemeriksaan materi & penawaran resmi.`;
+  const intent = `Diskusi Lanjutan Proyek (${proj.id}) - "${proj.judul}"\nLayanan: ${proj.serviceLineLabel}\nMohon konfirmasi hasil pemeriksaan materi & penawaran resmi.`;
   openProducerWaModal(intent, proj.serviceLineLabel, proj.clientName, `${proj.instansi} - ${proj.kota}`);
 }
 
@@ -80,11 +76,9 @@ function sendClientRevisionNoteToWA(projId) {
   if (!proj) return;
   const note = document.getElementById('client-revision-note')?.value.trim();
   if (!note) {
-    showToast('Isi Catatan Revisi', 'Tuliskan poin revisi terlebih dahulu sebelum mengirim ke WhatsApp.', 'warning');
+    showToast('Isi Catatan Revisi', 'Tuliskan poin revisi terlebih dahulu.', 'warning');
     return;
   }
-  const intent =
-    `Catatan Revisi Proyek (${proj.id}) - "${proj.judul}"\n` +
-    `Detail Revisi:\n${note}`;
+  const intent = `Catatan Revisi Proyek (${proj.id}) - "${proj.judul}"\nDetail Revisi:\n${note}`;
   openProducerWaModal(intent, proj.serviceLineLabel, proj.clientName, `${proj.instansi} - ${proj.kota}`);
 }
