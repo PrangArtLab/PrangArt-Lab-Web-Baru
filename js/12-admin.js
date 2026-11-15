@@ -2,150 +2,92 @@ function verifyAdminPin(e) {
   e.preventDefault();
   const pin = document.getElementById('admin-pin-input')?.value.trim();
   const validPin = appState.settings.adminPin || '2026';
-  if (pin !== validPin) {
-    showToast('PIN Salah', 'PIN Studio tidak sesuai.', 'error');
-    return;
-  }
-  appState.isAdminAuthenticated = true;
-  refreshAdminPageUI();
+  if (pin !== validPin) { showToast('PIN Salah', 'PIN Studio tidak sesuai.', 'error'); return; }
+  appState.isAdminAuthenticated = true; refreshAdminPageUI();
 }
 
 function refreshAdminPageUI() {
   const gate = document.getElementById('admin-pin-gate');
   const ws = document.getElementById('admin-workspace-content');
-  if (!appState.isAdminAuthenticated) {
-    gate?.classList.remove('hidden');
-    ws?.classList.add('hidden');
-    return;
-  }
-  gate?.classList.add('hidden');
-  ws?.classList.remove('hidden');
-  renderAdminDashboard();
+  if (!appState.isAdminAuthenticated) { gate?.classList.remove('hidden'); ws?.classList.add('hidden'); return; }
+  gate?.classList.add('hidden'); ws?.classList.remove('hidden'); renderAdminDashboard();
 }
 
 function renderAdminDashboard() {
   const container = document.getElementById('admin-workspace-content');
   if (!container) return;
-
-  const filtered = appState.adminFilterStatus === 'Semua'
-    ? appState.projects
-    : appState.projects.filter(p => p.productionStatus === appState.adminFilterStatus);
-
-  if (!filtered.some(p => p.id === appState.selectedAdminProjectId) && filtered.length > 0) {
-    appState.selectedAdminProjectId = filtered[0].id;
-  }
+  const filtered = appState.adminFilterStatus === 'Semua' ? appState.projects : appState.projects.filter(p => p.productionStatus === appState.adminFilterStatus);
+  if (!filtered.some(p => p.id === appState.selectedAdminProjectId) && filtered.length > 0) appState.selectedAdminProjectId = filtered[0].id;
 
   container.innerHTML = `
-    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-borderline pb-4">
-      <div>
-        <span class="text-xs font-mono uppercase text-gold font-bold">Panel Produser &amp; Komposer</span>
-        <h2 class="text-2xl font-bold text-ivory">Pemeriksaan Brief, Penawaran &amp; Produksi</h2>
-      </div>
-      <div class="flex flex-wrap gap-1.5">
-        ${['Semua', ...TRACKER_MILESTONES].map(st => `
-          <button type="button" onclick="appState.adminFilterStatus = '${st}'; renderAdminDashboard()" class="px-2.5 py-1.5 rounded-lg text-[11px] font-semibold ${appState.adminFilterStatus === st ? 'bg-gold text-obsidian' : 'bg-charcoal text-ash border border-borderline'}">${st}</button>
-        `).join('')}
+    <div class="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-5">
+      <div><span class="text-xs font-mono uppercase text-primary font-bold">Panel Admin</span><h2 class="text-2xl font-display font-bold text-textMain">Pemeriksaan &amp; Produksi</h2></div>
+      <div class="flex flex-wrap gap-2">
+        ${['Semua', ...TRACKER_MILESTONES].map(st => `<button type="button" onclick="appState.adminFilterStatus = '${st}'; renderAdminDashboard()" class="px-3 py-1.5 rounded-lg text-xs font-bold ${appState.adminFilterStatus === st ? 'bg-primary text-white shadow' : 'bg-surface text-textMuted border border-border hover:text-textMain'}">${st}</button>`).join('')}
       </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-      <div class="lg:col-span-4 space-y-2.5">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div class="lg:col-span-4 space-y-3">
         ${filtered.map(p => `
-          <button type="button" onclick="appState.selectedAdminProjectId = '${p.id}'; renderAdminDashboard()" class="w-full text-left p-4 rounded-2xl border transition ${p.id === appState.selectedAdminProjectId ? 'bg-charcoal border-gold' : 'bg-charcoal/60 border-borderline hover:border-gold/40'}">
-            <div class="flex items-center justify-between text-[11px] font-mono mb-1">
-              <span class="text-gold font-bold">${p.id}</span>
-              <span class="text-ash">${p.createdAt}</span>
-            </div>
-            <strong class="text-sm text-ivory block truncate">${p.judul}</strong>
-            <span class="text-xs text-ash block truncate">${p.clientName} • ${p.instansi}</span>
-            <div class="flex items-center justify-between mt-2 pt-2 border-t border-borderline text-[11px]">
-              <span class="text-emerald-400 font-semibold truncate max-w-[170px]">${p.productionStatus}</span>
-              <span class="font-mono text-ivory">${formatRupiah(p.totalPrice)}</span>
+          <button type="button" onclick="appState.selectedAdminProjectId = '${p.id}'; renderAdminDashboard()" class="w-full text-left p-5 rounded-2xl border transition ${p.id === appState.selectedAdminProjectId ? 'bg-surface border-primary shadow-sm' : 'bg-surface/50 border-border hover:border-primary/50'}">
+            <div class="flex items-center justify-between text-xs font-mono mb-2"><span class="text-primary font-bold">${p.id}</span><span class="text-textMuted">${p.createdAt}</span></div>
+            <strong class="text-base font-display font-bold text-textMain block truncate">${p.judul}</strong>
+            <span class="text-xs text-textMuted block truncate mt-1">${p.clientName} • ${p.instansi}</span>
+            <div class="flex items-center justify-between mt-3 pt-3 border-t border-border text-xs">
+              <span class="text-emerald-500 font-bold truncate max-w-[170px]">${p.productionStatus}</span>
+              <span class="font-mono text-textMain font-bold">${formatRupiah(p.totalPrice)}</span>
             </div>
           </button>
-        `).join('')}
+        `).join('') || '<p class="text-sm text-textMuted text-center py-10">Belum ada proyek.</p>'}
       </div>
       <div id="admin-inspector-panel" class="lg:col-span-8"></div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div class="bg-charcoal border border-borderline rounded-2xl p-5 space-y-4">
-        <h3 class="text-sm font-bold text-gold uppercase font-mono">Pengaturan Studio &amp; Pembayaran</h3>
-        <div class="space-y-3 text-xs">
-          <div>
-            <label class="block text-ash mb-1">WhatsApp Admin (628...)</label>
-            <input type="text" id="set-wa" value="${appState.settings.studioWhatsApp}" class="w-full bg-acoustic border border-borderline rounded-xl px-3 py-2 font-mono text-ivory" />
-          </div>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-ash mb-1">PIN Akses Admin</label>
-              <input type="text" id="set-pin" value="${appState.settings.adminPin || '2026'}" class="w-full bg-acoustic border border-borderline rounded-xl px-3 py-2 font-mono text-ivory" />
-            </div>
-          </div>
-          
-          <!-- DAFTAR METODE PEMBAYARAN -->
-          <div class="pt-3 border-t border-borderline">
-            <label class="block text-ash mb-1 font-bold">Daftar Metode Pembayaran:</label>
-            <div class="space-y-2 mb-3" id="admin-payment-methods-list">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-10">
+      <div class="bg-surface border border-border rounded-3xl p-6 space-y-5">
+        <h3 class="text-lg font-display font-bold text-primary">Pengaturan Pembayaran</h3>
+        <div class="space-y-4 text-sm">
+          <div><label class="block text-xs font-semibold text-textMain mb-1.5">WhatsApp Admin</label><input type="text" id="set-wa" value="${appState.settings.studioWhatsApp}" class="w-full bg-panel border border-border focus:border-primary rounded-xl px-4 py-3 font-mono text-textMain" /></div>
+          <div><label class="block text-xs font-semibold text-textMain mb-1.5">PIN Akses Admin</label><input type="text" id="set-pin" value="${appState.settings.adminPin || '2026'}" class="w-full bg-panel border border-border focus:border-primary rounded-xl px-4 py-3 font-mono text-textMain" /></div>
+          <div class="pt-4 border-t border-border">
+            <label class="block text-xs font-bold text-textMain mb-2">Metode Pembayaran:</label>
+            <div class="space-y-2 mb-4">
               ${appState.settings.paymentMethods.map(pm => `
-                <div class="flex items-center justify-between bg-acoustic rounded-lg p-2 border border-borderline">
-                  <div class="flex items-center gap-2">
-                    <img src="${pm.logo}" class="h-5 w-auto object-contain" />
-                    <span class="text-ivory">${pm.name} - ${pm.number} (${pm.holder})</span>
-                  </div>
-                  <button type="button" onclick="removePaymentMethod('${pm.id}')" class="text-red-400 hover:underline">Hapus</button>
+                <div class="flex items-center justify-between bg-panel rounded-xl p-3 border border-border">
+                  <div class="flex items-center gap-3"><img src="${pm.logo}" class="h-6 w-auto object-contain bg-white rounded p-0.5" /><span class="text-xs text-textMain font-semibold">${pm.name} - ${pm.number}</span></div>
+                  <button type="button" onclick="removePaymentMethod('${pm.id}')" class="text-red-500 text-xs font-bold hover:underline">Hapus</button>
                 </div>
               `).join('')}
             </div>
-            
-            <!-- FORM TAMBAH PEMBAYARAN -->
-            <div class="bg-obsidian p-3 rounded-xl border border-borderline space-y-2">
-              <select id="new-pm-type" class="w-full bg-acoustic border border-borderline rounded-lg px-2 py-1.5 text-ivory">
-                <option value="bank">Bank Transfer</option>
-                <option value="qris">QRIS / E-Wallet</option>
-              </select>
-              <input type="text" id="new-pm-name" placeholder="Nama Metode (cth: BCA, Dana)" class="w-full bg-acoustic border border-borderline rounded-lg px-2 py-1.5 text-ivory" />
-              <input type="text" id="new-pm-number" placeholder="Nomor Rekening / No HP" class="w-full bg-acoustic border border-borderline rounded-lg px-2 py-1.5 text-ivory" />
-              <input type="text" id="new-pm-holder" placeholder="Atas Nama" class="w-full bg-acoustic border border-borderline rounded-lg px-2 py-1.5 text-ivory" />
-              <input type="url" id="new-pm-logo" placeholder="URL Logo / Gambar QRIS (https://...)" class="w-full bg-acoustic border border-borderline rounded-lg px-2 py-1.5 text-ivory text-[10px]" />
-              <button type="button" onclick="addPaymentMethod()" class="btn-ghost-gold w-full py-1.5 rounded-lg font-bold">+ Tambah Metode</button>
+            <div class="bg-base p-4 rounded-xl border border-border space-y-3">
+              <select id="new-pm-type" class="w-full bg-panel border border-border rounded-xl px-3 py-2 text-sm text-textMain"><option value="bank">Bank Transfer</option><option value="qris">QRIS / E-Wallet</option></select>
+              <input type="text" id="new-pm-name" placeholder="Nama (cth: BCA, Dana)" class="w-full bg-panel border border-border rounded-xl px-3 py-2 text-sm text-textMain" />
+              <input type="text" id="new-pm-number" placeholder="No Rekening / No HP" class="w-full bg-panel border border-border rounded-xl px-3 py-2 text-sm text-textMain" />
+              <input type="text" id="new-pm-holder" placeholder="Atas Nama" class="w-full bg-panel border border-border rounded-xl px-3 py-2 text-sm text-textMain" />
+              <input type="url" id="new-pm-logo" placeholder="URL Logo / QRIS (https://...)" class="w-full bg-panel border border-border rounded-xl px-3 py-2 text-sm text-textMain text-xs" />
+              <button type="button" onclick="addPaymentMethod()" class="btn-outline w-full py-2.5 rounded-xl text-xs font-bold">+ Tambah</button>
             </div>
           </div>
-
-          <div class="flex flex-wrap gap-2 pt-2">
-            <button type="button" onclick="saveStudioSettings()" class="btn-gold px-4 py-2.5 rounded-xl text-xs font-bold w-full">Simpan Pengaturan Utama</button>
-          </div>
+          <button type="button" onclick="saveStudioSettings()" class="btn-primary w-full py-3 rounded-xl text-sm font-bold mt-2">Simpan Pengaturan</button>
         </div>
       </div>
-
-      <div class="bg-charcoal border border-borderline rounded-2xl p-5 space-y-4">
-        <h3 class="text-sm font-bold text-gold uppercase font-mono">Kelola Portofolio Publik</h3>
-        <form onsubmit="addPortfolioItem(event)" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
-          <input type="text" id="pf-new-title" required placeholder="Judul karya..." class="bg-acoustic border border-borderline rounded-xl px-3 py-2 text-ivory" />
-          <select id="pf-new-cat" class="bg-acoustic border border-borderline rounded-xl px-3 py-2 text-ivory">
-            <option value="Produksi Musik Tari">Produksi Musik Tari</option>
-            <option value="Produksi Musik Non-Tari">Produksi Musik Non-Tari</option>
-            <option value="Transkripsi Musik">Transkripsi Musik</option>
-          </select>
-          <input type="text" id="pf-new-culture" required placeholder="Latar budaya / format..." class="bg-acoustic border border-borderline rounded-xl px-3 py-2 text-ivory" />
-          <input type="url" id="pf-new-url" placeholder="Link YouTube atau Drive (Opsional)..." class="bg-acoustic border border-borderline rounded-xl px-3 py-2 text-ivory" />
-          <input type="text" id="pf-new-desc" placeholder="Deskripsi singkat..." class="bg-acoustic border border-borderline rounded-xl px-3 py-2 text-ivory sm:col-span-2" />
-          <button type="submit" class="btn-ghost-gold rounded-xl py-2 font-bold sm:col-span-2">+ Tambah Karya ke Portofolio</button>
+      <div class="bg-surface border border-border rounded-3xl p-6 space-y-5">
+        <h3 class="text-lg font-display font-bold text-primary">Portofolio Publik</h3>
+        <form onsubmit="addPortfolioItem(event)" class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+          <input type="text" id="pf-new-title" required placeholder="Judul karya..." class="bg-panel border border-border rounded-xl px-4 py-2 text-textMain" />
+          <select id="pf-new-cat" class="bg-panel border border-border rounded-xl px-4 py-2 text-textMain"><option value="Produksi Musik Tari">Musik Tari</option><option value="Produksi Musik Non-Tari">Musik Non-Tari</option><option value="Transkripsi Musik">Transkripsi</option></select>
+          <input type="text" id="pf-new-culture" required placeholder="Latar budaya..." class="bg-panel border border-border rounded-xl px-4 py-2 text-textMain" />
+          <input type="url" id="pf-new-url" placeholder="Link YouTube/Drive..." class="bg-panel border border-border rounded-xl px-4 py-2 text-textMain" />
+          <input type="text" id="pf-new-desc" placeholder="Deskripsi..." class="bg-panel border border-border rounded-xl px-4 py-2 text-textMain sm:col-span-2" />
+          <button type="submit" class="btn-outline rounded-xl py-2.5 font-bold sm:col-span-2">+ Tambah Karya</button>
         </form>
-        <div class="space-y-1.5 max-h-48 overflow-y-auto">
-          ${appState.portfolioItems.map((item, idx) => `
-            <div class="flex items-center justify-between bg-acoustic rounded-lg px-3 py-2 text-xs">
-              <div>
-                <strong class="text-ivory">${item.title}</strong> <span class="text-ash text-[10px] block">${item.category} ${item.mediaUrl ? '• Link Tersedia' : ''}</span>
-              </div>
-              <button type="button" onclick="removePortfolioItem(${idx})" class="text-red-400 hover:underline px-2 py-1 bg-red-400/10 rounded">Hapus</button>
-            </div>
-          `).join('') || '<p class="text-xs text-ash text-center py-4">Belum ada karya portofolio.</p>'}
+        <div class="space-y-2 max-h-48 overflow-y-auto">
+          ${appState.portfolioItems.map((item, idx) => `<div class="flex items-center justify-between bg-panel rounded-xl px-4 py-3 text-sm"><div><strong class="text-textMain block">${item.title}</strong><span class="text-xs text-textMuted">${item.category}</span></div><button type="button" onclick="removePortfolioItem(${idx})" class="text-red-500 text-xs font-bold">Hapus</button></div>`).join('') || '<p class="text-sm text-textMuted text-center py-4">Belum ada karya.</p>'}
         </div>
       </div>
     </div>
   `;
-
   renderAdminInspector();
 }
 
@@ -153,153 +95,72 @@ function renderAdminInspector() {
   const panel = document.getElementById('admin-inspector-panel');
   if (!panel) return;
   const proj = appState.projects.find(p => p.id === appState.selectedAdminProjectId);
-  if (!proj) {
-    panel.innerHTML = `<div class="bg-charcoal border border-borderline rounded-2xl p-8 text-center text-xs text-ash">Pilih proyek di sebelah kiri untuk memeriksa detail.</div>`;
-    return;
-  }
+  if (!proj) { panel.innerHTML = `<div class="bg-surface border border-border rounded-3xl p-10 text-center text-sm text-textMuted">Pilih proyek untuk melihat detail.</div>`; return; }
 
   let specHtml = '';
   if (proj.musicalSpec) {
     const spec = proj.musicalSpec;
     if (spec.mode === 'standar' && spec.structures) {
-      specHtml = spec.structures.map(s => `
-        <div class="mb-2 last:mb-0">
-          <strong class="text-ivory">[${s.time}] ${s.name}:</strong>
-          <p class="text-ash text-[11px]">${s.detail}</p>
-          ${s.link ? `<a href="${s.link}" target="_blank" class="text-gold underline text-[10px] break-all block mt-1">${s.link}</a>` : ''}
-        </div>
-      `).join('');
+      specHtml = spec.structures.map(s => `<div class="mb-3 last:mb-0 bg-panel p-4 rounded-xl border border-border"><strong class="text-textMain text-sm block mb-1">[${s.time}] ${s.name}:</strong><p class="text-textMuted text-xs mb-2">${s.detail}</p>${s.link ? `<a href="${s.link}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 text-primary text-xs font-bold hover:bg-primary/20 transition"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg> Buka Link Drive</a>` : ''}</div>`).join('');
     } else if (spec.mode === 'pro' && spec.scenes) {
-      specHtml = spec.scenes.map(s => `
-        <div class="mb-2 last:mb-0">
-          <strong class="text-ivory">${s.title}:</strong>
-          <p class="text-ash text-[11px]">${s.detail}</p>
-          ${s.link ? `<a href="${s.link}" target="_blank" class="text-gold underline text-[10px] break-all block mt-1">${s.link}</a>` : ''}
-        </div>
-      `).join('');
+      specHtml = spec.scenes.map(s => `<div class="mb-3 last:mb-0 bg-panel p-4 rounded-xl border border-border"><strong class="text-textMain text-sm block mb-1">${s.title}:</strong><p class="text-textMuted text-xs mb-2">${s.detail}</p>${s.link ? `<a href="${s.link}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 text-primary text-xs font-bold hover:bg-primary/20 transition"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg> Buka Link Drive</a>` : ''}</div>`).join('');
     } else if (spec.mode === 'dasar') {
-      specHtml = `
-        <p><strong class="text-ivory">Tempo:</strong> <span class="text-ash">${spec.bpm} BPM (${spec.mood})</span></p>
-        <p><strong class="text-ivory">Instrumen:</strong> <span class="text-ash">${(spec.instruments || []).join(', ')}</span></p>
-      `;
+      specHtml = `<p class="text-sm"><strong class="text-textMain">Tempo:</strong> <span class="text-textMuted">${spec.bpm} BPM (${spec.mood})</span></p><p class="text-sm mt-1"><strong class="text-textMain">Instrumen:</strong> <span class="text-textMuted">${(spec.instruments || []).join(', ')}</span></p>`;
     } else if (spec.mode === 'transkripsi') {
-      specHtml = `
-        <p><strong class="text-ivory">Format:</strong> <span class="text-ash">${spec.format}</span></p>
-        <p><strong class="text-ivory">Detail:</strong> <span class="text-ash">${spec.key}</span></p>
-        <p><strong class="text-ivory">Hasil:</strong> <span class="text-ash">${spec.meter}</span></p>
-        <p><strong class="text-ivory">Catatan:</strong> <span class="text-ash">${spec.detail}</span></p>
-      `;
+      specHtml = `<p class="text-sm"><strong class="text-textMain">Format:</strong> <span class="text-textMuted">${spec.format} (${spec.key})</span></p><p class="text-sm mt-1"><strong class="text-textMain">Catatan:</strong> <span class="text-textMuted">${spec.detail}</span></p>`;
     } else if (spec.mode === 'digital') {
-      specHtml = `
-        <p><strong class="text-ivory">Genre:</strong> <span class="text-ash">${spec.genre}</span></p>
-        <p><strong class="text-ivory">Tempo/Nada:</strong> <span class="text-ash">${spec.tempo}</span></p>
-        <p><strong class="text-ivory">Catatan:</strong> <span class="text-ash">${spec.detail}</span></p>
-      `;
+      specHtml = `<p class="text-sm"><strong class="text-textMain">Genre:</strong> <span class="text-textMuted">${spec.genre}</span></p><p class="text-sm mt-1"><strong class="text-textMain">Catatan:</strong> <span class="text-textMuted">${spec.detail}</span></p>`;
     }
   }
 
   panel.innerHTML = `
-    <div class="bg-charcoal border border-borderline rounded-2xl p-5 sm:p-6 space-y-5">
-      <div class="flex flex-wrap items-start justify-between gap-3 border-b border-borderline pb-4">
+    <div class="bg-surface border border-border rounded-3xl p-6 sm:p-8 space-y-6">
+      <div class="flex flex-wrap items-start justify-between gap-4 border-b border-border pb-5">
         <div>
-          <span class="text-xs font-mono text-gold font-bold">${proj.id} • ${proj.serviceLineLabel} (${proj.packageName})</span>
-          <h3 class="text-xl font-bold text-ivory mt-0.5">${proj.judul}</h3>
-          <p class="text-xs text-ash">${proj.clientName} (${proj.instansi}, ${proj.kota}) • ${proj.entryPath}</p>
+          <span class="text-xs font-mono text-primary font-bold">${proj.id} • ${proj.serviceLineLabel}</span>
+          <h3 class="text-2xl font-display font-bold text-textMain mt-1">${proj.judul}</h3>
+          <p class="text-sm text-textMuted">${proj.clientName} (${proj.instansi}) • ${proj.entryPath}</p>
         </div>
         <div class="flex flex-wrap gap-2">
-          <button type="button" onclick="openBriefCardModal('${proj.id}')" class="btn-gold px-3.5 py-2 rounded-xl text-xs font-bold">Kartu Brief</button>
-          <button type="button" onclick="openContractDocModal('${proj.id}', false)" class="btn-ghost-gold px-3 py-2 rounded-xl text-xs font-bold">Perjanjian</button>
-          <button type="button" onclick="openOfficialDocModal('${proj.id}', 'invoice', 'dp')" class="btn-ghost-gold px-3 py-2 rounded-xl text-xs font-bold">Invoice</button>
-          <button type="button" onclick="openOfficialDocModal('${proj.id}', 'kuitansi', 'dp')" class="btn-ghost-gold px-3 py-2 rounded-xl text-xs font-bold">Kuitansi</button>
+          <button type="button" onclick="openBriefCardModal('${proj.id}')" class="btn-primary px-4 py-2 rounded-xl text-xs font-bold">Kartu Brief</button>
+          <button type="button" onclick="openOfficialDocModal('${proj.id}', 'invoice', 'dp')" class="btn-outline px-4 py-2 rounded-xl text-xs font-bold">Invoice</button>
         </div>
       </div>
 
-      <div class="bg-acoustic border border-gold/30 rounded-xl p-4 space-y-3">
-        <div class="flex items-center justify-between">
-          <strong class="text-xs text-gold uppercase font-mono">Tahap 6 &amp; 7 • Penawaran Resmi &amp; Lampiran A Perjanjian</strong>
-          <span class="text-[11px] font-mono text-ivory">Status: ${proj.quoteStatus}</span>
+      <div class="bg-panel border border-border rounded-2xl p-5 space-y-4">
+        <div class="flex items-center justify-between"><strong class="text-sm text-primary font-mono uppercase">Penawaran Resmi</strong><span class="text-xs text-textMuted">Status: ${proj.quoteStatus}</span></div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+          <div><label class="block text-xs text-textMuted mb-1">Biaya (Rp)</label><input type="number" id="admin-quote-price" value="${proj.totalPrice}" class="w-full bg-base border border-border rounded-xl px-4 py-2 font-mono text-textMain" /></div>
+          <div><label class="block text-xs text-textMuted mb-1">Kedudukan Pihak I</label><select id="admin-composer-role" class="w-full bg-base border border-border rounded-xl px-3 py-2 text-textMain"><option value="Composer" ${(proj.composerRole || '') === 'Composer' ? 'selected' : ''}>Composer</option><option value="Arranger" ${(proj.composerRole || '') === 'Arranger' ? 'selected' : ''}>Arranger</option><option value="Composer & Arranger" ${(proj.composerRole || '') === 'Composer & Arranger' ? 'selected' : ''}>Composer &amp; Arranger</option></select></div>
+          <div><label class="block text-xs text-textMuted mb-1">Revisi</label><input type="text" id="admin-quote-rev" value="${proj.revisionQuota || '6'}" class="w-full bg-base border border-border rounded-xl px-4 py-2 font-mono text-textMain" /></div>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
-          <div><label class="block text-[11px] text-ash mb-1">Biaya Final (Rp)</label><input type="number" id="admin-quote-price" value="${proj.totalPrice}" class="w-full bg-obsidian border border-borderline rounded-lg px-3 py-2 font-mono text-ivory" /></div>
-          <div>
-            <label class="block text-[11px] text-ash mb-1">Kedudukan Pihak I (Lampiran A)</label>
-            <select id="admin-composer-role" class="w-full bg-obsidian border border-borderline rounded-lg px-3 py-2 text-ivory">
-              <option value="Composer" ${(proj.composerRole || '') === 'Composer' ? 'selected' : ''}>Composer</option>
-              <option value="Arranger" ${(proj.composerRole || '') === 'Arranger' ? 'selected' : ''}>Arranger</option>
-              <option value="Composer & Arranger" ${(proj.composerRole || 'Composer & Arranger') === 'Composer & Arranger' ? 'selected' : ''}>Composer &amp; Arranger</option>
-              <option value="Tim produksi saja" ${(proj.composerRole || '') === 'Tim produksi saja' ? 'selected' : ''}>Tim produksi saja</option>
-            </select>
-          </div>
-          <div><label class="block text-[11px] text-ash mb-1">Kuota Revisi Ringan (Pasal 8)</label><input type="text" id="admin-quote-rev" value="${proj.revisionQuota || '6'}" placeholder="Contoh: 3 / 6" class="w-full bg-obsidian border border-borderline rounded-lg px-3 py-2 font-mono text-ivory" /></div>
-          <div><label class="block text-[11px] text-ash mb-1">Format File Diserahkan</label><input type="text" id="admin-quote-deliver" value="${proj.deliverableFormat || 'WAV 24-bit & MP3 320kbps'}" class="w-full bg-obsidian border border-borderline rounded-lg px-3 py-2 text-ivory" /></div>
-          <div><label class="block text-[11px] text-ash mb-1">Estimasi Waktu Pengerjaan</label><input type="text" id="admin-quote-days" value="${proj.quoteDurationDays || '7-10 Hari Kerja'}" class="w-full bg-obsidian border border-borderline rounded-lg px-3 py-2 text-ivory" /></div>
-          <div><label class="block text-[11px] text-ash mb-1">Kolaborator (Lampiran B)</label><input type="text" id="admin-collab-notes" value="${proj.collaboratorNotes || 'Tidak ada kontributor tambahan'}" class="w-full bg-obsidian border border-borderline rounded-lg px-3 py-2 text-ivory" /></div>
-        </div>
-        <div class="flex flex-wrap items-center justify-between gap-2">
-          <input type="text" id="admin-quote-notes" value="${proj.quoteNotes || ''}" placeholder="Catatan tambahan penawaran / Lampiran A..." class="flex-1 bg-obsidian border border-borderline rounded-lg px-3 py-2 text-xs text-ivory" />
-          <button type="button" onclick="issueOfficialQuotation('${proj.id}')" class="btn-gold px-4 py-2 rounded-xl text-xs font-bold shrink-0">Terbitkan Penawaran &amp; Perjanjian</button>
-        </div>
+        <button type="button" onclick="issueOfficialQuotation('${proj.id}')" class="btn-primary w-full py-3 rounded-xl text-sm font-bold">Terbitkan Penawaran &amp; Perjanjian</button>
       </div>
 
-      <div class="bg-acoustic border border-borderline rounded-xl p-4 space-y-2">
-        <label class="block text-xs font-bold text-ivory">Tahapan Progres Saat Ini:</label>
-        <select onchange="updateAdminProjectStage('${proj.id}', this.value)" class="w-full bg-obsidian border border-gold/40 rounded-xl px-3.5 py-2.5 text-xs font-bold text-gold">
-          ${TRACKER_MILESTONES.map(st => `<option value="${st}" ${proj.productionStatus === st ? 'selected' : ''}>${st}</option>`).join('')}
-        </select>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div class="bg-acoustic border border-borderline rounded-xl p-4 space-y-2.5">
-          <div class="flex items-center justify-between text-xs">
-            <strong>Termin I (${proj.paymentScheme})</strong>
-            <span class="font-mono text-gold">${proj.dpStatus}</span>
-          </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div class="bg-panel border border-border rounded-2xl p-5 space-y-3">
+          <div class="flex items-center justify-between text-sm"><strong class="text-textMain">Termin I (${proj.paymentScheme})</strong><span class="font-mono text-primary font-bold">${proj.dpStatus}</span></div>
           <div class="flex flex-wrap gap-2">
-            <button type="button" onclick="inspectPaymentProof('${proj.id}', 'dp')" class="px-2.5 py-1.5 rounded-lg bg-obsidian border border-borderline text-xs text-ivory hover:border-gold">Lihat Bukti</button>
-            <button type="button" onclick="verifyProjectPayment('${proj.id}', 'dp', 'Terverifikasi')" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-bold">✓ Sah</button>
-            <button type="button" onclick="verifyProjectPayment('${proj.id}', 'dp', 'Ditolak')" class="px-2.5 py-1.5 rounded-lg bg-red-600 text-white text-xs font-bold">× Tolak</button>
+            <button type="button" onclick="inspectPaymentProof('${proj.id}', 'dp')" class="btn-outline px-3 py-2 rounded-xl text-xs font-bold">Lihat Bukti</button>
+            <button type="button" onclick="verifyProjectPayment('${proj.id}', 'dp', 'Terverifikasi')" class="px-3 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold">✓ Sah</button>
           </div>
         </div>
-
-        <div class="bg-acoustic border border-borderline rounded-xl p-4 space-y-2.5">
-          <div class="flex items-center justify-between text-xs">
-            <strong>Termin II: Pelunasan (${formatRupiah(proj.totalPrice - proj.dpAmount)})</strong>
-            <span class="font-mono text-gold">${proj.pelunasanStatus}</span>
-          </div>
+        <div class="bg-panel border border-border rounded-2xl p-5 space-y-3">
+          <div class="flex items-center justify-between text-sm"><strong class="text-textMain">Termin II (Pelunasan)</strong><span class="font-mono text-primary font-bold">${proj.pelunasanStatus}</span></div>
           <div class="flex flex-wrap gap-2">
-            <button type="button" onclick="inspectPaymentProof('${proj.id}', 'lunas')" class="px-2.5 py-1.5 rounded-lg bg-obsidian border border-borderline text-xs text-ivory hover:border-gold">Lihat Bukti</button>
-            <button type="button" onclick="verifyProjectPayment('${proj.id}', 'lunas', 'Lunas')" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-bold">✓ Sah Lunas</button>
+            <button type="button" onclick="inspectPaymentProof('${proj.id}', 'lunas')" class="btn-outline px-3 py-2 rounded-xl text-xs font-bold">Lihat Bukti</button>
+            <button type="button" onclick="verifyProjectPayment('${proj.id}', 'lunas', 'Lunas')" class="px-3 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold">✓ Lunas</button>
           </div>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <label class="bg-acoustic border border-dashed border-gold/40 hover:border-gold rounded-xl p-4 cursor-pointer text-xs space-y-1">
-          <strong class="text-ivory block">Unggah Audio Pratinjau (MP3/WAV)</strong>
-          <span class="text-ash block truncate">${proj.previewAudioName || 'Belum ada file pratinjau'}</span>
-          <input type="file" accept="audio/*" onchange="uploadStudioDeliverable('${proj.id}', 'preview', this.files[0])" class="hidden" />
-        </label>
-        <label class="bg-acoustic border border-dashed border-emerald-500/40 hover:border-emerald-400 rounded-xl p-4 cursor-pointer text-xs space-y-1">
-          <strong class="text-ivory block">Unggah Hasil Akhir Master (WAV/ZIP/PDF)</strong>
-          <span class="text-ash block truncate">${proj.masterFileName || 'Belum ada file master'}</span>
-          <input type="file" onchange="uploadStudioDeliverable('${proj.id}', 'master', this.files[0])" class="hidden" />
-        </label>
-      </div>
-
-      <div class="bg-obsidian border border-borderline rounded-xl p-4 space-y-3 text-xs">
-        <strong class="text-gold block border-b border-borderline pb-2">Rincian Brief &amp; Link Referensi Klien:</strong>
-        <div class="space-y-2 text-[11px]">
-          <p><strong class="text-ivory">Sinopsis:</strong> <span class="text-ash leading-relaxed">${proj.sinopsis}</span></p>
-          <p><strong class="text-ivory">Link Referensi Utama:</strong> <a href="${proj.referensi}" target="_blank" class="text-gold underline break-all">${proj.referensi}</a></p>
-          
-          <div class="pt-2 mt-2 border-t border-borderline">
-            <strong class="text-ivory block mb-1.5">Spesifikasi Teknis &amp; Link Bagian:</strong>
-            <div class="text-ash leading-relaxed space-y-1">${specHtml || 'Tidak ada spesifikasi detail.'}</div>
-          </div>
-        </div>
-
-        <div class="pt-2 flex flex-wrap gap-2">
-          <a href="https://wa.me/${proj.wa.replace(/^0/, '62')}?text=${encodeURIComponent(`Halo ${proj.clientName}, saya dari PrangArt Lab terkait karya "${proj.judul}" (${proj.id}). Penawaran resmi dan dokumen perjanjian sudah siap.`)}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold">Hubungi WhatsApp Klien (${proj.wa})</a>
+      <div class="bg-base border border-border rounded-2xl p-5 text-sm space-y-3">
+        <strong class="text-primary block border-b border-border pb-2">Rincian Brief &amp; Link Referensi</strong>
+        <p><strong class="text-textMain">Sinopsis:</strong> <span class="text-textMuted leading-relaxed">${proj.sinopsis}</span></p>
+        <p><strong class="text-textMain">Link Referensi Utama:</strong> <a href="${proj.referensi}" target="_blank" class="text-primary underline font-bold">Buka Link</a></p>
+        <div class="pt-2 mt-2 border-t border-border">
+          <strong class="text-textMain block mb-2">Spesifikasi Teknis:</strong>
+          <div class="text-textMuted space-y-1">${specHtml || 'Tidak ada.'}</div>
         </div>
       </div>
     </div>
@@ -314,41 +175,16 @@ async function issueOfficialQuotation(projId) {
   proj.dpAmount = proj.paymentScheme === 'DP 50%' ? Math.round(newTotal * 0.5) : newTotal;
   proj.composerRole = document.getElementById('admin-composer-role')?.value || 'Composer & Arranger';
   proj.revisionQuota = document.getElementById('admin-quote-rev')?.value.trim() || '6';
-  proj.deliverableFormat = document.getElementById('admin-quote-deliver')?.value.trim() || 'WAV 24-bit & MP3 320kbps';
-  proj.quoteDurationDays = document.getElementById('admin-quote-days')?.value.trim() || '7-10 Hari Kerja';
-  proj.collaboratorNotes = document.getElementById('admin-collab-notes')?.value.trim() || 'Tidak ada kontributor tambahan';
-  proj.quoteDeliverables = `${proj.deliverableFormat} (${proj.revisionQuota}x revisi ringan)`;
-  proj.quoteNotes = document.getElementById('admin-quote-notes')?.value.trim() || '';
-  proj.quoteStatus = 'Diterbitkan';
-  proj.productionStatus = TRACKER_MILESTONES[2];
-  await syncProjectToCloud(proj);
-  renderAdminDashboard();
-  showToast('Penawaran & Perjanjian Diterbitkan', 'Klien kini dapat menyetujui perjanjian & melakukan pembayaran.');
-}
-
-async function updateAdminProjectStage(projId, newStage) {
-  const proj = appState.projects.find(p => p.id === projId);
-  if (!proj) return;
-  proj.productionStatus = newStage;
-  await syncProjectToCloud(proj);
-  renderAdminDashboard();
-  showToast('Tahapan Diperbarui', `${proj.id} → ${newStage}`);
+  proj.quoteStatus = 'Diterbitkan'; proj.productionStatus = TRACKER_MILESTONES[2];
+  await syncProjectToCloud(proj); renderAdminDashboard(); showToast('Diterbitkan', 'Klien dapat menyetujui perjanjian.');
 }
 
 async function verifyProjectPayment(projId, kind, status) {
   const proj = appState.projects.find(p => p.id === projId);
   if (!proj) return;
-  if (kind === 'dp') {
-    proj.dpStatus = status;
-    if (status === 'Terverifikasi') proj.productionStatus = TRACKER_MILESTONES[4];
-    if (status === 'Ditolak') proj.dpRejectReason = 'Bukti transfer belum terbaca / nominal belum sesuai. Silakan unggah ulang.';
-  } else {
-    proj.pelunasanStatus = status;
-    if (status === 'Lunas') proj.productionStatus = TRACKER_MILESTONES[6];
-  }
-  await syncProjectToCloud(proj);
-  renderAdminDashboard();
-  showToast('Status Pembayaran Diperbarui', `${proj.id}: ${status}`);
+  if (kind === 'dp') { proj.dpStatus = status; if (status === 'Terverifikasi') proj.productionStatus = TRACKER_MILESTONES[4]; } 
+  else { proj.pelunasanStatus = status; if (status === 'Lunas') proj.productionStatus = TRACKER_MILESTONES[6]; }
+  await syncProjectToCloud(proj); renderAdminDashboard(); showToast('Diperbarui', `Status: ${status}`);
 }
 
 function inspectPaymentProof(projId, kind) {
@@ -356,54 +192,17 @@ function inspectPaymentProof(projId, kind) {
   if (!proj) return;
   const name = kind === 'dp' ? proj.dpProofName : proj.pelunasanProofName;
   const url = kind === 'dp' ? proj.dpProofDataUrl : proj.pelunasanProofDataUrl;
-  document.getElementById('custom-modal-title').textContent = `Bukti Transfer (${kind === 'dp' ? 'Termin I' : 'Pelunasan'})`;
-  document.getElementById('custom-modal-body').innerHTML = `
-    <div class="space-y-3">
-      <p class="font-mono text-gold">${name || 'Belum ada file terunggah'}</p>
-      ${url && (url.startsWith('data:image') || url.startsWith('http'))
-        ? `<img src="${url}" alt="Bukti Transfer" class="w-full max-h-96 object-contain rounded-xl border border-borderline bg-obsidian" />`
-        : `<p class="text-ash">Pratinjau dokumen PDF/simulasi siap diverifikasi.</p>`}
-    </div>
-  `;
-  const m = document.getElementById('custom-modal');
-  m?.classList.remove('hidden');
-  m?.classList.add('flex');
+  document.getElementById('custom-modal-title').textContent = `Bukti Transfer`;
+  document.getElementById('custom-modal-body').innerHTML = `<div class="space-y-4"><p class="font-mono text-primary font-bold">${name || 'Belum ada file'}</p>${url && (url.startsWith('data:image') || url.startsWith('http')) ? `<img src="${url}" class="w-full max-h-96 object-contain rounded-xl border border-border bg-base" />` : `<p class="text-textMuted">Pratinjau PDF.</p>`}</div>`;
+  document.getElementById('custom-modal')?.classList.remove('hidden'); document.getElementById('custom-modal')?.classList.add('flex');
 }
 
-function closeCustomModal() {
-  const m = document.getElementById('custom-modal');
-  m?.classList.add('hidden');
-  m?.classList.remove('flex');
-}
-
-function uploadStudioDeliverable(projId, kind, file) {
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = async () => {
-    const proj = appState.projects.find(p => p.id === projId);
-    if (!proj) return;
-    const cloudUrl = await uploadFileToFirebaseStorage(`deliverables/${projId}_${kind}_${Date.now()}_${file.name}`, file);
-    const finalUrl = cloudUrl || reader.result;
-    if (kind === 'preview') {
-      proj.previewAudioName = file.name;
-      proj.previewAudioUrl = finalUrl;
-      proj.productionStatus = TRACKER_MILESTONES[5];
-    } else {
-      proj.masterFileName = file.name;
-      proj.masterFileUrl = finalUrl;
-    }
-    await syncProjectToCloud(proj);
-    renderAdminInspector();
-    showToast('File Terunggah', `${file.name} berhasil dilampirkan ke ${proj.id}.`);
-  };
-  reader.readAsDataURL(file);
-}
+function closeCustomModal() { document.getElementById('custom-modal')?.classList.add('hidden'); document.getElementById('custom-modal')?.classList.remove('flex'); }
 
 function saveStudioSettings() {
   appState.settings.studioWhatsApp = document.getElementById('set-wa')?.value.trim() || appState.settings.studioWhatsApp;
   appState.settings.adminPin = document.getElementById('set-pin')?.value.trim() || appState.settings.adminPin;
-  syncStudioConfigToCloud();
-  showToast('Pengaturan Tersimpan', 'Pengaturan studio diperbarui & tersinkron ke Cloud.');
+  syncStudioConfigToCloud(); showToast('Tersimpan', 'Pengaturan diperbarui.');
 }
 
 function addPaymentMethod() {
@@ -412,28 +211,14 @@ function addPaymentMethod() {
   const number = document.getElementById('new-pm-number').value.trim();
   const holder = document.getElementById('new-pm-holder').value.trim();
   const logo = document.getElementById('new-pm-logo').value.trim();
-
-  if (!name || !number || !logo) {
-    showToast('Data Kurang', 'Lengkapi nama, nomor, dan URL logo/gambar.', 'warning');
-    return;
-  }
-
-  const newPm = {
-    id: `pay-${Date.now()}`,
-    type, name, number, holder, logo
-  };
-
-  appState.settings.paymentMethods.push(newPm);
-  syncStudioConfigToCloud();
-  renderAdminDashboard();
-  showToast('Berhasil', 'Metode pembayaran ditambahkan.');
+  if (!name || !number || !logo) { showToast('Kurang', 'Lengkapi data.', 'warning'); return; }
+  appState.settings.paymentMethods.push({ id: `pay-${Date.now()}`, type, name, number, holder, logo });
+  syncStudioConfigToCloud(); renderAdminDashboard(); showToast('Berhasil', 'Metode ditambahkan.');
 }
 
 function removePaymentMethod(id) {
   appState.settings.paymentMethods = appState.settings.paymentMethods.filter(pm => pm.id !== id);
-  syncStudioConfigToCloud();
-  renderAdminDashboard();
-  showToast('Dihapus', 'Metode pembayaran telah dihapus.');
+  syncStudioConfigToCloud(); renderAdminDashboard(); showToast('Dihapus', 'Metode dihapus.');
 }
 
 function addPortfolioItem(e) {
@@ -443,30 +228,11 @@ function addPortfolioItem(e) {
   const culture = document.getElementById('pf-new-culture').value.trim();
   const mediaUrl = document.getElementById('pf-new-url').value.trim();
   const desc = document.getElementById('pf-new-desc').value.trim();
-
-  appState.portfolioItems.unshift({
-    id: `PF-${Date.now()}`, 
-    title, 
-    category, 
-    culture, 
-    mediaUrl,
-    desc: desc || `Karya ${category} oleh PrangArt Lab.`, 
-    duration: '--:--',
-    freq: 293.66
-  });
-  
-  syncStudioConfigToCloud();
-  renderAdminDashboard();
-  showToast('Portofolio Ditambahkan', `"${title}" tampil di halaman Portofolio.`);
-  
-  document.getElementById('pf-new-title').value = '';
-  document.getElementById('pf-new-culture').value = '';
-  document.getElementById('pf-new-url').value = '';
-  document.getElementById('pf-new-desc').value = '';
+  appState.portfolioItems.unshift({ id: `PF-${Date.now()}`, title, category, culture, mediaUrl, desc: desc || `Karya ${category}`, duration: '--:--', freq: 293.66 });
+  syncStudioConfigToCloud(); renderAdminDashboard(); showToast('Ditambahkan', 'Portofolio tampil.');
+  document.getElementById('pf-new-title').value = ''; document.getElementById('pf-new-culture').value = ''; document.getElementById('pf-new-url').value = ''; document.getElementById('pf-new-desc').value = '';
 }
 
 function removePortfolioItem(idx) {
-  appState.portfolioItems.splice(idx, 1);
-  syncStudioConfigToCloud();
-  renderAdminDashboard();
+  appState.portfolioItems.splice(idx, 1); syncStudioConfigToCloud(); renderAdminDashboard();
 }
