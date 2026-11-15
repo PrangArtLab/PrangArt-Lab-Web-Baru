@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>PrangArt Lab — Produksi Musik Tari, Non-Tari &amp; Transkripsi Musik</title>
 <script>
-  // Mencegah "flash" saat halaman dimuat dengan menerapkan tema secepat mungkin
   (function() {
     const savedTheme = localStorage.getItem('prangart_theme') || 'auto';
     const isDark = savedTheme === 'dark' || (savedTheme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
@@ -16,13 +15,17 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<!-- reCAPTCHA v3 untuk Firebase App Check -->
+<script src="https://www.google.com/recaptcha/api.js?render=6LeDaSEuAAAAAIDdp1Ir_V-wkmOXE-e8imq9Alzj"></script>
+<script>
+  window.__recaptchaSiteKey = '6LeDaSEuAAAAAIDdp1Ir_V-wkmOXE-e8imq9Alzj';
+</script>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
 tailwind.config = {
   darkMode: 'class',
   theme: { extend: {
     colors: { 
-      // Menggunakan CSS Variables (rgb) agar bisa berubah Light/Dark
       obsidian: 'rgb(var(--obsidian) / <alpha-value>)', 
       charcoal: 'rgb(var(--charcoal) / <alpha-value>)', 
       acoustic: 'rgb(var(--acoustic) / <alpha-value>)', 
@@ -61,7 +64,6 @@ tailwind.config = {
       <button type="button" id="nav-admin" onclick="navigateTo('admin')" class="nav-pill px-3.5 py-1.5 rounded-lg text-xs font-semibold transition">Admin</button>
     </nav>
     <div class="flex items-center gap-2">
-      <!-- TOMBOL TEMA -->
       <div class="relative">
         <button type="button" onclick="toggleThemeDropdown()" class="p-2 rounded-xl bg-charcoal border border-borderline hover:border-gold text-ivory transition flex items-center gap-1.5">
           <svg id="theme-icon-dark" class="hidden w-4 h-4 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
@@ -132,7 +134,6 @@ tailwind.config = {
       </div>
     </div>
 
-    <!-- Layanan Studio (Sama seperti sebelumnya) -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 space-y-8">
       <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
         <div>
@@ -209,13 +210,12 @@ tailwind.config = {
       </div>
     </div>
 
-    <!-- SOP & FAQ (Tetap Sama) -->
     <div class="border-y border-borderline bg-charcoal/40 transition-colors duration-300">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 space-y-10">
         <div class="space-y-2">
           <span class="text-xs font-mono uppercase tracking-wider text-gold font-bold">Panduan Sesi Konsultasi</span>
           <h2 class="text-2xl font-bold text-ivory">Materi Diskusi per Layanan &amp; Poin Kesepakatan</h2>
-          <p class="text-xs text-ash">Diskusi dilakukan via WhatsApp atau pertemuan daring (dapat lebih dari satu kali untuk karya kompleks).</p>
+          <p class="text-xs text-ash">Diskusi dilakukan via WhatsApp atau pertemuan daring.</p>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
           <div class="bg-charcoal border border-borderline rounded-2xl p-5 space-y-3 transition-colors duration-300">
@@ -243,7 +243,7 @@ tailwind.config = {
             <div class="bg-acoustic rounded-xl p-3 border border-borderline transition-colors duration-300">4. Perkiraan durasi karya &amp; waktu penyelesaian</div>
             <div class="bg-acoustic rounded-xl p-3 border border-borderline transition-colors duration-300">5. Besaran biaya &amp; skema pembayaran (DP 50% / Penuh)</div>
             <div class="bg-acoustic rounded-xl p-3 border border-borderline transition-colors duration-300">6. Ketentuan kuota revisi dan penyerahan hasil</div>
-            <div class="bg-acoustic rounded-xl p-3 border border-borderline sm:col-span-2 transition-colors duration-300">7. Pengaturan kredit komposer &amp; hak cipta (khusus produksi musik)</div>
+            <div class="bg-acoustic rounded-xl p-3 border border-borderline sm:col-span-2 transition-colors duration-300">7. Pengaturan kredit komposer &amp; hak cipta</div>
           </div>
         </div>
       </div>
@@ -266,7 +266,6 @@ tailwind.config = {
     </div>
   </section>
 
-  <!-- PORTOFOLIO -->
   <section id="page-portfolio" class="page-section hidden page-dissolve">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
       <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-borderline pb-6">
@@ -286,7 +285,6 @@ tailwind.config = {
     </div>
   </section>
 
-  <!-- ORDER -->
   <section id="page-order" class="page-section hidden page-dissolve">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pb-28 lg:pb-14">
       <div id="order-form-container">
@@ -462,7 +460,6 @@ tailwind.config = {
     </div>
   </section>
 
-  <!-- RUANG KLIEN -->
   <section id="page-client" class="page-section hidden page-dissolve">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <div id="client-login-wall" class="max-w-md mx-auto bg-charcoal border border-borderline rounded-2xl p-6 shadow-xl space-y-4 transition-colors duration-300">
@@ -484,7 +481,6 @@ tailwind.config = {
     </div>
   </section>
 
-  <!-- ADMIN -->
   <section id="page-admin" class="page-section hidden page-dissolve">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <div id="admin-pin-gate" class="max-w-sm mx-auto bg-charcoal border border-borderline rounded-2xl p-6 shadow-xl space-y-4 transition-colors duration-300">
@@ -505,7 +501,6 @@ tailwind.config = {
 
 </main>
 
-<!-- Mobile Sticky Bar -->
 <div id="mobile-sticky-bar" class="lg:hidden fixed bottom-0 inset-x-0 z-30 hidden bg-charcoal/95 backdrop-blur-md border-t border-gold/40 px-4 py-3 transition-colors duration-300">
   <div class="flex items-center justify-between gap-3">
     <div>
@@ -521,7 +516,6 @@ tailwind.config = {
   <span class="hidden sm:inline">Diskusi WA</span>
 </button>
 
-<!-- Modal Welcome -->
 <div id="welcome-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[70] hidden items-center justify-center p-4">
   <div class="bg-charcoal border border-gold/50 rounded-2xl max-w-md w-full p-6 shadow-2xl text-center space-y-4 transition-colors duration-300">
     <div class="w-16 h-16 rounded-full bg-obsidian border border-gold/60 p-1.5 mx-auto flex items-center justify-center overflow-hidden transition-colors duration-300">
@@ -540,7 +534,6 @@ tailwind.config = {
   </div>
 </div>
 
-<!-- Modal WA Composer -->
 <div id="wa-producer-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[75] hidden items-center justify-center p-4">
   <div class="bg-charcoal border border-gold/50 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto transition-colors duration-300">
     <div class="flex items-center justify-between border-b border-borderline pb-3">
@@ -580,7 +573,6 @@ tailwind.config = {
   </div>
 </div>
 
-<!-- Modal Daftar Cepat -->
 <div id="client-auth-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[72] hidden items-center justify-center p-4">
   <div class="bg-charcoal border border-gold/50 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 transition-colors duration-300">
     <div class="flex items-center justify-between border-b border-borderline pb-3">
@@ -612,7 +604,6 @@ tailwind.config = {
   </div>
 </div>
 
-<!-- Modal Kartu Brief -->
 <div id="brief-card-modal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-[68] hidden items-center justify-center p-4">
   <div class="bg-charcoal border border-gold/50 rounded-2xl max-w-4xl w-full p-5 shadow-2xl space-y-4 transition-colors duration-300">
     <div class="flex items-center justify-between border-b border-borderline pb-3">
@@ -629,7 +620,6 @@ tailwind.config = {
   </div>
 </div>
 
-<!-- Modal Custom -->
 <div id="custom-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[65] hidden items-center justify-center p-4">
   <div class="bg-charcoal border border-borderline rounded-2xl max-w-lg w-full p-5 shadow-2xl space-y-4 transition-colors duration-300">
     <div class="flex items-center justify-between border-b border-borderline pb-3">
@@ -640,7 +630,6 @@ tailwind.config = {
   </div>
 </div>
 
-<!-- Modal Invoice / Kuitansi -->
 <div id="official-doc-modal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-[66] hidden items-center justify-center p-3 sm:p-6 overflow-y-auto">
   <div class="bg-charcoal border border-gold/50 rounded-2xl max-w-3xl w-full p-4 sm:p-6 shadow-2xl space-y-4 my-auto transition-colors duration-300">
     <div class="flex flex-wrap items-center justify-between gap-2 border-b border-borderline pb-3">
@@ -655,6 +644,7 @@ tailwind.config = {
       </div>
       <div class="flex items-center gap-2">
         <button type="button" onclick="downloadOfficialDocPNG()" class="btn-gold px-3 py-1.5 rounded-lg text-xs font-bold">↓ Unduh PNG</button>
+        <button type="button" onclick="sendInvoiceToWA()" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-bold">→ Kirim WA</button>
         <button type="button" onclick="window.print()" class="btn-ghost-gold px-3 py-1.5 rounded-lg text-xs font-bold">Cetak / PDF</button>
         <button type="button" onclick="closeOfficialDocModal()" class="p-1.5 rounded-lg bg-acoustic text-ash hover:text-ivory text-xs transition-colors duration-300">×</button>
       </div>
@@ -663,7 +653,6 @@ tailwind.config = {
   </div>
 </div>
 
-<!-- Modal Perjanjian -->
 <div id="contract-doc-modal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-[67] hidden items-center justify-center p-3 sm:p-6 overflow-y-auto">
   <div class="bg-charcoal border border-gold/50 rounded-2xl max-w-4xl w-full p-4 sm:p-6 shadow-2xl space-y-4 my-auto transition-colors duration-300">
     <div class="flex flex-wrap items-center justify-between gap-2 border-b border-borderline pb-3">
