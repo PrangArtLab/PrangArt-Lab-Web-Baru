@@ -40,8 +40,9 @@ function updateWaComposerPreview() {
   const svc = document.getElementById('wa-comp-service')?.value || 'Produksi Musik Tari';
   const intent = document.getElementById('wa-comp-intent')?.value.trim() || '[Kebutuhan / Rencana Diskusi]';
 
+  // SAPAAN DIUBAH MENJADI HALO ADMIN PRANGART LAB
   const msg =
-    `Halo Produser & Komposer PrangArt Lab,\n` +
+    `Halo Admin PrangArt Lab,\n` +
     `Perkenalkan saya *${name}*${org ? ` (${org})` : ''}.\n` +
     `Layanan: *${svc}*\n\n` +
     `Hal yang ingin saya lakukan/diskusikan:\n${intent}`;
