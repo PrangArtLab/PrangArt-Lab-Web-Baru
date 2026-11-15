@@ -51,8 +51,27 @@ const DEFAULT_STATE = {
     studioAddress: 'Jl. Wiraguna Gang 4, Kel. Sidodadi, Samarinda',
     studioEmail: 'prangart.studios@gmail.com',
     studioWhatsApp: '628977230597',
-    bankAccount: 'BCA 1234567890 a.n. Fikri Yassaar Arrazaq',
-    adminPin: '2026'
+    recaptchaSiteKey: '6LeDaSEuAAAAAIDdp1Ir_V-wkmOXE-e8imq9Alzj',
+    adminPin: '2026',
+    // PAYMENT METHODS DINAMIS
+    paymentMethods: [
+      { 
+        id: 'pay-1', 
+        type: 'bank', 
+        name: 'Bank BCA', 
+        number: '1234567890', 
+        holder: 'Fikri Yassaar Arrazaq', 
+        logo: 'https://iili.io/oHYybgj.md.png' 
+      },
+      { 
+        id: 'pay-2', 
+        type: 'qris', 
+        name: 'QRIS (Shopee/DANA/OVO)', 
+        number: '-', 
+        holder: 'PrangArt Lab', 
+        logo: 'https://iili.io/oHaHbAQ.md.png' 
+      }
+    ]
   },
   serviceCatalog: {
     tari: {
@@ -72,7 +91,7 @@ const DEFAULT_STATE = {
       }
     },
     transkripsi: {
-      label:'Transkripsi Musik', addonLabel:'Partitur Ansambel Lengkap / Express', addonPrice:50000,
+      label:'Transkripsi Musik', addonLabel:'Partitur Ansembel Lengkap / Express', addonPrice:50000,
       packages: {
         dasar: { label:'Paket Dasar (350rb)', price:350000, desc:'Melodi utama / vokal tunggal, 1 jenis notasi, 2x revisi ringan.' },
         standar: { label:'Paket Standar (600rb)', price:600000, desc:'Not Angka & Not Balok lengkap, akor dasar, 4x revisi ringan.' },
@@ -80,7 +99,6 @@ const DEFAULT_STATE = {
       }
     }
   },
-  // PORTOFOLIO DIKOSONGKAN (Diisi manual lewat Admin)
   portfolioItems: [],
   faqs: [
     { q:'Mengapa diskusi dilakukan sebelum pembayaran?', a:'Sesi diskusi memastikan kebutuhan artistik, ruang lingkup kerja, durasi, serta anggaran benar-benar dipahami sebelum penawaran resmi diterbitkan. Diskusi awal tidak otomatis mengikat klien untuk membayar.' },
@@ -152,7 +170,6 @@ try {
     if (parsed.settings) appState.settings = { ...appState.settings, ...parsed.settings };
     if (Array.isArray(parsed.users) && parsed.users.length) appState.users = parsed.users;
     if (Array.isArray(parsed.projects) && parsed.projects.length) appState.projects = parsed.projects;
-    // Memastikan jika array kosong, local storage tidak menimpanya dengan data lama
     if (Array.isArray(parsed.portfolioItems)) appState.portfolioItems = parsed.portfolioItems;
   }
 } catch(_) {}
