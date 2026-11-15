@@ -35,8 +35,6 @@ function handleQuickClientRegister(e) {
   const name = document.getElementById('reg-name').value.trim();
   const email = document.getElementById('reg-email').value.trim().toLowerCase();
   const wa = document.getElementById('reg-wa').value.trim();
-  const instansi = document.getElementById('reg-instansi').value.trim();
-  const kota = document.getElementById('reg-kota').value.trim();
   const pass = document.getElementById('reg-pass').value;
 
   const existing = appState.users.find(u => u.email === email);
@@ -47,15 +45,20 @@ function handleQuickClientRegister(e) {
     return;
   }
 
-  const newUser = { name, email, wa, instansi, kota, pass };
+  // Hanya menyimpan Nama, Email, WA, Pass. Instansi & Kota diisi manual nanti di form pemesanan.
+  const newUser = { name, email, wa, pass, instansi: '', kota: '', alamat: '', nik: '' };
   appState.users.push(newUser);
   appState.currentClientUser = newUser;
   syncUserToCloud(newUser);
   updateHeaderAuthBadge();
   closeClientAuthModal();
-  showToast('Akun Berhasil Dibuat', `Selamat datang, ${name}! Data Anda otomatis terisi.`);
-  if (appState.currentPage === 'order') refreshOrderPageUI();
-  if (appState.currentPage === 'client') refreshClientPageUI();
+  showToast('Akun Berhasil Dibuat', `Selamat datang, ${name}! Silakan isi formulir pengajuan.`);
+  
+  if (appState.currentPage === 'client') {
+    refreshClientPageUI();
+  } else if (appState.currentPage === 'order') {
+    refreshOrderPageUI();
+  }
 }
 
 function handleQuickClientLogin(e) {
@@ -71,8 +74,8 @@ function handleQuickClientLogin(e) {
   updateHeaderAuthBadge();
   closeClientAuthModal();
   showToast('Berhasil Masuk', `Halo, ${found.name}.`);
-  if (appState.currentPage === 'order') refreshOrderPageUI();
   if (appState.currentPage === 'client') refreshClientPageUI();
+  if (appState.currentPage === 'order') refreshOrderPageUI();
 }
 
 function handleClientPortalLogin(e) {
@@ -93,6 +96,5 @@ function logoutClientUser() {
   appState.currentClientUser = null;
   updateHeaderAuthBadge();
   showToast('Keluar Akun', 'Anda telah keluar dari sesi klien.');
-  if (appState.currentPage === 'order') refreshOrderPageUI();
-  if (appState.currentPage === 'client') refreshClientPageUI();
+  navigateTo('client');
 }
