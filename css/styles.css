@@ -1,0 +1,57 @@
+* { box-sizing: border-box; }
+html, body {
+  background-color: #09090b;
+  color: #f4f4f5;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #09090b; }
+::-webkit-scrollbar-thumb { background: #27272a; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: #d4af37; }
+.btn-gold {
+  background: linear-gradient(135deg, #d4af37 0%, #c59b27 100%);
+  color: #09090b;
+  transition: all 0.2s ease;
+}
+.btn-gold:hover:not(:disabled) {
+  background: linear-gradient(135deg, #e6c34d 0%, #d4af37 100%);
+  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.25);
+  transform: translateY(-1px);
+}
+.btn-gold:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-ghost-gold {
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  color: #d4af37;
+  background: rgba(212, 175, 55, 0.04);
+  transition: all 0.2s ease;
+}
+.btn-ghost-gold:hover {
+  background: rgba(212, 175, 55, 0.14);
+  border-color: #d4af37;
+}
+.page-dissolve { animation: pageDissolve 0.25s ease-out forwards; }
+@keyframes pageDissolve {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.shake-error { animation: shakeX 0.32s ease-in-out; }
+@keyframes shakeX {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+@media print {
+  body * { visibility: hidden; }
+  #official-doc-modal:not(.hidden) #official-doc-canvas,
+  #official-doc-modal:not(.hidden) #official-doc-canvas *,
+  #contract-doc-modal:not(.hidden) #contract-doc-canvas,
+  #contract-doc-modal:not(.hidden) #contract-doc-canvas * {
+    visibility: visible;
+  }
+  #official-doc-modal:not(.hidden) #official-doc-canvas,
+  #contract-doc-modal:not(.hidden) #contract-doc-canvas {
+    position: fixed; left: 0; top: 0; width: 100%; box-shadow: none !important;
+  }
+}
