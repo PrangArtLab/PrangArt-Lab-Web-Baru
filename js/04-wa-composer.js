@@ -1,84 +1,95 @@
-function closeWelcomeModal() {
-  const m = document.getElementById('welcome-modal');
+function openClientAuthModal(tab = 'register') {
+  switchAuthModalTab(tab);
+  const m = document.getElementById('client-auth-modal');
+  m?.classList.remove('hidden');
+  m?.classList.add('flex');
+}
+
+function closeClientAuthModal() {
+  const m = document.getElementById('client-auth-modal');
   m?.classList.add('hidden');
   m?.classList.remove('flex');
 }
 
-function openProducerWaModal(defaultIntent = '', defaultService = '', presetName = '', presetOrg = '') {
-  const nameInput = document.getElementById('wa-comp-name');
-  const orgInput = document.getElementById('wa-comp-org');
-  const svcInput = document.getElementById('wa-comp-service');
-  const intentInput = document.getElementById('wa-comp-intent');
+function switchAuthModalTab(tab) {
+  const regTab = document.getElementById('auth-tab-register');
+  const logTab = document.getElementById('auth-tab-login');
+  const regForm = document.getElementById('form-client-register');
+  const logForm = document.getElementById('form-client-login');
 
-  if (nameInput) nameInput.value = presetName || appState.currentClientUser?.name || '';
-  if (orgInput) orgInput.value = presetOrg || (appState.currentClientUser ? `${appState.currentClientUser.instansi} - ${appState.currentClientUser.kota}` : '');
-  if (svcInput && defaultService) {
-    for (const opt of svcInput.options) {
-      if (opt.value.toLowerCase().includes(defaultService.toLowerCase())) {
-        svcInput.value = opt.value;
-        break;
-      }
-    }
+  if (tab === 'register') {
+    regTab.className = 'py-2.5 rounded-lg text-xs font-bold bg-surface shadow text-textMain';
+    logTab.className = 'py-2.5 rounded-lg text-xs font-semibold text-textMuted hover:text-textMain transition';
+    regForm.classList.remove('hidden');
+    logForm.classList.add('hidden');
+  } else {
+    logTab.className = 'py-2.5 rounded-lg text-xs font-bold bg-surface shadow text-textMain';
+    regTab.className = 'py-2.5 rounded-lg text-xs font-semibold text-textMuted hover:text-textMain transition';
+    logForm.classList.remove('hidden');
+    regForm.classList.add('hidden');
   }
-  if (intentInput && defaultIntent) intentInput.value = defaultIntent;
-
-  updateWaComposerPreview();
-  const modal = document.getElementById('wa-producer-modal');
-  modal?.classList.remove('hidden');
-  modal?.classList.add('flex');
 }
 
-function closeProducerWaModal() {
-  const modal = document.getElementById('wa-producer-modal');
-  modal?.classList.add('hidden');
-  modal?.classList.remove('flex');
-}
+function handleQuickClientRegister(e) {
+  e.preventDefault();
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim().toLowerCase();
+  const wa = document.getElementById('reg-wa').value.trim();
+  const pass = document.getElementById('reg-pass').value;
 
-function updateWaComposerPreview() {
-  const name = document.getElementById('wa-comp-name')?.value.trim() || '[Nama Anda]';
-  const org = document.getElementById('wa-comp-org')?.value.trim();
-  const svc = document.getElementById('wa-comp-service')?.value || 'Produksi Musik Tari';
-  const intent = document.getElementById('wa-comp-intent')?.value.trim() || '[Kebutuhan / Rencana Diskusi]';
-
-  const msg =
-    `Halo Admin PrangArt Lab,\n` +
-    `Perkenalkan saya *${name}*${org ? ` (${org})` : ''}.\n` +
-    `Layanan: *${svc}*\n\n` +
-    `Hal yang ingin saya lakukan/diskusikan:\n${intent}`;
-
-  const prev = document.getElementById('wa-comp-preview');
-  if (prev) prev.textContent = msg;
-  return msg;
-}
-
-function submitProducerWaMessage() {
-  const name = document.getElementById('wa-comp-name')?.value.trim();
-  const intent = document.getElementById('wa-comp-intent')?.value.trim();
-  if (!name || !intent) {
-    showToast('Lengkapi Pesan', 'Mohon isi Nama Anda dan hal yang ingin didiskusikan.', 'warning');
+  const existing = appState.users.find(u => u.email === email);
+  if (existing) {
+    showToast('Email Terdaftar', 'Silakan masuk menggunakan tab Masuk.', 'warning');
+    switchAuthModalTab('login');
+    document.getElementById('login-email').value = email;
     return;
   }
-  const text = updateWaComposerPreview();
-  const waUrl = `https://wa.me/${appState.settings.studioWhatsApp}?text=${encodeURIComponent(text)}`;
-  window.open(waUrl, '_blank', 'noopener');
-  closeProducerWaModal();
+
+  const newUser = { name, email, wa, pass, instansi: '', kota: '', alamat: '', nik: '' };
+  appState.users.push(newUser);
+  appState.currentClientUser = newUser;
+  syncUserToCloud(newUser);
+  updateHeaderAuthBadge();
+  closeClientAuthModal();
+  showToast('Akun Dibuat', `Selamat datang, ${name}!`);
+  if (appState.currentPage === 'client') refreshClientPageUI();
+  if (appState.currentPage === 'order') refreshOrderPageUI();
 }
 
-function launchWhatsAppProjectDiscussion(projId) {
-  const proj = appState.projects.find(p => p.id === projId);
-  if (!proj) return;
-  const intent = `Diskusi Lanjutan Proyek (${proj.id}) - "${proj.judul}"\nLayanan: ${proj.serviceLineLabel}\nMohon konfirmasi hasil pemeriksaan materi & penawaran resmi.`;
-  openProducerWaModal(intent, proj.serviceLineLabel, proj.clientName, `${proj.instansi} - ${proj.kota}`);
-}
-
-function sendClientRevisionNoteToWA(projId) {
-  const proj = appState.projects.find(p => p.id === projId);
-  if (!proj) return;
-  const note = document.getElementById('client-revision-note')?.value.trim();
-  if (!note) {
-    showToast('Isi Catatan Revisi', 'Tuliskan poin revisi terlebih dahulu.', 'warning');
+function handleQuickClientLogin(e) {
+  e.preventDefault();
+  const email = document.getElementById('login-email').value.trim().toLowerCase();
+  const pass = document.getElementById('login-pass').value;
+  const found = appState.users.find(u => u.email === email && u.pass === pass);
+  if (!found) {
+    showToast('Gagal Masuk', 'Email atau kata sandi salah.', 'error');
     return;
   }
-  const intent = `Catatan Revisi Proyek (${proj.id}) - "${proj.judul}"\nDetail Revisi:\n${note}`;
-  openProducerWaModal(intent, proj.serviceLineLabel, proj.clientName, `${proj.instansi} - ${proj.kota}`);
+  appState.currentClientUser = found;
+  updateHeaderAuthBadge();
+  closeClientAuthModal();
+  showToast('Berhasil Masuk', `Halo, ${found.name}.`);
+  if (appState.currentPage === 'client') refreshClientPageUI();
+  if (appState.currentPage === 'order') refreshOrderPageUI();
+}
+
+function handleClientPortalLogin(e) {
+  e.preventDefault();
+  const email = document.getElementById('portal-login-email').value.trim().toLowerCase();
+  const pass = document.getElementById('portal-login-pass').value;
+  const found = appState.users.find(u => u.email === email && u.pass === pass);
+  if (!found) {
+    showToast('Gagal Masuk', 'Email atau kata sandi tidak sesuai.', 'error');
+    return;
+  }
+  appState.currentClientUser = found;
+  updateHeaderAuthBadge();
+  refreshClientPageUI();
+}
+
+function logoutClientUser() {
+  appState.currentClientUser = null;
+  updateHeaderAuthBadge();
+  showToast('Keluar Akun', 'Anda telah keluar dari sesi klien.');
+  navigateTo('client');
 }
