@@ -318,3 +318,211 @@ function copyBankAccount() {
   tmp.remove();
   showToast('Rekening Disalin', txt);
 }
+async function generateAISynopsis(isVariation = false) {
+  const judul = document.getElementById('field-judul')?.value.trim();
+  const jenis = document.getElementById('field-jenis-tari')?.value.trim();
+  const budaya = document.getElementById('field-budaya')?.value.trim();
+  const sinopsisEl = document.getElementById('field-sinopsis');
+  const btn = document.getElementById('btn-ai-synopsis');
+
+  if (!judul || !jenis) {
+    showToast('Data Belum Lengkap', 'Isi Judul Karya dan Jenis Karya terlebih dahulu agar AI dapat menyusun sinopsis.', 'warning');
+    return;
+  }
+
+  if (!isVariation && sinopsisEl.value.trim()) {
+    appState.previousSynopsisBackup = sinopsisEl.value;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Menyusun Sinopsis...';
+
+  const prompt = `Buatkan sinopsis singkat dan jelas (2 paragraf padat, maksimal 90 kata) untuk karya "${judul}" kategori "${jenis}" berlatar "${budaya || 'Nusantara'}". ${isVariation ? 'Gunakan sudut pandang narasi berbeda.' : ''}`;
+
+  try {
+    const apiKey = '';
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+    });
+    if (!res.ok) throw new Error('API fallback');
+    const data = await res.json();
+    const generated = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+    if (!generated) throw new Error('Empty AI text');
+    sinopsisEl.value = generated;
+  } catch (_) {
+    const variants = [
+      `Karya "${judul}" menghadirkan alur dramatik berakar pada ${budaya || 'budaya Nusantara'} dalam balutan ${jenis}. Bagian pembuka mengalir tenang membangun suasana sebelum meningkat menuju dinamika ritmis yang tegas.\n\nPada puncak ketegangan, perpaduan dinamika dan aksen musikal menyimbolkan keteguhan karakter, lalu ditutup dengan harmoni yang berkesan.`,
+      `Terinspirasi dari nilai ${budaya || 'tradisi lokal'}, "${judul}" merangkai ekspresi ${jenis} yang memadukan kehalusan rasa dan kekuatan tempo. Setiap pergeseran ritme menjadi penanda perubahan emosi dari keheningan menuju puncak klimaks.`
+    ];
+    sinopsisEl.value = variants[isVariation ? 1 : 0];
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '✦ Generate Sinopsis AI';
+    const bar = document.getElementById('ai-synopsis-toolbar');
+    bar?.classList.remove('hidden');
+    bar?.classList.add('flex');
+  }
+}
+
+function restorePreviousSynopsis() {
+  const sinopsisEl = document.getElementById('field-sinopsis');
+  if (sinopsisEl && appState.previousSynopsisBackup) {
+    sinopsisEl.value = appState.previousSynopsisBackup;
+    showToast('Teks Dikembalikan', 'Draf sinopsis sebelumnya dipulihkan.');
+  }
+}
+
+function collectOrderMusicalSpec() {
+  const svc = appState.selectedServiceLine;
+  const pkg = appState.selectedPackage;
+  if (svc === 'tari') {
+    if (pkg === 'dasar') {
+      return {
+        mode: 'dasar',
+        bpm: document.getElementById('spec-dasar-bpm')?.value || '110',
+        mood: document.getElementById('spec-dasar-mood')?.value || 'Dinamis',
+        instruments: [...appState.basicInstruments]
+      };
+    }
+    if (pkg === 'standar') {
+      const structures = [];
+      document.querySelectorAll('.std-struct-cb:checked').forEach(cb => {
+        const idx = cb.dataset.idx;
+        structures.push({
+          name: cb.dataset.name,
+          time: document.getElementById(`std-time-${idx}`)?.value.trim() || '-',
+          detail: document.getElementById(`std-detail-${idx}`)?.value.trim() || '-',
+          link: document.getElementById(`std-link-${idx}`)?.value.trim() || ''
+        });
+      });
+      return { mode: 'standar', structures };
+    }
+    return { mode: 'pro', scenes: structuredClone(appState.proScenes) };
+  }
+  if (svc === 'transkripsi') {
+    return {
+      mode: 'transkripsi',
+      format: document.getElementById('spec-trans-format')?.value || 'Not Angka & Not Balok',
+      key: document.getElementById('spec-trans-key')?.value.trim() || 'Melodi + Akor',
+      meter: document.getElementById('spec-trans-meter')?.value.trim() || 'PDF Cetak',
+      detail: document.getElementById('spec-trans-detail')?.value.trim() || '-'
+    };
+  }
+  return {
+    mode: 'digital',
+    genre: document.getElementById('spec-dig-genre')?.value.trim() || '-',
+    tempo: document.getElementById('spec-dig-tempo')?.value.trim() || '-',
+    detail: document.getElementById('spec-dig-detail')?.value.trim() || '-'
+  };
+}
+
+async function handleOrderFormSubmit(e) {
+  e.preventDefault();
+  if (!appState.currentClientUser) {
+    showToast('Buat Akun Terlebih Dahulu', 'Silakan daftar atau masuk akun singkat agar progres dapat dipantau.', 'warning');
+    openClientAuthModal('register');
+    return;
+  }
+
+  const entryPath = document.querySelector('input[name="entry-path"]:checked')?.value || 'Jalur A (Sudah Diskusi WA)';
+  const paymentScheme = document.querySelector('input[name="payment-plan"]:checked')?.value || 'DP 50%';
+  const nama = document.getElementById('field-nama').value.trim();
+  const email = document.getElementById('field-email').value.trim().toLowerCase();
+  const wa = document.getElementById('field-wa').value.trim();
+  const kota = document.getElementById('field-kota').value.trim();
+  const alamat = document.getElementById('field-alamat')?.value.trim() || kota;
+  const nik = document.getElementById('field-nik')?.value.trim() || '';
+  const instansi = document.getElementById('field-instansi').value.trim();
+  const koreografer = document.getElementById('field-koreografer').value.trim();
+  const judul = document.getElementById('field-judul').value.trim();
+  const jenisTari = document.getElementById('field-jenis-tari').value.trim();
+  const budaya = document.getElementById('field-budaya').value.trim();
+  const durasi = document.getElementById('field-durasi').value.trim();
+  const referensi = document.getElementById('field-referensi').value.trim();
+  const sinopsis = document.getElementById('field-sinopsis').value.trim();
+
+  const svcObj = appState.serviceCatalog[appState.selectedServiceLine];
+  const pkgObj = svcObj.packages[appState.selectedPackage];
+  const addonSelected = Boolean(document.getElementById('field-addon-vocal')?.checked);
+  const addonPrice = addonSelected ? svcObj.addonPrice : 0;
+  const totalPrice = pkgObj.price + addonPrice;
+  const dpAmount = paymentScheme === 'DP 50%' ? Math.round(totalPrice * 0.5) : totalPrice;
+
+  const seqNum = String(Math.floor(100 + Math.random() * 899));
+  const ticketId = `PAL-2026-${seqNum}`;
+  const nowDate = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+  const musicalSpec = collectOrderMusicalSpec();
+  const defaultRev = appState.selectedPackage === 'dasar' ? '3' : appState.selectedPackage === 'standar' ? '6' : 'Sesuai kesepakatan';
+
+  const newProject = {
+    id: ticketId,
+    createdTs: Date.now(),
+    createdAt: nowDate,
+    entryPath,
+    clientEmail: email,
+    clientName: nama,
+    instansi, kota, alamat, nik, wa,
+    serviceLine: appState.selectedServiceLine,
+    serviceLineLabel: svcObj.label,
+    packageKey: appState.selectedPackage,
+    packageName: pkgObj.label,
+    addonSelected,
+    addonLabel: svcObj.addonLabel,
+    addonPrice: svcObj.addonPrice,
+    basePrice: pkgObj.price,
+    totalPrice, dpAmount, paymentScheme,
+    judul, koreografer, jenisTari, budaya, durasi, referensi, sinopsis,
+    musicalSpec,
+    contractNumber: `${seqNum}/PAL-SPK/XI/2026`,
+    composerRole: 'Composer & Arranger',
+    musicFileTitle: judul.replace(/\s+/g, '_') + '_Final',
+    deliverableFormat: appState.selectedServiceLine === 'transkripsi' ? 'PDF Partitur & Audio Panduan' : 'WAV 24-bit & MP3 320kbps',
+    revisionQuota: defaultRev,
+    thirdPartyMaterial: 'Tidak ada',
+    collaboratorNotes: 'Tidak ada kontributor tambahan',
+    rawFilesIncluded: false,
+    rawFilesDetail: '',
+    extraAttachmentNotes: '-',
+    courtCity: 'Samarinda',
+    quoteStatus: 'Menunggu Pemeriksaan',
+    quoteDurationDays: '7-10 Hari Kerja',
+    quoteDeliverables: 'Sesuai Lampiran A & paket yang disepakati',
+    quoteNotes: '',
+    agreementSigned: false,
+    agreementSignedAt: '',
+    dpStatus: 'Belum Dibayar',
+    dpRejectReason: '',
+    dpProofName: '',
+    dpProofDataUrl: '',
+    pelunasanStatus: paymentScheme === 'Pembayaran Penuh 100%' ? 'Tidak Perlu (Skema Penuh)' : 'Belum Lunas',
+    pelunasanProofName: '',
+    pelunasanProofDataUrl: '',
+    productionStatus: TRACKER_MILESTONES[0],
+    previewAudioName: '',
+    previewAudioUrl: '',
+    masterFileName: '',
+    masterFileUrl: '',
+    clientAcceptedFinal: false
+  };
+
+  appState.projects.unshift(newProject);
+  appState.activeBriefProjectId = ticketId;
+  appState.selectedClientProjectId = ticketId;
+  appState.selectedAdminProjectId = ticketId;
+  await syncProjectToCloud(newProject);
+
+  const briefDataUrl = await generateBriefCardPNGDataUrl(newProject);
+  document.getElementById('success-ticket-id').textContent = ticketId;
+  document.getElementById('brief-card-preview-img').src = briefDataUrl;
+
+  document.getElementById('order-form-container').classList.add('hidden');
+  document.getElementById('mobile-sticky-bar')?.classList.add('hidden');
+  document.getElementById('order-success-container').classList.remove('hidden');
+
+  triggerPngFileDownload(briefDataUrl, `Kartu-Brief-PrangArt-${ticketId}.png`);
+  showToast('Kartu Brief Terunduh!', 'Kirim Kartu Brief PNG ke WhatsApp Produser untuk pemeriksaan & penawaran.');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
