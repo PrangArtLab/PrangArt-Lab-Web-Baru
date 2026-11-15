@@ -1,137 +1,132 @@
-function initTheme() {
-  const savedTheme = localStorage.getItem('prangart_theme') || 'auto';
-  setTheme(savedTheme, false);
-}
-function setTheme(mode, triggerUIUpdate = true) {
-  localStorage.setItem('prangart_theme', mode);
-  const applyTheme = () => {
-    const isDark = mode === 'dark' || (mode === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    if (isDark) document.documentElement.classList.add('dark');
-    else document.documentElement.classList.remove('dark');
-    if (triggerUIUpdate) updateThemeIcon(mode);
-    document.getElementById('theme-dropdown').classList.add('hidden');
-  };
-  applyTheme();
-  if (!window.themeMediaQuery) {
-    window.themeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    window.themeMediaQuery.addEventListener('change', (e) => {
-      if (localStorage.getItem('prangart_theme') === 'auto') {
-        if (e.matches) document.documentElement.classList.add('dark');
-        else document.documentElement.classList.remove('dark');
+const LOGO_URL = 'https://iili.io/o9B6HXa.md.png';
+const STORAGE_KEY = 'prangart_lab_state_v7';
+
+const STUDIO_FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDJX7Y95gJ8j3A3te5pvTONrAJBxZ5yS2s",
+  authDomain: "website-prangart-8ceeb.firebaseapp.com",
+  projectId: "website-prangart-8ceeb",
+  storageBucket: "website-prangart-8ceeb.firebasestorage.app",
+  messagingSenderId: "153873576617",
+  appId: "1:153873576617:web:34441945bc26c38d53afb8"
+};
+
+const firebaseAppId = 'website-prangart-8ceeb';
+let db = null;
+let fbStorage = null;
+let firebaseUser = null;
+
+const SOP_14_STEPS = [
+  { no:'01', title:'Kontak Awal', desc:'Klien menghubungi via WhatsApp atau website.' },
+  { no:'02', title:'Konsultasi', desc:'Membahas konsep, referensi, dan anggaran.' },
+  { no:'03', title:'Formulir', desc:'Mengisi form sesuai layanan.' },
+  { no:'04', title:'Pemeriksaan', desc:'PrangArt Lab memeriksa kelengkapan data.' },
+  { no:'05', title:'Diskusi Lanjutan', desc:'Klarifikasi detail (jika perlu).' },
+  { no:'06', title:'Penawaran', desc:'Biaya resmi, waktu, output, dan ketentuan.' },
+  { no:'07', title:'Persetujuan', desc:'Tanda tangan Perjanjian.' },
+  { no:'08', title:'Pembayaran', desc:'DP 50% atau Penuh 100%, diverifikasi.' },
+  { no:'09', title:'Konfirmasi', desc:'Nomor pesanan terbit.' },
+  { no:'10', title:'Pengerjaan', desc:'Produksi sesuai kesepakatan.' },
+  { no:'11', title:'Revisi', desc:'Pemeriksaan hasil sementara.' },
+  { no:'12', title:'Pelunasan', desc:'Sisa 50% sebelum file final.' },
+  { no:'13', title:'Penyerahan', desc:'Berkas master diserahkan.' },
+  { no:'14', title:'Selesai', desc:'Dokumen diarsipkan.' }
+];
+
+const TRACKER_MILESTONES = [
+  '01. Pengajuan & Pemeriksaan Brief',
+  '02. Diskusi & Penawaran Harga',
+  '03. Persetujuan Administrasi',
+  '04. Pembayaran & Konfirmasi',
+  '05. Proses Pengerjaan Studio',
+  '06. Pratinjau Hasil & Revisi',
+  '07. Pelunasan & Penyerahan Akhir',
+  '08. Selesai & Diarsipkan'
+];
+
+const DEFAULT_STATE = {
+  settings: {
+    directorName: 'Fikri Yassaar Arrazaq',
+    directorIdNumber: '6472050000000001',
+    studioAddress: 'Jl. Wiraguna Gang 4, Kel. Sidodadi, Samarinda',
+    studioEmail: 'prangart.studios@gmail.com',
+    studioWhatsApp: '628977230597',
+    recaptchaSiteKey: '6LeDaSEuAAAAAIDdp1Ir_V-wkmOXE-e8imq9Alzj',
+    adminPin: '2026',
+    paymentMethods: [
+      { id: 'pay-1', type: 'bank', name: 'Bank BCA', number: '1234567890', holder: 'Fikri Yassaar Arrazaq', logo: 'https://iili.io/oHYybgj.md.png' },
+      { id: 'pay-2', type: 'qris', name: 'QRIS Shopee', number: '-', holder: 'PrangArt Lab', logo: 'https://iili.io/oHaHbAQ.md.png' }
+    ]
+  },
+  serviceCatalog: {
+    tari: {
+      label:'Produksi Musik Tari', addonLabel:'Rekaman Vokal', addonPrice:50000,
+      packages: {
+        dasar: { label:'Paket Dasar (1 Juta)', price:1000000, desc:'1 tempo utama, maks. 5 instrumen.' },
+        standar: { label:'Paket Standar (1,5 Juta)', price:1500000, desc:'Rincian per struktur tari + timestamp.' },
+        pro: { label:'Paket Pro (2 Juta)', price:2000000, desc:'Alur dramatik kompleks, perubahan bebas.' }
       }
-    });
+    },
+    digital: {
+      label:'Produksi Musik Non-Tari', addonLabel:'Rekaman Vokal', addonPrice:50000,
+      packages: {
+        dasar: { label:'Paket Dasar (750rb)', price:750000, desc:'Aransemen digital standar.' },
+        standar: { label:'Paket Standar (1,2 Juta)', price:1200000, desc:'Aransemen penuh + mixing.' },
+        pro: { label:'Paket Pro (1,8 Juta)', price:1800000, desc:'Produksi multi-layer + stem.' }
+      }
+    },
+    transkripsi: {
+      label:'Transkripsi Musik', addonLabel:'Partitur Lengkap', addonPrice:50000,
+      packages: {
+        dasar: { label:'Paket Dasar (350rb)', price:350000, desc:'Melodi utama, 1 notasi.' },
+        standar: { label:'Paket Standar (600rb)', price:600000, desc:'Not Angka & Balok lengkap.' },
+        pro: { label:'Paket Pro (1 Juta)', price:1000000, desc:'Full skor ansambel + MIDI.' }
+      }
+    }
+  },
+  portfolioItems: [],
+  faqs: [
+    { q:'Mengapa diskusi sebelum pembayaran?', a:'Memastikan kebutuhan artistik dan anggaran dipahami sebelum penawaran resmi.' },
+    { q:'Bagaimana perbedaan persetujuan?', a:'Tari/Non-Tari menggunakan Perjanjian Produksi. Transkripsi menggunakan Persetujuan Layanan.' }
+  ],
+  users: [
+    { email:'siti@sanggar.id', pass:'1234', name:'Siti Rahmawati', wa:'081254889900', instansi:'Sanggar Pesona Mahakam', kota:'Samarinda', alamat:'Jl. AW Syahranie No. 45', nik:'6472015504950002' }
+  ],
+  projects: []
+};
+
+let appState = {
+  ...structuredClone(DEFAULT_STATE),
+  currentPage:'home', currentClientUser:null, isAdminAuthenticated:false,
+  selectedServiceLine:'tari', selectedPackage:'standar',
+  basicInstruments:['Sampe','Kendang','Gong'],
+  proScenes:[{ title:'Babak 1', detail:'Tempo lambat.', link:'' }],
+  previousSynopsisBackup:'',
+  activeBriefProjectId:null,
+  selectedClientProjectId:null,
+  selectedAdminProjectId:null,
+  adminFilterStatus:'Semua', portfolioFilter:'Semua',
+  docModalState:{ projectId:null, docType:'invoice', stage:'dp' }
+};
+
+try {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    const parsed = JSON.parse(saved);
+    if (parsed.settings) appState.settings = { ...appState.settings, ...parsed.settings };
+    if (Array.isArray(parsed.users)) appState.users = parsed.users;
+    if (Array.isArray(parsed.projects)) appState.projects = parsed.projects;
+    if (Array.isArray(parsed.portfolioItems)) appState.portfolioItems = parsed.portfolioItems;
   }
-}
-function toggleThemeDropdown() {
-  document.getElementById('theme-dropdown').classList.toggle('hidden');
-}
-function updateThemeIcon(mode) {
-  document.getElementById('theme-icon-dark').classList.add('hidden');
-  document.getElementById('theme-icon-light').classList.add('hidden');
-  document.getElementById('theme-icon-auto').classList.add('hidden');
-  if (mode === 'dark') document.getElementById('theme-icon-dark').classList.remove('hidden');
-  else if (mode === 'light') document.getElementById('theme-icon-light').classList.remove('hidden');
-  else document.getElementById('theme-icon-auto').classList.remove('hidden');
-}
-document.addEventListener('click', function(event) {
-  const dd = document.getElementById('theme-dropdown');
-  const btn = dd?.previousElementSibling;
-  if (dd && !dd.classList.contains('hidden') && !dd.contains(event.target) && !btn.contains(event.target)) {
-    dd.classList.add('hidden');
-  }
-});
+} catch(_) {}
 
-function showToast(title, message, type = 'success') {
-  const container = document.getElementById('toast-container');
-  if (!container) return;
-  const borderColor = type === 'error' ? 'border-l-red-500' : type === 'warning' ? 'border-l-amber-400' : 'border-l-emerald-400';
-  const el = document.createElement('div');
-  el.className = `pointer-events-auto bg-surface border border-border border-l-4 ${borderColor} rounded-xl p-4 shadow-2xl text-sm transition-all duration-200`;
-  el.innerHTML = `
-    <div class="flex items-start justify-between gap-3">
-      <div>
-        <strong class="text-textMain block font-bold">${title}</strong>
-        <span class="text-textMuted block mt-1 leading-relaxed">${message}</span>
-      </div>
-      <button type="button" onclick="this.parentElement.parentElement.remove()" class="text-textMuted hover:text-textMain text-lg">×</button>
-    </div>
-  `;
-  container.appendChild(el);
-  setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 250); }, 4200);
+function persistLocalState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      settings: appState.settings,
+      users: appState.users,
+      projects: appState.projects,
+      portfolioItems: appState.portfolioItems
+    }));
+  } catch(_) {}
 }
-
-function formatRupiah(num) {
-  return 'Rp' + Number(num || 0).toLocaleString('id-ID');
-}
-
-function numberToIndonesianWords(n) {
-  n = Math.floor(Number(n) || 0);
-  if (n === 0) return 'Nol';
-  const satuan = ['','Satu','Dua','Tiga','Empat','Lima','Enam','Tujuh','Delapan','Sembilan','Sepuluh','Sebelas'];
-  function convert(x) {
-    if (x < 12) return satuan[x];
-    if (x < 20) return convert(x - 10) + ' Belas';
-    if (x < 100) return convert(Math.floor(x / 10)) + ' Puluh' + (x % 10 ? ' ' + convert(x % 10) : '');
-    if (x < 200) return 'Seratus' + (x - 100 ? ' ' + convert(x - 100) : '');
-    if (x < 1000) return convert(Math.floor(x / 100)) + ' Ratus' + (x % 100 ? ' ' + convert(x % 100) : '');
-    if (x < 2000) return 'Seribu' + (x - 1000 ? ' ' + convert(x - 1000) : '');
-    if (x < 1000000) return convert(Math.floor(x / 1000)) + ' Ribu' + (x % 1000 ? ' ' + convert(x % 1000) : '');
-    if (x < 1000000000) return convert(Math.floor(x / 1000000)) + ' Juta' + (x % 1000000 ? ' ' + convert(x % 1000000) : '');
-    return convert(Math.floor(x / 1000000000)) + ' Miliar' + (x % 1000000000 ? ' ' + convert(x % 1000000000) : '');
-  }
-  return convert(n).trim();
-}
-
-function wrapCanvasText(ctx, text, maxWidth) {
-  const paragraphs = String(text || '').split('\n');
-  const lines = [];
-  paragraphs.forEach(p => {
-    const words = p.split(' ');
-    let current = '';
-    words.forEach(word => {
-      const test = current ? current + ' ' + word : word;
-      if (ctx.measureText(test).width > maxWidth && current) {
-        lines.push(current);
-        current = word;
-      } else current = test;
-    });
-    if (current) lines.push(current);
-  });
-  return lines;
-}
-
-function triggerPngFileDownload(dataUrl, filename) {
-  const a = document.createElement('a');
-  a.href = dataUrl;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-}
-
-function loadImageElement(src) {
-  return new Promise(resolve => {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => resolve(img);
-    img.onerror = () => resolve(null);
-    img.src = src;
-  });
-}
-
-function updateCloudSyncBadge(statusText, isOnline) {
-  // Fungsi ini dikosongkan karena elemen badge dihapus sesuai permintaan
-}
-
-function sanitizeDocId(raw) {
-  return String(raw || 'item').toLowerCase().replace(/[^a-z0-9_-]/g, '_');
-}
-
-function prepareProjectForFirestore(proj) {
-  const copy = { ...proj };
-  const maxFieldLen = 650000;
-  ['dpProofDataUrl','pelunasanProofDataUrl','previewAudioUrl','masterFileUrl'].forEach(key => {
-    if (typeof copy[key] === 'string' && copy[key].length > maxFieldLen) copy[key] = '';
-  });
-  return copy;
-}
+window.appState = appState;
