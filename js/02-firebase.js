@@ -4,12 +4,24 @@ async function initFirebaseSync() {
     const { getAuth, signInAnonymously, signInWithCustomToken } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js');
     const { getFirestore, collection, doc, setDoc, onSnapshot } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js');
     const { getStorage } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js');
+    const { initializeAppCheck, ReCaptchaV3Provider } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-app-check.js');
 
     const cfg = (typeof __firebase_config !== 'undefined' && __firebase_config)
       ? JSON.parse(__firebase_config)
       : STUDIO_FIREBASE_CONFIG;
 
     const fbApp = initializeApp(cfg);
+    
+    // Initialize App Check dengan reCAPTCHA v3
+    try {
+      initializeAppCheck(fbApp, {
+        provider: new ReCaptchaV3Provider(appState.settings.recaptchaSiteKey),
+        isTokenAutoRefreshEnabled: true
+      });
+    } catch(e) {
+      console.warn('App Check inisialisasi gagal, mungkin domain belum diizinkan.', e);
+    }
+
     const fbAuth = getAuth(fbApp);
     db = getFirestore(fbApp);
     fbStorage = getStorage(fbApp);
@@ -81,7 +93,7 @@ async function initFirebaseSync() {
     updateCloudSyncBadge('Mode Mandiri (GitHub Pages)', false);
   }
 }
-
+// ... (sisa kode fungsi syncProjectToCloud, syncUserToCloud, syncStudioConfigToCloud, uploadFileToFirebaseStorage tetap sama seperti sebelumnya)
 async function uploadFileToFirebaseStorage(path, file) {
   if (!fbStorage || !firebaseUser || !file) return '';
   try {
@@ -93,7 +105,6 @@ async function uploadFileToFirebaseStorage(path, file) {
     return '';
   }
 }
-
 async function syncProjectToCloud(proj) {
   persistLocalState();
   if (!db || !firebaseUser) return;
@@ -103,7 +114,6 @@ async function syncProjectToCloud(proj) {
     await setDoc(ref, prepareProjectForFirestore(proj));
   } catch (_) {}
 }
-
 async function syncUserToCloud(userObj) {
   persistLocalState();
   if (!db || !firebaseUser || !userObj?.email) return;
@@ -113,7 +123,6 @@ async function syncUserToCloud(userObj) {
     await setDoc(ref, userObj);
   } catch (_) {}
 }
-
 async function syncStudioConfigToCloud() {
   persistLocalState();
   if (!db || !firebaseUser) return;
