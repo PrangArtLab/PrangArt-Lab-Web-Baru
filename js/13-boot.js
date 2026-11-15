@@ -7,6 +7,9 @@ Object.assign(window, {
   numberToIndonesianWords,
   triggerPngFileDownload,
   updateCloudSyncBadge,
+  initTheme,
+  setTheme,
+  toggleThemeDropdown,
 
   navigateTo,
   updateHeaderAuthBadge,
@@ -56,6 +59,9 @@ Object.assign(window, {
   uploadClientStagePayment,
   confirmClientFinalReceipt,
   downloadMasterAsset,
+  
+  changePaymentMethodDisplay,
+  copyBankAccountNumber,
 
   generateBriefCardPNGDataUrl,
   downloadCurrentBriefPNG,
@@ -74,6 +80,7 @@ Object.assign(window, {
   switchOfficialDocType,
   switchOfficialDocStage,
   downloadOfficialDocPNG,
+  sendInvoiceToWA,
 
   verifyAdminPin,
   refreshAdminPageUI,
@@ -86,6 +93,8 @@ Object.assign(window, {
   closeCustomModal,
   uploadStudioDeliverable,
   saveStudioSettings,
+  addPaymentMethod,
+  removePaymentMethod,
   addPortfolioItem,
   removePortfolioItem,
   syncProjectToCloud,
@@ -95,16 +104,23 @@ Object.assign(window, {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
+  initTheme(); 
+  
   updateHeaderAuthBadge();
   renderSop14Grid();
   renderFaqAccordion();
   renderPortfolioGrid();
-  navigateTo('home');
+  
+  const initialPage = window.location.hash.replace('#', '') || 'home';
+  navigateTo(initialPage);
+
   initFirebaseSync();
 
-  setTimeout(() => {
-    const wm = document.getElementById('welcome-modal');
-    wm?.classList.remove('hidden');
-    wm?.classList.add('flex');
-  }, 350);
+  if (!window.location.hash) {
+    setTimeout(() => {
+      const wm = document.getElementById('welcome-modal');
+      wm?.classList.remove('hidden');
+      wm?.classList.add('flex');
+    }, 350);
+  }
 });
