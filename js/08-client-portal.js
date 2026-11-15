@@ -20,10 +20,11 @@ function renderClientWorkspace() {
     ws.innerHTML = `
       <div class="bg-charcoal border border-borderline rounded-2xl p-10 text-center max-w-lg mx-auto space-y-4">
         <h3 class="text-lg font-bold text-ivory">Belum Ada Pengajuan Aktif</h3>
-        <p class="text-xs text-ash">Mulai diskusi dengan Produser atau isi formulir pengajuan kebutuhan pertama Anda.</p>
+        <p class="text-xs text-ash">Mulai diskusi dengan Admin atau isi formulir pengajuan kebutuhan pertama Anda.</p>
         <div class="flex justify-center gap-2">
           <button type="button" onclick="openProducerWaModal()" class="btn-ghost-gold px-4 py-2.5 rounded-xl text-xs font-bold">Diskusi WA</button>
-          <button type="button" onclick="navigateTo('order')" class="btn-gold px-4 py-2.5 rounded-xl text-xs font-bold">Isi Formulir →</button>
+          <!-- TOMBOL BARU KE FORMULIR -->
+          <button type="button" onclick="navigateTo('order')" class="btn-gold px-4 py-2.5 rounded-xl text-xs font-bold">+ Buat Pengajuan Baru</button>
         </div>
       </div>
     `;
@@ -55,7 +56,8 @@ function renderClientWorkspace() {
             ${myProjects.map(p => `<option value="${p.id}" ${p.id === proj.id ? 'selected' : ''}>${p.id} - ${p.judul}</option>`).join('')}
           </select>
         ` : ''}
-        <button type="button" onclick="navigateTo('order')" class="btn-gold px-3.5 py-2 rounded-xl text-xs font-bold">+ Ajukan Baru</button>
+        <!-- TOMBOL TAMBAH PENGAJUAN BARU -->
+        <button type="button" onclick="navigateTo('order')" class="btn-gold px-3.5 py-2 rounded-xl text-xs font-bold">+ Buat Pengajuan Baru</button>
       </div>
     </div>
 
@@ -168,10 +170,10 @@ function renderClientWorkspace() {
           <div class="bg-acoustic/60 border border-borderline rounded-xl p-4 text-xs text-ash">Audio pratinjau akan muncul di sini setelah proses produksi studio selesai dikerjakan.</div>
         `}
         <div class="space-y-2">
-          <label class="block text-xs font-semibold text-ivory">Kirim Catatan Revisi / Masukan ke Produser:</label>
+          <label class="block text-xs font-semibold text-ivory">Kirim Catatan Revisi / Masukan ke Admin:</label>
           <textarea id="client-revision-note" rows="2" placeholder="Tuliskan timestamp & detail perbaikan ringan (misal: 01:20 transisi kendang diperhalus)..." class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3.5 py-2 text-xs text-ivory focus:outline-none"></textarea>
           <div class="flex flex-wrap gap-2">
-            <button type="button" onclick="sendClientRevisionNoteToWA('${proj.id}')" class="btn-ghost-gold px-4 py-2 rounded-xl text-xs font-bold">Kirim Catatan Revisi ke WA Produser</button>
+            <button type="button" onclick="sendClientRevisionNoteToWA('${proj.id}')" class="btn-ghost-gold px-4 py-2 rounded-xl text-xs font-bold">Kirim Catatan Revisi ke WA Admin</button>
           </div>
         </div>
       </div>
