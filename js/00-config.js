@@ -80,11 +80,8 @@ const DEFAULT_STATE = {
       }
     }
   },
-  portfolioItems: [
-    { id:'PF-01', title:'Gema Enggang Mahakam', category:'Produksi Musik Tari', culture:'Etnis Dayak Kenyah', duration:'05:40', desc:'Komposisi sampe, kendang tradisional, dan orkestrasi sinematik untuk tarian kreasi pesisir.', freq:220 },
-    { id:'PF-02', title:'Langgam Tepian Etam', category:'Produksi Musik Non-Tari', culture:'Kontemporer Nusantara', duration:'03:50', desc:'Produksi musik non-tari memadukan petikan gambus modern dengan elemen perkusi elektronik.', freq:261.63 },
-    { id:'PF-03', title:'Partitur Paduan Suara Pesisir', category:'Transkripsi Musik', culture:'Not Angka & Balok SATB', duration:'04:15', desc:'Transkripsi presisi 4 suara lengkap dengan dinamika, tanda tempo, dan panduan piano.', freq:329.63 }
-  ],
+  // PORTOFOLIO DIKOSONGKAN (Diisi manual lewat Admin)
+  portfolioItems: [],
   faqs: [
     { q:'Mengapa diskusi dilakukan sebelum pembayaran?', a:'Sesi diskusi memastikan kebutuhan artistik, ruang lingkup kerja, durasi, serta anggaran benar-benar dipahami sebelum penawaran resmi diterbitkan. Diskusi awal tidak otomatis mengikat klien untuk membayar.' },
     { q:'Bagaimana perbedaan persetujuan administrasi antar layanan?', a:'Untuk Produksi Musik Tari dan Non-Tari dilakukan penandatanganan Perjanjian Produksi Musik beserta Lampiran A, B, dan C. Untuk Transkripsi Musik dilakukan persetujuan penawaran dan ketentuan layanan secara tertulis/elektronik.' },
@@ -155,7 +152,8 @@ try {
     if (parsed.settings) appState.settings = { ...appState.settings, ...parsed.settings };
     if (Array.isArray(parsed.users) && parsed.users.length) appState.users = parsed.users;
     if (Array.isArray(parsed.projects) && parsed.projects.length) appState.projects = parsed.projects;
-    if (Array.isArray(parsed.portfolioItems) && parsed.portfolioItems.length) appState.portfolioItems = parsed.portfolioItems;
+    // Memastikan jika array kosong, local storage tidak menimpanya dengan data lama
+    if (Array.isArray(parsed.portfolioItems)) appState.portfolioItems = parsed.portfolioItems;
   }
 } catch(_) {}
 
