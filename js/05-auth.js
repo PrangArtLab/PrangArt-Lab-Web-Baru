@@ -18,13 +18,13 @@ function switchAuthModalTab(tab) {
   const logForm = document.getElementById('form-client-login');
 
   if (tab === 'register') {
-    regTab.className = 'py-2 rounded-lg text-xs font-bold bg-gold text-obsidian';
-    logTab.className = 'py-2 rounded-lg text-xs font-semibold text-ash';
+    regTab.className = 'py-2.5 rounded-lg text-xs font-bold bg-surface shadow text-textMain';
+    logTab.className = 'py-2.5 rounded-lg text-xs font-semibold text-textMuted hover:text-textMain transition';
     regForm.classList.remove('hidden');
     logForm.classList.add('hidden');
   } else {
-    logTab.className = 'py-2 rounded-lg text-xs font-bold bg-gold text-obsidian';
-    regTab.className = 'py-2 rounded-lg text-xs font-semibold text-ash';
+    logTab.className = 'py-2.5 rounded-lg text-xs font-bold bg-surface shadow text-textMain';
+    regTab.className = 'py-2.5 rounded-lg text-xs font-semibold text-textMuted hover:text-textMain transition';
     logForm.classList.remove('hidden');
     regForm.classList.add('hidden');
   }
@@ -39,26 +39,21 @@ function handleQuickClientRegister(e) {
 
   const existing = appState.users.find(u => u.email === email);
   if (existing) {
-    showToast('Email Sudah Terdaftar', 'Silakan masuk menggunakan tab Masuk Akun.', 'warning');
+    showToast('Email Terdaftar', 'Silakan masuk menggunakan tab Masuk.', 'warning');
     switchAuthModalTab('login');
     document.getElementById('login-email').value = email;
     return;
   }
 
-  // Hanya menyimpan Nama, Email, WA, Pass. Instansi & Kota diisi manual nanti di form pemesanan.
   const newUser = { name, email, wa, pass, instansi: '', kota: '', alamat: '', nik: '' };
   appState.users.push(newUser);
   appState.currentClientUser = newUser;
   syncUserToCloud(newUser);
   updateHeaderAuthBadge();
   closeClientAuthModal();
-  showToast('Akun Berhasil Dibuat', `Selamat datang, ${name}! Silakan isi formulir pengajuan.`);
-  
-  if (appState.currentPage === 'client') {
-    refreshClientPageUI();
-  } else if (appState.currentPage === 'order') {
-    refreshOrderPageUI();
-  }
+  showToast('Akun Dibuat', `Selamat datang, ${name}!`);
+  if (appState.currentPage === 'client') refreshClientPageUI();
+  if (appState.currentPage === 'order') refreshOrderPageUI();
 }
 
 function handleQuickClientLogin(e) {
@@ -67,7 +62,7 @@ function handleQuickClientLogin(e) {
   const pass = document.getElementById('login-pass').value;
   const found = appState.users.find(u => u.email === email && u.pass === pass);
   if (!found) {
-    showToast('Gagal Masuk', 'Email atau kata sandi tidak cocok.', 'error');
+    showToast('Gagal Masuk', 'Email atau kata sandi salah.', 'error');
     return;
   }
   appState.currentClientUser = found;
