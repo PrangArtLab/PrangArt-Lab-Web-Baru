@@ -53,24 +53,9 @@ const DEFAULT_STATE = {
     studioWhatsApp: '628977230597',
     recaptchaSiteKey: '6LeDaSEuAAAAAIDdp1Ir_V-wkmOXE-e8imq9Alzj',
     adminPin: '2026',
-    // PAYMENT METHODS DINAMIS
     paymentMethods: [
-      { 
-        id: 'pay-1', 
-        type: 'bank', 
-        name: 'Bank BCA', 
-        number: '1234567890', 
-        holder: 'Fikri Yassaar Arrazaq', 
-        logo: 'https://iili.io/oHYybgj.md.png' 
-      },
-      { 
-        id: 'pay-2', 
-        type: 'qris', 
-        name: 'QRIS (Shopee/DANA/OVO)', 
-        number: '-', 
-        holder: 'PrangArt Lab', 
-        logo: 'https://iili.io/oHaHbAQ.md.png' 
-      }
+      { id: 'pay-1', type: 'bank', name: 'Bank BCA', number: '1234567890', holder: 'Fikri Yassaar Arrazaq', logo: 'https://iili.io/oHYybgj.md.png' },
+      { id: 'pay-2', type: 'qris', name: 'QRIS (Shopee/DANA/OVO)', number: '-', holder: 'PrangArt Lab', logo: 'https://iili.io/oHaHbAQ.md.png' }
     ]
   },
   serviceCatalog: {
@@ -91,7 +76,7 @@ const DEFAULT_STATE = {
       }
     },
     transkripsi: {
-      label:'Transkripsi Musik', addonLabel:'Partitur Ansembel Lengkap / Express', addonPrice:50000,
+      label:'Transkripsi Musik', addonLabel:'Partitur Ansambel Lengkap / Express', addonPrice:50000,
       packages: {
         dasar: { label:'Paket Dasar (350rb)', price:350000, desc:'Melodi utama / vokal tunggal, 1 jenis notasi, 2x revisi ringan.' },
         standar: { label:'Paket Standar (600rb)', price:600000, desc:'Not Angka & Not Balok lengkap, akor dasar, 4x revisi ringan.' },
@@ -101,52 +86,15 @@ const DEFAULT_STATE = {
   },
   portfolioItems: [],
   faqs: [
-    { q:'Mengapa diskusi dilakukan sebelum pembayaran?', a:'Sesi diskusi memastikan kebutuhan artistik, ruang lingkup kerja, durasi, serta anggaran benar-benar dipahami sebelum penawaran resmi diterbitkan. Diskusi awal tidak otomatis mengikat klien untuk membayar.' },
-    { q:'Bagaimana perbedaan persetujuan administrasi antar layanan?', a:'Untuk Produksi Musik Tari dan Non-Tari dilakukan penandatanganan Perjanjian Produksi Musik beserta Lampiran A, B, dan C. Untuk Transkripsi Musik dilakukan persetujuan penawaran dan ketentuan layanan secara tertulis/elektronik.' },
-    { q:'Bagaimana ketentuan pengalihan hak ekonomi & kredit komposer?', a:'Harga produksi sudah termasuk pengalihan hak ekonomi kepada Pihak Kedua yang berlaku otomatis setelah pelunasan dan penyerahan file final (Pasal 3). Kredit tetap dicantumkan sesuai kedudukan Pihak Pertama di Lampiran A tanpa gelar akademik (Pasal 4).' },
-    { q:'Apakah file mentah (multitrack / sesi DAW / preset) ikut diserahkan?', a:'Tidak termasuk dalam penyerahan standar, kecuali dicantumkan secara tegas pada Lampiran A berdasarkan kesepakatan tertulis sebelumnya.' }
+    { q:'Mengapa diskusi dilakukan sebelum pembayaran?', a:'Sesi diskusi memastikan kebutuhan artistik, ruang lingkup kerja, durasi, serta anggaran benar-benar dipahami sebelum penawaran resmi diterbitkan.' },
+    { q:'Bagaimana perbedaan persetujuan administrasi antar layanan?', a:'Untuk Produksi Musik Tari dan Non-Tari dilakukan penandatanganan Perjanjian Produksi Musik. Untuk Transkripsi Musik dilakukan persetujuan penawaran secara elektronik.' },
+    { q:'Bagaimana ketentuan pengalihan hak ekonomi & kredit komposer?', a:'Harga produksi sudah termasuk pengalihan hak ekonomi kepada Pihak Kedua yang berlaku otomatis setelah pelunasan dan penyerahan file final (Pasal 3).' },
+    { q:'Apakah file mentah (multitrack) ikut diserahkan?', a:'Tidak termasuk dalam penyerahan standar, kecuali dicantumkan secara tegas pada Lampiran A.' }
   ],
   users: [
-    { email:'siti@sanggar.id', pass:'1234', name:'Siti Rahmawati', wa:'081254889900', instansi:'Sanggar Pesona Mahakam', kota:'Samarinda', alamat:'Jl. AW Syahranie No. 45, Samarinda', nik:'6472015504950002' }
+    { email:'admin@prangart.com', pass:'rahasia', name:'Admin PrangArt', wa:'08977230597', instansi:'PrangArt Lab', kota:'Samarinda', alamat:'Jl. Wiraguna', nik:'6472' }
   ],
-  projects: [
-    {
-      id:'PAL-2026-041', createdTs:1731300000000, createdAt:'15 Nov 2026',
-      entryPath:'Jalur A (Sudah Diskusi WA)', clientEmail:'siti@sanggar.id',
-      clientName:'Siti Rahmawati', instansi:'Sanggar Pesona Mahakam', kota:'Samarinda',
-      alamat:'Jl. AW Syahranie No. 45, Samarinda', nik:'6472015504950002', wa:'081254889900',
-      serviceLine:'tari', serviceLineLabel:'Produksi Musik Tari',
-      packageKey:'standar', packageName:'Paket Standar (1,5 Juta)',
-      addonSelected:true, addonLabel:'Rekaman Vokal / Sinden / Narasi', addonPrice:50000,
-      basePrice:1500000, totalPrice:1550000, dpAmount:775000, paymentScheme:'DP 50%',
-      judul:'Mandau & Embun Pagi', koreografer:'Siti Rahmawati', jenisTari:'Tari Kreasi Baru',
-      budaya:'Dayak Bahau & Pesisir Mahakam', durasi:'05:30',
-      referensi:'https://drive.google.com/drive/folders/demo-referensi',
-      sinopsis:'Menggambarkan keteguhan perempuan penjaga sungai Mahakam yang menyatu dengan alam pagi sebelum menyongsong upacara adat panen raya.',
-      musicalSpec: {
-        mode:'standar',
-        structures:[
-          { name:'Opening / Pembuka', time:'00:00 - 01:15', detail:'Suasana kabut pagi, petikan sampe lembut dan vokal sinden pembuka.', link:'https://drive.google.com/file/d/opening-ref' },
-          { name:'Klimaks / Puncak', time:'03:10 - 04:45', detail:'Ritme kendang cepat, dinamika penuh semangat upacara adat.', link:'https://drive.google.com/file/d/klimaks-ref' }
-        ]
-      },
-      contractNumber:'041/PAL-SPK/XI/2026', composerRole:'Composer & Arranger',
-      musicFileTitle:'Mandau_Embun_Pagi_Final', deliverableFormat:'WAV 24-bit & MP3 320kbps',
-      revisionQuota:'6', thirdPartyMaterial:'Tidak ada', collaboratorNotes:'Tidak ada kontributor tambahan',
-      rawFilesIncluded:false, rawFilesDetail:'', extraAttachmentNotes:'-', courtCity:'Samarinda',
-      quoteStatus:'Diterbitkan', quoteDurationDays:'10 Hari Kerja',
-      quoteDeliverables:'WAV 24-bit & MP3 320kbps (6x revisi ringan)',
-      quoteNotes:'Sudah disepakati pada sesi diskusi WhatsApp.',
-      agreementSigned:true, agreementSignedAt:'15 Nov 2026',
-      dpStatus:'Terverifikasi', dpRejectReason:'',
-      dpProofName:'Transfer_BCA_DP_Siti.jpg', dpProofDataUrl:'',
-      pelunasanStatus:'Belum Lunas', pelunasanProofName:'', pelunasanProofDataUrl:'',
-      productionStatus:'06. Pratinjau Hasil & Revisi',
-      previewAudioName:'Preview_Mandau_Embun_Pagi_v1.mp3', previewAudioUrl:'',
-      masterFileName:'MASTER_Mandau_Embun_Pagi_24bit.wav', masterFileUrl:'',
-      clientAcceptedFinal:false
-    }
-  ]
+  projects: []
 };
 
 let appState = {
@@ -157,8 +105,8 @@ let appState = {
   proScenes:[{ title:'Babak 1 — Pembuka', detail:'Tempo lambat 75 BPM, nuansa sakral.', link:'' }],
   previousSynopsisBackup:'',
   activeBriefProjectId:null,
-  selectedClientProjectId:'PAL-2026-041',
-  selectedAdminProjectId:'PAL-2026-041',
+  selectedClientProjectId:null,
+  selectedAdminProjectId:null,
   adminFilterStatus:'Semua', portfolioFilter:'Semua',
   docModalState:{ projectId:null, docType:'invoice', stage:'dp' }
 };
