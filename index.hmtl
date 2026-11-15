@@ -670,9 +670,6 @@
             <div class="rounded-xl overflow-hidden border border-gold/40 bg-obsidian">
               <img id="brief-card-preview-img" src="" alt="Kartu Brief PrangArt Lab" class="w-full h-auto block" />
             </div>
-            <div class="rounded-xl overflow-hidden border border-gold/40 bg-obsidian">
-              <img id="brief-card-preview-img" src="" alt="Kartu Brief PrangArt Studios" class="w-full h-auto block" />
-            </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
               <button type="button" onclick="downloadCurrentBriefPNG()" class="btn-ghost-gold py-3 px-4 rounded-xl text-xs font-bold">
@@ -1011,6 +1008,7 @@
       </div>
       <div class="flex flex-wrap items-center justify-center gap-4 font-mono text-[11px]">
         <span id="firebase-sync-badge" class="px-2.5 py-0.5 rounded-full bg-acoustic border border-borderline text-ash">Cloud: Menghubungkan...</span>
+        <button type="button" onclick="openGitHubPagesGuideModal()" class="px-2.5 py-0.5 rounded-full bg-gold/15 border border-gold/40 text-gold hover:bg-gold/25 transition">🚀 Panduan GitHub Pages</button>
         <span>IG: @prangart.studios</span>
         <span class="text-gold">WA: 08977230597</span>
         <span>prangart.studios@gmail.com</span>
@@ -1367,7 +1365,7 @@
             if (appState.currentPage === 'admin' && appState.isAdminAuthenticated) renderAdminDashboard();
           }
         }, () => {
-          updateCloudSyncBadge('Cloud: Mode Lokal', false);
+          updateCloudSyncBadge('Mode Mandiri (GitHub Pages)', false);
         });
 
         const usersCol = collection(db, 'artifacts', firebaseAppId, 'public', 'data', 'users');
@@ -1394,7 +1392,7 @@
           }
         }, () => {});
       } catch (_) {
-        updateCloudSyncBadge('Cloud: Mode Lokal', false);
+        updateCloudSyncBadge('Mode Mandiri (GitHub Pages)', false);
       }
     }
 
@@ -2657,15 +2655,15 @@
             <p class="text-xs text-ash leading-relaxed">
               ${proj.serviceLine === 'transkripsi'
                 ? 'Persetujuan penawaran dan ketentuan layanan transkripsi musik secara elektronik.'
-                : 'Penandatanganan Perjanjian Produksi Musik oleh kedua pihak sebelum pembayaran.'}
+                : 'Penandatanganan Perjanjian Produksi Musik (v4-8) beserta Lampiran A, B, C sebelum pembayaran.'}
             </p>
             ${isAgreementSigned ? `
               <button type="button" onclick="openContractDocModal('${proj.id}', false)" class="btn-ghost-gold w-full py-2.5 rounded-xl text-xs font-bold">
-                📜 Lihat Dokumen yang Disetujui
+                📜 Lihat Perjanjian yang Disetujui
               </button>
             ` : isQuoteIssued ? `
               <button type="button" onclick="openContractDocModal('${proj.id}', true)" class="btn-gold w-full py-2.5 rounded-xl text-xs font-bold">
-                ✍️ Baca &amp; Setujui Sekarang
+                ✍️ Baca &amp; Setujui Perjanjian
               </button>
             ` : `
               <button type="button" disabled class="w-full py-2.5 rounded-xl bg-acoustic text-ash text-xs font-semibold cursor-not-allowed">
@@ -2698,48 +2696,53 @@
                   <label class="btn-gold w-full py-2.5 rounded-xl text-xs font-bold text-center block cursor-pointer">
                     📤 Unggah Bukti Transfer (${formatRupiah(firstPayAmount)})
                     <input type="file" accept="image/jpeg,image/png,application/pdf" onchange="uploadClientStagePayment('${proj.id}', 'dp', this.files[0])" class="hidden" />
-          <!-- Tahap 6 & 7: Penawaran Harga & Pengaturan Lampiran A/B Perjanjian -->
-          <div class="bg-acoustic border border-gold/30 rounded-xl p-4 space-y-3">
-            <div class="flex items-center justify-between">
-              <strong class="text-xs text-gold uppercase font-mono">Tahap 6 &amp; 7 • Penawaran Resmi &amp; Lampiran A Perjanjian</strong>
-              <span class="text-[11px] font-mono text-ivory">Status: ${proj.quoteStatus}</span>
+                  </label>
+                ` : `
+                  <p class="text-[11px] text-emerald-400 font-semibold">✓ Pembayaran Termin I telah diverifikasi oleh PrangArt Lab.</p>
+                `}
+              </div>
+            ` : `
+              <p class="text-xs text-ash leading-relaxed">
+                Kolom unggah bukti transfer terbuka otomatis setelah Anda menyetujui dokumen pada Tahap 7.
+              </p>
+            `}
+          </div>
+        </div>
+
+        <!-- BOTTOM 2-COLUMN WORKSPACE: AUDIO PREVIEW & REVISION (LEFT) + DOCUMENTS & FINAL MASTER (RIGHT) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div class="lg:col-span-7 bg-charcoal border border-borderline rounded-2xl p-5 space-y-4">
+            <div class="flex items-center justify-between border-b border-borderline pb-3">
+              <h3 class="text-sm font-bold text-ivory">🎧 Tahap 11 • Pratinjau Audio &amp; Catatan Revisi</h3>
+              <span class="text-[11px] font-mono text-gold">Kuota: ${proj.revisionQuota || '6'}x revisi ringan</span>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
-              <div>
-                <label class="block text-[11px] text-ash mb-1">Biaya Final (Rp)</label>
-                <input type="number" id="admin-quote-price" value="${proj.totalPrice}" class="w-full bg-obsidian border border-borderline rounded-lg px-3 py-2 font-mono text-ivory" />
+
+            ${proj.previewAudioName ? `
+              <div class="bg-acoustic border border-gold/30 rounded-xl p-4 space-y-2.5">
+                <div class="flex items-center justify-between text-xs">
+                  <strong class="text-ivory">${proj.previewAudioName}</strong>
+                  <span class="text-[11px] font-mono text-emerald-400">Draf Studio Tersedia</span>
+                </div>
+                ${proj.previewAudioUrl ? `
+                  <audio controls src="${proj.previewAudioUrl}" class="w-full h-9 rounded-lg"></audio>
+                ` : `
+                  <button type="button" onclick="playSampleTone(246.94, '${proj.judul} (Pratinjau)')" class="btn-ghost-gold px-3.5 py-2 rounded-lg text-xs font-bold">▶ Putar Simulasi Pratinjau</button>
+                `}
               </div>
-              <div>
-                <label class="block text-[11px] text-ash mb-1">Kedudukan Pihak I (Lampiran A)</label>
-                <select id="admin-composer-role" class="w-full bg-obsidian border border-borderline rounded-lg px-3 py-2 text-ivory">
-                  <option value="Composer" ${(proj.composerRole || '') === 'Composer' ? 'selected' : ''}>Composer</option>
-                  <option value="Arranger" ${(proj.composerRole || '') === 'Arranger' ? 'selected' : ''}>Arranger</option>
-                  <option value="Composer & Arranger" ${(proj.composerRole || 'Composer & Arranger') === 'Composer & Arranger' ? 'selected' : ''}>Composer &amp; Arranger</option>
-                  <option value="Tim produksi saja" ${(proj.composerRole || '') === 'Tim produksi saja' ? 'selected' : ''}>Tim produksi saja</option>
-                </select>
+            ` : `
+              <div class="bg-acoustic/60 border border-borderline rounded-xl p-4 text-xs text-ash">
+                Audio pratinjau akan muncul di sini setelah proses produksi studio selesai dikerjakan.
               </div>
-              <div>
-                <label class="block text-[11px] text-ash mb-1">Kuota Revisi Ringan (Pasal 8)</label>
-                <input type="text" id="admin-quote-rev" value="${proj.revisionQuota || '6'}" placeholder="Contoh: 3 / 6" class="w-full bg-obsidian border border-borderline rounded-lg px-3 py-2 font-mono text-ivory" />
+            `}
+
+            <div class="space-y-2">
+              <label class="block text-xs font-semibold text-ivory">Kirim Catatan Revisi / Masukan ke Produser:</label>
+              <textarea id="client-revision-note" rows="2" placeholder="Tuliskan timestamp & detail perbaikan ringan (misal: 01:20 transisi kendang diperhalus)..." class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3.5 py-2 text-xs text-ivory focus:outline-none"></textarea>
+              <div class="flex flex-wrap gap-2">
+                <button type="button" onclick="sendClientRevisionNoteToWA('${proj.id}')" class="btn-ghost-gold px-4 py-2 rounded-xl text-xs font-bold">
+                  💬 Kirim Catatan Revisi ke WA Produser
+                </button>
               </div>
-              <div>
-                <label class="block text-[11px] text-ash mb-1">Format File Diserahkan</label>
-                <input type="text" id="admin-quote-deliver" value="${proj.deliverableFormat || 'WAV 24-bit & MP3 320kbps'}" class="w-full bg-obsidian border border-borderline rounded-lg px-3 py-2 text-ivory" />
-              </div>
-              <div>
-                <label class="block text-[11px] text-ash mb-1">Estimasi Waktu Pengerjaan</label>
-                <input type="text" id="admin-quote-days" value="${proj.quoteDurationDays || '7–10 Hari Kerja'}" class="w-full bg-obsidian border border-borderline rounded-lg px-3 py-2 text-ivory" />
-              </div>
-              <div>
-                <label class="block text-[11px] text-ash mb-1">Kolaborator (Lampiran B)</label>
-                <input type="text" id="admin-collab-notes" value="${proj.collaboratorNotes || 'Tidak ada kontributor tambahan'}" class="w-full bg-obsidian border border-borderline rounded-lg px-3 py-2 text-ivory" />
-              </div>
-            </div>
-            <div class="flex flex-wrap items-center justify-between gap-2">
-              <input type="text" id="admin-quote-notes" value="${proj.quoteNotes || ''}" placeholder="Catatan tambahan penawaran / Lampiran A..." class="flex-1 bg-obsidian border border-borderline rounded-lg px-3 py-2 text-xs text-ivory" />
-              <button type="button" onclick="issueOfficialQuotation('${proj.id}')" class="btn-gold px-4 py-2 rounded-xl text-xs font-bold shrink-0">
-                📨 Terbitkan Penawaran &amp; Perjanjian
-              </button>
             </div>
           </div>
 
@@ -2783,6 +2786,81 @@
           </div>
         </div>
       `;
+    }
+
+    function launchWhatsAppProjectDiscussion(projId) {
+      const proj = appState.projects.find(p => p.id === projId);
+      if (!proj) return;
+      const intent =
+        `Diskusi Lanjutan Proyek (${proj.id}) — "${proj.judul}"\n` +
+        `Layanan: ${proj.serviceLineLabel} (${proj.packageName})\n` +
+        `Mohon konfirmasi hasil pemeriksaan materi & penawaran resmi.`;
+      openProducerWaModal(intent, proj.serviceLineLabel, proj.clientName, `${proj.instansi} — ${proj.kota}`);
+    }
+
+    function sendClientRevisionNoteToWA(projId) {
+      const proj = appState.projects.find(p => p.id === projId);
+      if (!proj) return;
+      const note = document.getElementById('client-revision-note')?.value.trim();
+      if (!note) {
+        showToast('Isi Catatan Revisi', 'Tuliskan poin revisi terlebih dahulu sebelum mengirim ke WhatsApp.', 'warning');
+        return;
+      }
+      const intent =
+        `Catatan Revisi Proyek (${proj.id}) — "${proj.judul}"\n` +
+        `Detail Revisi:\n${note}`;
+      openProducerWaModal(intent, proj.serviceLineLabel, proj.clientName, `${proj.instansi} — ${proj.kota}`);
+    }
+
+    async function changeClientPaymentScheme(projId, scheme) {
+      const proj = appState.projects.find(p => p.id === projId);
+      if (!proj) return;
+      proj.paymentScheme = scheme;
+      proj.dpAmount = scheme === 'DP 50%' ? Math.round(proj.totalPrice * 0.5) : proj.totalPrice;
+      proj.pelunasanStatus = scheme === 'Pembayaran Penuh 100%' ? 'Tidak Perlu (Skema Penuh)' : 'Belum Lunas';
+      await syncProjectToCloud(proj);
+      renderClientWorkspace();
+    }
+
+    function uploadClientStagePayment(projId, kind, file) {
+      if (!file) return;
+      if (file.size > 2 * 1024 * 1024) {
+        showToast('File Terlalu Besar', 'Maksimal ukuran file bukti transfer adalah 2 MB.', 'error');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const proj = appState.projects.find(p => p.id === projId);
+        if (!proj) return;
+        const cloudUrl = await uploadFileToFirebaseStorage(`payments/${projId}_${kind}_${Date.now()}_${file.name}`, file);
+        const finalUrl = cloudUrl || reader.result;
+
+        if (kind === 'dp') {
+          proj.dpProofName = file.name;
+          proj.dpProofDataUrl = finalUrl;
+          proj.dpStatus = 'Menunggu Verifikasi';
+          proj.dpRejectReason = '';
+          proj.productionStatus = TRACKER_MILESTONES[3];
+        } else {
+          proj.pelunasanProofName = file.name;
+          proj.pelunasanProofDataUrl = finalUrl;
+          proj.pelunasanStatus = 'Menunggu Verifikasi';
+        }
+        await syncProjectToCloud(proj);
+        renderClientWorkspace();
+        showToast('Bukti Pembayaran Terkirim', 'Menunggu verifikasi Admin sebelum pekerjaan/rilis dilanjutkan.');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function confirmClientFinalReceipt(projId) {
+      const proj = appState.projects.find(p => p.id === projId);
+      if (!proj) return;
+      proj.clientAcceptedFinal = true;
+      proj.productionStatus = TRACKER_MILESTONES[7];
+      await syncProjectToCloud(proj);
+      renderClientWorkspace();
+      showToast('Pesanan Selesai & Diarsipkan', 'Terima kasih telah berkarya bersama PrangArt Lab.');
     }
 
     async function changeClientPaymentScheme(projId, scheme) {
@@ -2940,7 +3018,10 @@
                   <input type="text" id="set-pin" value="${appState.settings.adminPin || '2026'}" class="w-full bg-acoustic border border-borderline rounded-xl px-3 py-2 font-mono text-ivory" />
                 </div>
               </div>
-              <button type="button" onclick="saveStudioSettings()" class="btn-gold px-4 py-2.5 rounded-xl text-xs font-bold">Simpan Pengaturan</button>
+              <div class="flex flex-wrap gap-2">
+                <button type="button" onclick="saveStudioSettings()" class="btn-gold px-4 py-2.5 rounded-xl text-xs font-bold">Simpan Pengaturan</button>
+                <button type="button" onclick="openGitHubPagesGuideModal()" class="btn-ghost-gold px-4 py-2.5 rounded-xl text-xs font-bold">🚀 Cara Deploy di GitHub Pages</button>
+              </div>
             </div>
           </div>
 
@@ -2996,10 +3077,10 @@
             </div>
           </div>
 
-          <!-- Tahap 6: Penawaran Harga & Estimasi Pengerjaan -->
+          <!-- Tahap 6 & 7: Penawaran Harga & Pengaturan Lampiran A/B Perjanjian -->
           <div class="bg-acoustic border border-gold/30 rounded-xl p-4 space-y-3">
             <div class="flex items-center justify-between">
-              <strong class="text-xs text-gold uppercase font-mono">Tahap 6 • Penerbitan Penawaran Harga Resmi</strong>
+              <strong class="text-xs text-gold uppercase font-mono">Tahap 6 &amp; 7 • Penawaran Resmi &amp; Lampiran A Perjanjian</strong>
               <span class="text-[11px] font-mono text-ivory">Status: ${proj.quoteStatus}</span>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
@@ -3008,18 +3089,35 @@
                 <input type="number" id="admin-quote-price" value="${proj.totalPrice}" class="w-full bg-obsidian border border-borderline rounded-lg px-3 py-2 font-mono text-ivory" />
               </div>
               <div>
-                <label class="block text-[11px] text-ash mb-1">Estimasi Pengerjaan</label>
+                <label class="block text-[11px] text-ash mb-1">Kedudukan Pihak I (Lampiran A)</label>
+                <select id="admin-composer-role" class="w-full bg-obsidian border border-borderline rounded-lg px-3 py-2 text-ivory">
+                  <option value="Composer" ${(proj.composerRole || '') === 'Composer' ? 'selected' : ''}>Composer</option>
+                  <option value="Arranger" ${(proj.composerRole || '') === 'Arranger' ? 'selected' : ''}>Arranger</option>
+                  <option value="Composer & Arranger" ${(proj.composerRole || 'Composer & Arranger') === 'Composer & Arranger' ? 'selected' : ''}>Composer &amp; Arranger</option>
+                  <option value="Tim produksi saja" ${(proj.composerRole || '') === 'Tim produksi saja' ? 'selected' : ''}>Tim produksi saja</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[11px] text-ash mb-1">Kuota Revisi Ringan (Pasal 8)</label>
+                <input type="text" id="admin-quote-rev" value="${proj.revisionQuota || '6'}" placeholder="Contoh: 3 / 6" class="w-full bg-obsidian border border-borderline rounded-lg px-3 py-2 font-mono text-ivory" />
+              </div>
+              <div>
+                <label class="block text-[11px] text-ash mb-1">Format File Diserahkan</label>
+                <input type="text" id="admin-quote-deliver" value="${proj.deliverableFormat || 'WAV 24-bit & MP3 320kbps'}" class="w-full bg-obsidian border border-borderline rounded-lg px-3 py-2 text-ivory" />
+              </div>
+              <div>
+                <label class="block text-[11px] text-ash mb-1">Estimasi Waktu Pengerjaan</label>
                 <input type="text" id="admin-quote-days" value="${proj.quoteDurationDays || '7–10 Hari Kerja'}" class="w-full bg-obsidian border border-borderline rounded-lg px-3 py-2 text-ivory" />
               </div>
               <div>
-                <label class="block text-[11px] text-ash mb-1">Hasil yang Diserahkan</label>
-                <input type="text" id="admin-quote-deliver" value="${proj.quoteDeliverables || 'Audio Master WAV & MP3'}" class="w-full bg-obsidian border border-borderline rounded-lg px-3 py-2 text-ivory" />
+                <label class="block text-[11px] text-ash mb-1">Kolaborator (Lampiran B)</label>
+                <input type="text" id="admin-collab-notes" value="${proj.collaboratorNotes || 'Tidak ada kontributor tambahan'}" class="w-full bg-obsidian border border-borderline rounded-lg px-3 py-2 text-ivory" />
               </div>
             </div>
             <div class="flex flex-wrap items-center justify-between gap-2">
-              <input type="text" id="admin-quote-notes" value="${proj.quoteNotes || ''}" placeholder="Catatan hasil diskusi (opsional)..." class="flex-1 bg-obsidian border border-borderline rounded-lg px-3 py-2 text-xs text-ivory" />
+              <input type="text" id="admin-quote-notes" value="${proj.quoteNotes || ''}" placeholder="Catatan tambahan penawaran / Lampiran A..." class="flex-1 bg-obsidian border border-borderline rounded-lg px-3 py-2 text-xs text-ivory" />
               <button type="button" onclick="issueOfficialQuotation('${proj.id}')" class="btn-gold px-4 py-2 rounded-xl text-xs font-bold shrink-0">
-                📨 Terbitkan Penawaran Resmi
+                📨 Terbitkan Penawaran &amp; Perjanjian
               </button>
             </div>
           </div>
@@ -3105,22 +3203,6 @@
       await syncProjectToCloud(proj);
       renderAdminDashboard();
       showToast('Penawaran & Perjanjian Diterbitkan', `Klien kini dapat menyetujui perjanjian & melakukan pembayaran.`);
-    }
-
-    async function issueOfficialQuotation(projId) {
-      const proj = appState.projects.find(p => p.id === projId);
-      if (!proj) return;
-      const newTotal = Number(document.getElementById('admin-quote-price')?.value) || proj.totalPrice;
-      proj.totalPrice = newTotal;
-      proj.dpAmount = proj.paymentScheme === 'DP 50%' ? Math.round(newTotal * 0.5) : newTotal;
-      proj.quoteDurationDays = document.getElementById('admin-quote-days')?.value.trim() || '7–10 Hari Kerja';
-      proj.quoteDeliverables = document.getElementById('admin-quote-deliver')?.value.trim() || 'Audio Master WAV & MP3';
-      proj.quoteNotes = document.getElementById('admin-quote-notes')?.value.trim() || '';
-      proj.quoteStatus = 'Diterbitkan';
-      proj.productionStatus = TRACKER_MILESTONES[2];
-      await syncProjectToCloud(proj);
-      renderAdminDashboard();
-      showToast('Penawaran Diterbitkan', `Klien kini dapat menyetujui administrasi & melakukan pembayaran.`);
     }
 
     async function updateAdminProjectStage(projId, newStage) {
@@ -3223,7 +3305,7 @@
         category,
         culture,
         duration: '04:30',
-        desc: `Karya ${category} oleh PrangArt Studios (${culture}).`,
+        desc: `Karya ${category} oleh PrangArt Lab (${culture}).`,
         freq: 293.66
       });
       syncStudioConfigToCloud();
@@ -4004,321 +4086,25 @@
     }
 
     // -------------------------------------------------------------------------
-    // OFFICIAL CONTRACT / SERVICE APPROVAL DOCUMENT (TAHAP 7)
+    // GITHUB PAGES DEPLOYMENT GUIDE MODAL
     // -------------------------------------------------------------------------
-    let activeContractDocData = null;
-
-    function buildContractDataFromProject(proj) {
-      const dpNominal = proj.dpAmount || Math.round((proj.totalPrice || 0) * 0.5);
-      const pelunasanNominal = (proj.totalPrice || 0) - dpNominal;
-      return {
-        tanggal: proj.createdAt || new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
-        nama: proj.clientName || '........................................',
-        sanggar: proj.instansi || '........................................',
-        namaTari: proj.judul || '........................................',
-        estimasi: proj.durasi || '.... : ....',
-        jumlahFormatted: Number(proj.totalPrice || 0).toLocaleString('id-ID') + ',00',
-        jumlahTerbilang: `${numberToIndonesianWords(proj.totalPrice || 0)} Rupiah`,
-        dpFormatted: formatRupiah(dpNominal),
-        pelunasanFormatted: formatRupiah(pelunasanNominal),
-        paketLabel: proj.packageName || 'Paket Pilihan',
-        serviceLine: proj.serviceLine || 'tari',
-        serviceLineLabel: proj.serviceLineLabel || 'Produksi Musik Tari',
-        buyoutSelected: Boolean(proj.buyoutSelected),
-        ticketId: proj.id || 'DRAFT'
-      };
-    }
-
-    function openDraftContractPreviewModal() {
-      const u = appState.currentClientUser || {};
-      const svc = appState.serviceCatalog[appState.selectedServiceLine];
-      const pkg = svc.packages[appState.selectedPackage];
-      const addonChecked = Boolean(document.getElementById('field-addon-vocal')?.checked);
-      const buyoutChecked = Boolean(document.getElementById('field-addon-buyout')?.checked);
-      const total = pkg.price + (addonChecked ? svc.addonPrice : 0) + (buyoutChecked ? 1000000 : 0);
-
-      const draftProj = {
-        id: 'DRAFT',
-        createdAt: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
-        clientName: document.getElementById('field-nama')?.value.trim() || u.name || '........................................',
-        instansi: document.getElementById('field-instansi')?.value.trim() || u.instansi || '........................................',
-        judul: document.getElementById('field-judul')?.value.trim() || '........................................',
-        durasi: document.getElementById('field-durasi')?.value.trim() || '05:00',
-        totalPrice: total,
-        dpAmount: Math.round(total * 0.5),
-        packageName: pkg.label,
-        serviceLine: appState.selectedServiceLine,
-        serviceLineLabel: svc.label,
-        buyoutSelected: buyoutChecked
-      };
-      activeContractDocData = buildContractDataFromProject(draftProj);
-      renderContractDocumentCanvas();
-      document.getElementById('contract-sign-footer')?.classList.add('hidden');
-      const modal = document.getElementById('contract-doc-modal');
-      modal?.classList.remove('hidden');
-      modal?.classList.add('flex');
-    }
-
-    function openContractDocModal(projId, enableSigning = false) {
-      const proj = appState.projects.find(p => p.id === projId);
-      if (!proj) return;
-      activeContractDocData = buildContractDataFromProject(proj);
-      renderContractDocumentCanvas();
-      const footer = document.getElementById('contract-sign-footer');
-      const cb = document.getElementById('sign-agreement-cb');
-      if (cb) cb.checked = false;
-      if (footer) {
-        if (enableSigning && !proj.agreementSigned) {
-          footer.classList.remove('hidden');
-          footer.classList.add('flex');
-        } else {
-          footer.classList.add('hidden');
-          footer.classList.remove('flex');
-        }
-      }
-      const modal = document.getElementById('contract-doc-modal');
-      modal?.classList.remove('hidden');
-      modal?.classList.add('flex');
-    }
-
-    function closeContractDocModal() {
-      const modal = document.getElementById('contract-doc-modal');
-      modal?.classList.add('hidden');
-      modal?.classList.remove('flex');
-    }
-
-    async function confirmClientAdministrativeApproval() {
-      const cb = document.getElementById('sign-agreement-cb');
-      if (!cb?.checked) {
-        showToast('Centang Persetujuan', 'Centang kotak persetujuan terlebih dahulu.', 'warning');
-        return;
-      }
-      const proj = appState.projects.find(p => p.id === activeContractDocData?.ticketId);
-      if (!proj) return;
-      proj.agreementSigned = true;
-      proj.agreementSignedAt = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-      proj.productionStatus = TRACKER_MILESTONES[3];
-      await syncProjectToCloud(proj);
-      closeContractDocModal();
-      renderClientWorkspace();
-      showToast('Administrasi Disetujui', 'Tahap pembayaran telah dibuka untuk pesanan Anda.');
-    }
-
-    function renderContractDocumentCanvas() {
-      const d = activeContractDocData;
-      const canvasEl = document.getElementById('contract-doc-canvas');
-      const headingEl = document.getElementById('contract-modal-heading');
-      if (!d || !canvasEl) return;
-
-      const isTranskripsi = d.serviceLine === 'transkripsi';
-      const docMainTitle = isTranskripsi
-        ? 'PERSETUJUAN PENAWARAN & KETENTUAN TRANSKRIPSI MUSIK'
-        : d.serviceLine === 'digital'
-          ? 'PERJANJIAN PRODUKSI MUSIK NON-TARI'
-          : 'PERJANJIAN PRODUKSI MUSIK TARI';
-
-      if (headingEl) headingEl.textContent = `${docMainTitle} — PrangArt Lab`;
-
-      canvasEl.innerHTML = `
-        <div class="space-y-5 text-neutral-900">
-          <div class="flex items-center justify-between border-b-2 border-neutral-900 pb-4">
-            <div class="flex items-center gap-3">
-              <img src="${LOGO_URL}" alt="PrangArt Lab" class="w-14 h-14 object-contain" />
-              <div>
-                <h2 class="text-lg sm:text-xl font-bold tracking-tight uppercase">${docMainTitle}</h2>
-                <p class="text-xs font-semibold text-neutral-700">PrangArt Lab • PrangArt Studios (${d.ticketId})</p>
-              </div>
-            </div>
-            <div class="text-right text-xs">
-              <p class="font-bold">Tanggal:</p>
-              <p>${d.tanggal}</p>
-            </div>
-          </div>
-
-          <p>Dokumen ini dibuat dan disetujui pada tanggal tersebut di atas, oleh dan antara:</p>
-
-          <table class="w-full text-xs sm:text-sm border-collapse">
-            <tbody>
-              <tr>
-                <td class="py-1 w-6 font-bold align-top">1.</td>
-                <td class="py-1 w-56">Nama</td>
-                <td class="py-1 w-4">:</td>
-                <td class="py-1 font-bold">${appState.settings.directorName}</td>
-              </tr>
-              <tr>
-                <td></td>
-                <td class="py-1">Jabatan</td>
-                <td class="py-1">:</td>
-                <td class="py-1">Komposer / Pemilik PrangArt Lab</td>
-              </tr>
-              <tr>
-                <td></td>
-                <td colspan="3" class="pb-2 italic">(Selanjutnya disebut sebagai <strong>"PIHAK PERTAMA"</strong>).</td>
-              </tr>
-              <tr>
-                <td class="py-1 font-bold align-top">2.</td>
-                <td class="py-1">Nama</td>
-                <td class="py-1">:</td>
-                <td class="py-1 font-bold">${d.nama}</td>
-              </tr>
-              <tr>
-                <td class="py-1 font-bold align-top">3.</td>
-                <td class="py-1">Instansi/Sanggar/Komunitas/Individu</td>
-                <td class="py-1">:</td>
-                <td class="py-1 font-semibold">${d.sanggar}</td>
-              </tr>
-              <tr>
-                <td class="py-1 font-bold align-top">4.</td>
-                <td class="py-1">Jabatan</td>
-                <td class="py-1">:</td>
-                <td class="py-1">Pemesan Layanan (${d.serviceLineLabel})</td>
-              </tr>
-              <tr>
-                <td></td>
-                <td colspan="3" class="italic">(Selanjutnya disebut sebagai <strong>"PIHAK KEDUA"</strong>).</td>
-              </tr>
-            </tbody>
-          </table>
-
-          <div class="space-y-4">
-            <div>
-              <h4 class="font-bold text-center uppercase">PASAL 1 — RUANG LINGKUP DAN OBJEK KERJA</h4>
-              <ol class="list-decimal pl-5 space-y-1 mt-1">
-                <li>PIHAK PERTAMA bertanggung jawab penuh atas proses pengerjaan ${d.serviceLineLabel} sesuai ruang lingkup yang telah didiskusikan dan disepakati.</li>
-                <li>Objek karya ini diperuntukkan bagi karya berjudul <strong>"${d.namaTari}"</strong> dengan durasi estimasi <strong>${d.estimasi}</strong> menit.</li>
-              </ol>
-            </div>
-
-            <div>
-              <h4 class="font-bold text-center uppercase">PASAL 2 — NILAI KONTRAK DAN KETENTUAN PEMBAYARAN</h4>
-              <ol class="list-decimal pl-5 space-y-1 mt-1">
-                <li>Total biaya yang disepakati adalah sebesar <strong>Rp${d.jumlahFormatted}</strong> (<em>${d.jumlahTerbilang}</em>).</li>
-                <li>Pembayaran dilakukan dengan skema DP 50% (<strong>${d.dpFormatted}</strong>) sebelum pengerjaan dimulai dan pelunasan 50% (<strong>${d.pelunasanFormatted}</strong>) sebelum penyerahan berkas kualitas tinggi, atau pembayaran penuh 100% di awal.</li>
-                <li>Seluruh biaya yang telah dibayarkan bersifat <em>non-refundable</em> apabila pembatalan dilakukan secara sepihak oleh PIHAK KEDUA.</li>
-              </ol>
-            </div>
-
-            <div>
-              <h4 class="font-bold text-center uppercase">PASAL 3 — HAK PORTOFOLIO DAN HAK MORAL</h4>
-              <ol class="list-decimal pl-5 space-y-1 mt-1">
-                <li><strong>Hak Moral:</strong> PIHAK PERTAMA selamanya memegang Hak Moral atas karya tersebut. PIHAK KEDUA wajib mencantumkan nama <strong>${appState.settings.directorName}</strong> sebagai Komposer/Transkriptor dalam materi publikasi.</li>
-                <li><strong>Hak Portofolio:</strong> PIHAK PERTAMA berhak menggunakan potongan karya maksimal 1 menit sebagai materi portofolio resmi PrangArt Lab dengan mencantumkan nama karya, sanggar/instansi, dan kreator.</li>
-              </ol>
-            </div>
-
-            <div>
-              <h4 class="font-bold text-center uppercase">PASAL 4 — LISENSI DAN EKSKLUSIVITAS PENGGUNAAN</h4>
-              <ol class="list-decimal pl-5 space-y-1 mt-1">
-                <li>PIHAK KEDUA menerima Lisensi Eksklusif untuk pementasan, perlombaan, pendidikan, dan dokumentasi visual pada media sosial.</li>
-                <li>PIHAK PERTAMA menjamin karya tidak akan dialihkan atau dijual kembali kepada pihak lain untuk karya berbeda.</li>
-              </ol>
-            </div>
-
-            <div>
-              <h4 class="font-bold text-center uppercase">PASAL 5 — PENGALIHAN HAK EKONOMI (BUYOUT) &amp; KLAIM HAK CIPTA</h4>
-              <ol class="list-decimal pl-5 space-y-1 mt-1">
-                <li>PIHAK KEDUA dilarang mendaftarkan karya ke LMK, melakukan <em>Content ID Claim</em>, atau mendistribusikan audio secara komersial mandiri tanpa persetujuan tertulis dari PIHAK PERTAMA.</li>
-                <li>Biaya Tambahan Pengalihan Hak Ekonomi (<em>Buyout Fee</em>) sebesar <strong>Rp1.000.000,00 (Satu Juta Rupiah)</strong> berlaku apabila PIHAK KEDUA mengklaim hak ekonomi penuh atas nama Sanggar/Instansi, disertai penerbitan Surat Pengalihan Hak Ekonomi. ${d.buyoutSelected ? '<span class="px-2 py-0.5 bg-emerald-100 text-emerald-900 font-bold rounded">[AKTIF]</span>' : ''}</li>
-              </ol>
-            </div>
-
-            <div>
-              <h4 class="font-bold text-center uppercase">PASAL 6 — REVISI DAN PERUBAHAN</h4>
-              <ol class="list-decimal pl-5 space-y-1 mt-1">
-                <li>Kuota revisi: Paket Dasar (3x revisi ringan), Paket Standar (6x revisi), Paket Pro (bebas revisi selama tidak mengubah konsep dasar awal).</li>
-                <li>Perubahan sebanyak 65% dari total kumulasi durasi dan/atau konsep secara total setelah proses berjalan dikenakan biaya tambahan sesuai eskalasi pekerjaan.</li>
-              </ol>
-            </div>
-
-            <div>
-              <h4 class="font-bold text-center uppercase">PASAL 7 — PENYELESAIAN PERSELISIHAN</h4>
-              <p class="mt-1">Segala perselisihan diselesaikan secara musyawarah untuk mufakat, atau menempuh jalur hukum sesuai domisili hukum PIHAK PERTAMA.</p>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-8 pt-8 text-center">
-            <div class="space-y-14">
-              <div>
-                <p class="font-bold">PIHAK PERTAMA</p>
-                <p class="text-xs text-neutral-600">PrangArt Lab • PrangArt Studios</p>
-              </div>
-              <p class="font-bold underline">${appState.settings.directorName}</p>
-            </div>
-            <div class="space-y-14">
-              <div>
-                <p class="font-bold">PIHAK KEDUA</p>
-                <p class="text-xs text-neutral-600">Klien / Pemesan Layanan</p>
-              </div>
-              <p class="font-bold underline">${d.nama}</p>
-            </div>
-          </div>
+    function openGitHubPagesGuideModal() {
+      document.getElementById('custom-modal-title').textContent = '🚀 Panduan Deploy PrangArt Lab ke GitHub Pages';
+      document.getElementById('custom-modal-body').innerHTML = `
+        <div class="space-y-3 text-xs leading-relaxed text-ivory/90">
+          <p class="text-ash">Aplikasi ini dirancang sebagai <strong>Single-File Web App (<code>index.html</code>)</strong> sehingga dapat langsung dipublikasikan gratis di GitHub Pages tanpa proses build:</p>
+          <ol class="list-decimal pl-5 space-y-2">
+            <li><strong>Buat Repositori Baru di GitHub:</strong> Buka <code>github.com/new</code>, beri nama misalnya <code>prangart-lab</code>, lalu pilih <strong>Public</strong>.</li>
+            <li><strong>Unggah File <code>index.html</code>:</strong> Klik <em>Add file → Upload files</em>, unggah file <code>index.html</code> ini ke cabang <code>main</code>, lalu klik <strong>Commit changes</strong>.</li>
+            <li><strong>Aktifkan GitHub Pages:</strong> Masuk ke tab <strong>Settings → Pages</strong> di repositori Anda. Pada bagian <em>Build and deployment</em>, pilih Source: <strong>Deploy from a branch</strong>, lalu pilih Branch: <strong>main</strong> dan folder <strong>/ (root)</strong> → klik <strong>Save</strong>.</li>
+            <li><strong>Akses Website Publik:</strong> Dalam ±1–2 menit, website aktif di <code>https://username-anda.github.io/prangart-lab/</code>.</li>
+            <li><strong>(Opsional) Sinkronisasi Cloud Multi-Perangkat:</strong> Jika menggunakan Firebase Auth/Firestore untuk sinkronisasi online antar-perangkat, buka <em>Firebase Console → Authentication → Settings → Authorized domains</em> dan tambahkan domain <code>username-anda.github.io</code>.</li>
+          </ol>
         </div>
       `;
-    }
-
-    function downloadContractDocPNG() {
-      const d = activeContractDocData;
-      if (!d) return;
-      const c = document.createElement('canvas');
-      c.width = 1240;
-      c.height = 1754;
-      const ctx = c.getContext('2d');
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, c.width, c.height);
-      ctx.fillStyle = '#171717';
-
-      ctx.font = 'bold 26px Georgia, serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(`PERJANJIAN / PERSETUJUAN ${d.serviceLineLabel.toUpperCase()}`, 620, 85);
-      ctx.font = 'bold 20px Georgia, serif';
-      ctx.fillText(`PrangArt Lab • PrangArt Studios (${d.ticketId})`, 620, 118);
-
-      ctx.beginPath(); ctx.moveTo(80, 142); ctx.lineTo(1160, 142); ctx.stroke();
-
-      ctx.textAlign = 'left';
-      ctx.font = '17px Georgia, serif';
-      let y = 178;
-      const lh = 25;
-
-      const writeLine = (txt, bold = false) => {
-        ctx.font = `${bold ? 'bold ' : ''}17px Georgia, serif`;
-        wrapCanvasText(ctx, txt, 1080).forEach(line => {
-          ctx.fillText(line, 80, y);
-          y += lh;
-        });
-      };
-
-      writeLine(`Tanggal: ${d.tanggal}`, true);
-      writeLine(`PIHAK PERTAMA: ${appState.settings.directorName} (Komposer / Pemilik PrangArt Lab)`, true);
-      writeLine(`PIHAK KEDUA: ${d.nama} — ${d.sanggar} (Pemesan ${d.serviceLineLabel})`, true);
-      y += 8;
-      writeLine(`PASAL 1 (Ruang Lingkup): Pengerjaan ${d.serviceLineLabel} untuk karya "${d.namaTari}" (estimasi ${d.estimasi} menit).`);
-      y += 6;
-      writeLine(`PASAL 2 (Nilai Kontrak): Total biaya Rp${d.jumlahFormatted} (${d.jumlahTerbilang}). Skema DP 50% (${d.dpFormatted}) & Pelunasan 50% (${d.pelunasanFormatted}), atau Penuh 100%. Pembatalan sepihak bersifat non-refundable.`);
-      y += 6;
-      writeLine(`PASAL 3 (Hak Moral & Portofolio): Hak Moral selamanya milik PIHAK PERTAMA; wajib mencantumkan nama ${appState.settings.directorName}. PIHAK PERTAMA berhak memakai potongan karya maks. 1 menit untuk portofolio.`);
-      y += 6;
-      writeLine(`PASAL 4 (Lisensi Eksklusif): Lisensi terbatas untuk pementasan, perlombaan, dan dokumentasi media sosial.`);
-      y += 6;
-      writeLine(`PASAL 5 (Buyout & Hak Cipta): Dilarang mendaftarkan ke LMK / Content ID Claim tanpa izin tertulis. Biaya Pengalihan Hak Ekonomi (Buyout Fee) sebesar Rp1.000.000,00 (${d.buyoutSelected ? 'AKTIF' : 'Opsional'}).`);
-      y += 6;
-      writeLine(`PASAL 6 (Revisi): Paket Dasar 3x revisi ringan; Paket Standar 6x revisi; Paket Pro bebas revisi sesuai konsep awal. Perubahan >65% durasi/konsep dikenakan biaya tambahan.`);
-      y += 6;
-      writeLine(`PASAL 7 & PENUTUP: Penyelesaian perselisihan secara musyawarah atau domisili hukum PIHAK PERTAMA.`);
-
-      const sigY = Math.max(y + 60, 1460);
-      ctx.textAlign = 'center';
-      ctx.font = 'bold 18px Georgia, serif';
-      ctx.fillText('PIHAK PERTAMA', 320, sigY);
-      ctx.fillText('PrangArt Lab', 320, sigY + 26);
-      ctx.fillText(appState.settings.directorName, 320, sigY + 145);
-
-      ctx.fillText('PIHAK KEDUA', 920, sigY);
-      ctx.fillText('Klien / Pemesan', 920, sigY + 26);
-      ctx.fillText(d.nama, 920, sigY + 145);
-
-      triggerPngFileDownload(c.toDataURL('image/png'), `Perjanjian-PrangArt-${d.ticketId}.png`);
-      showToast('Dokumen Diunduh', 'Dokumen perjanjian PNG siap dikirim/ditandatangani.', 'success');
+      const m = document.getElementById('custom-modal');
+      m?.classList.remove('hidden');
+      m?.classList.add('flex');
     }
 
     // -------------------------------------------------------------------------
@@ -4447,6 +4233,8 @@
       confirmClientFinalReceipt,
       downloadMasterAsset,
       launchWhatsAppProjectDiscussion,
+      sendClientRevisionNoteToWA,
+      openGitHubPagesGuideModal,
       verifyAdminPin,
       renderAdminDashboard,
       issueOfficialQuotation,
