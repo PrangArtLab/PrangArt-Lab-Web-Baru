@@ -70,25 +70,50 @@ function renderAdminDashboard() {
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <div class="bg-charcoal border border-borderline rounded-2xl p-5 space-y-4">
-        <h3 class="text-sm font-bold text-gold uppercase font-mono">Pengaturan Studio</h3>
+        <h3 class="text-sm font-bold text-gold uppercase font-mono">Pengaturan Studio &amp; Pembayaran</h3>
         <div class="space-y-3 text-xs">
           <div>
-            <label class="block text-ash mb-1">Rekening Tujuan Pembayaran</label>
-            <input type="text" id="set-bank" value="${appState.settings.bankAccount}" class="w-full bg-acoustic border border-borderline rounded-xl px-3 py-2 text-ivory" />
+            <label class="block text-ash mb-1">WhatsApp Admin (628...)</label>
+            <input type="text" id="set-wa" value="${appState.settings.studioWhatsApp}" class="w-full bg-acoustic border border-borderline rounded-xl px-3 py-2 font-mono text-ivory" />
           </div>
           <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-ash mb-1">WhatsApp Produser (628...)</label>
-              <input type="text" id="set-wa" value="${appState.settings.studioWhatsApp}" class="w-full bg-acoustic border border-borderline rounded-xl px-3 py-2 font-mono text-ivory" />
-            </div>
             <div>
               <label class="block text-ash mb-1">PIN Akses Admin</label>
               <input type="text" id="set-pin" value="${appState.settings.adminPin || '2026'}" class="w-full bg-acoustic border border-borderline rounded-xl px-3 py-2 font-mono text-ivory" />
             </div>
           </div>
-          <div class="flex flex-wrap gap-2">
-            <button type="button" onclick="saveStudioSettings()" class="btn-gold px-4 py-2.5 rounded-xl text-xs font-bold">Simpan Pengaturan</button>
-            <button type="button" onclick="openGitHubPagesGuideModal()" class="btn-ghost-gold px-4 py-2.5 rounded-xl text-xs font-bold">Panduan GitHub Pages</button>
+          
+          <!-- DAFTAR METODE PEMBAYARAN -->
+          <div class="pt-3 border-t border-borderline">
+            <label class="block text-ash mb-1 font-bold">Daftar Metode Pembayaran:</label>
+            <div class="space-y-2 mb-3" id="admin-payment-methods-list">
+              ${appState.settings.paymentMethods.map(pm => `
+                <div class="flex items-center justify-between bg-acoustic rounded-lg p-2 border border-borderline">
+                  <div class="flex items-center gap-2">
+                    <img src="${pm.logo}" class="h-5 w-auto object-contain" />
+                    <span class="text-ivory">${pm.name} - ${pm.number} (${pm.holder})</span>
+                  </div>
+                  <button type="button" onclick="removePaymentMethod('${pm.id}')" class="text-red-400 hover:underline">Hapus</button>
+                </div>
+              `).join('')}
+            </div>
+            
+            <!-- FORM TAMBAH PEMBAYARAN -->
+            <div class="bg-obsidian p-3 rounded-xl border border-borderline space-y-2">
+              <select id="new-pm-type" class="w-full bg-acoustic border border-borderline rounded-lg px-2 py-1.5 text-ivory">
+                <option value="bank">Bank Transfer</option>
+                <option value="qris">QRIS / E-Wallet</option>
+              </select>
+              <input type="text" id="new-pm-name" placeholder="Nama Metode (cth: BCA, Dana)" class="w-full bg-acoustic border border-borderline rounded-lg px-2 py-1.5 text-ivory" />
+              <input type="text" id="new-pm-number" placeholder="Nomor Rekening / No HP" class="w-full bg-acoustic border border-borderline rounded-lg px-2 py-1.5 text-ivory" />
+              <input type="text" id="new-pm-holder" placeholder="Atas Nama" class="w-full bg-acoustic border border-borderline rounded-lg px-2 py-1.5 text-ivory" />
+              <input type="url" id="new-pm-logo" placeholder="URL Logo / Gambar QRIS (https://...)" class="w-full bg-acoustic border border-borderline rounded-lg px-2 py-1.5 text-ivory text-[10px]" />
+              <button type="button" onclick="addPaymentMethod()" class="btn-ghost-gold w-full py-1.5 rounded-lg font-bold">+ Tambah Metode</button>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap gap-2 pt-2">
+            <button type="button" onclick="saveStudioSettings()" class="btn-gold px-4 py-2.5 rounded-xl text-xs font-bold w-full">Simpan Pengaturan Utama</button>
           </div>
         </div>
       </div>
@@ -133,7 +158,6 @@ function renderAdminInspector() {
     return;
   }
 
-  // RENDER DETAIL SPESIFIKASI MUSIK & LINK
   let specHtml = '';
   if (proj.musicalSpec) {
     const spec = proj.musicalSpec;
@@ -376,11 +400,40 @@ function uploadStudioDeliverable(projId, kind, file) {
 }
 
 function saveStudioSettings() {
-  appState.settings.bankAccount = document.getElementById('set-bank')?.value.trim() || appState.settings.bankAccount;
   appState.settings.studioWhatsApp = document.getElementById('set-wa')?.value.trim() || appState.settings.studioWhatsApp;
   appState.settings.adminPin = document.getElementById('set-pin')?.value.trim() || appState.settings.adminPin;
   syncStudioConfigToCloud();
   showToast('Pengaturan Tersimpan', 'Pengaturan studio diperbarui & tersinkron ke Cloud.');
+}
+
+function addPaymentMethod() {
+  const type = document.getElementById('new-pm-type').value;
+  const name = document.getElementById('new-pm-name').value.trim();
+  const number = document.getElementById('new-pm-number').value.trim();
+  const holder = document.getElementById('new-pm-holder').value.trim();
+  const logo = document.getElementById('new-pm-logo').value.trim();
+
+  if (!name || !number || !logo) {
+    showToast('Data Kurang', 'Lengkapi nama, nomor, dan URL logo/gambar.', 'warning');
+    return;
+  }
+
+  const newPm = {
+    id: `pay-${Date.now()}`,
+    type, name, number, holder, logo
+  };
+
+  appState.settings.paymentMethods.push(newPm);
+  syncStudioConfigToCloud();
+  renderAdminDashboard();
+  showToast('Berhasil', 'Metode pembayaran ditambahkan.');
+}
+
+function removePaymentMethod(id) {
+  appState.settings.paymentMethods = appState.settings.paymentMethods.filter(pm => pm.id !== id);
+  syncStudioConfigToCloud();
+  renderAdminDashboard();
+  showToast('Dihapus', 'Metode pembayaran telah dihapus.');
 }
 
 function addPortfolioItem(e) {
