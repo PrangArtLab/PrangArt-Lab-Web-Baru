@@ -137,6 +137,13 @@ function renderAdminInspector() {
         <button type="button" onclick="issueOfficialQuotation('${proj.id}')" class="btn-primary w-full py-3 rounded-xl text-sm font-bold">Terbitkan Penawaran &amp; Perjanjian</button>
       </div>
 
+      <div class="bg-acoustic border border-border rounded-xl p-4 space-y-2">
+        <label class="block text-xs font-bold text-textMain">Tahapan Progres Saat Ini:</label>
+        <select onchange="updateAdminProjectStage('${proj.id}', this.value)" class="w-full bg-obsidian border border-gold/40 rounded-xl px-3.5 py-2.5 text-xs font-bold text-gold">
+          ${TRACKER_MILESTONES.map(st => `<option value="${st}" ${proj.productionStatus === st ? 'selected' : ''}>${st}</option>`).join('')}
+        </select>
+      </div>
+
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div class="bg-panel border border-border rounded-2xl p-5 space-y-3">
           <div class="flex items-center justify-between text-sm"><strong class="text-textMain">Termin I (${proj.paymentScheme})</strong><span class="font-mono text-primary font-bold">${proj.dpStatus}</span></div>
@@ -152,6 +159,19 @@ function renderAdminInspector() {
             <button type="button" onclick="verifyProjectPayment('${proj.id}', 'lunas', 'Lunas')" class="px-3 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold">✓ Lunas</button>
           </div>
         </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <label class="bg-panel border border-dashed border-primary/40 hover:border-primary rounded-xl p-5 cursor-pointer text-sm space-y-2">
+          <strong class="text-textMain block">Unggah Audio Pratinjau (MP3/WAV)</strong>
+          <span class="text-textMuted block truncate text-xs">${proj.previewAudioName || 'Belum ada file pratinjau'}</span>
+          <input type="file" accept="audio/*" onchange="uploadStudioDeliverable('${proj.id}', 'preview', this.files[0])" class="hidden" />
+        </label>
+        <label class="bg-panel border border-dashed border-emerald-500/40 hover:border-emerald-400 rounded-xl p-5 cursor-pointer text-sm space-y-2">
+          <strong class="text-textMain block">Unggah Hasil Akhir Master (WAV/ZIP/PDF)</strong>
+          <span class="text-textMuted block truncate text-xs">${proj.masterFileName || 'Belum ada file master'}</span>
+          <input type="file" onchange="uploadStudioDeliverable('${proj.id}', 'master', this.files[0])" class="hidden" />
+        </label>
       </div>
 
       <div class="bg-base border border-border rounded-2xl p-5 text-sm space-y-3">
@@ -179,6 +199,16 @@ async function issueOfficialQuotation(projId) {
   await syncProjectToCloud(proj); renderAdminDashboard(); showToast('Diterbitkan', 'Klien dapat menyetujui perjanjian.');
 }
 
+// FUNGSI YANG SEBELUMNYA HILANG (UPDATE STATUS)
+async function updateAdminProjectStage(projId, newStage) {
+  const proj = appState.projects.find(p => p.id === projId);
+  if (!proj) return;
+  proj.productionStatus = newStage;
+  await syncProjectToCloud(proj);
+  renderAdminDashboard();
+  showToast('Tahapan Diperbarui', `${proj.id} → ${newStage}`);
+}
+
 async function verifyProjectPayment(projId, kind, status) {
   const proj = appState.projects.find(p => p.id === projId);
   if (!proj) return;
@@ -198,6 +228,25 @@ function inspectPaymentProof(projId, kind) {
 }
 
 function closeCustomModal() { document.getElementById('custom-modal')?.classList.add('hidden'); document.getElementById('custom-modal')?.classList.remove('flex'); }
+
+// FUNGSI YANG SEBELUMNYA HILANG (UPLOAD FILE)
+function uploadStudioDeliverable(projId, kind, file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async () => {
+    const proj = appState.projects.find(p => p.id === projId);
+    if (!proj) return;
+    const cloudUrl = await uploadFileToFirebaseStorage(`deliverables/${projId}_${kind}_${Date.now()}_${file.name}`, file);
+    const finalUrl = cloudUrl || reader.result;
+    if (kind === 'preview') {
+      proj.previewAudioName = file.name; proj.previewAudioUrl = finalUrl; proj.productionStatus = TRACKER_MILESTONES[5];
+    } else {
+      proj.masterFileName = file.name; proj.masterFileUrl = finalUrl;
+    }
+    await syncProjectToCloud(proj); renderAdminInspector(); showToast('Terunggah', file.name);
+  };
+  reader.readAsDataURL(file);
+}
 
 function saveStudioSettings() {
   appState.settings.studioWhatsApp = document.getElementById('set-wa')?.value.trim() || appState.settings.studioWhatsApp;
