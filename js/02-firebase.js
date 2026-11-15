@@ -12,15 +12,12 @@ async function initFirebaseSync() {
 
     const fbApp = initializeApp(cfg);
     
-    // Initialize App Check dengan reCAPTCHA v3
     try {
       initializeAppCheck(fbApp, {
         provider: new ReCaptchaV3Provider(appState.settings.recaptchaSiteKey),
         isTokenAutoRefreshEnabled: true
       });
-    } catch(e) {
-      console.warn('App Check inisialisasi gagal, mungkin domain belum diizinkan.', e);
-    }
+    } catch(e) { console.warn('App Check Gagal:', e); }
 
     const fbAuth = getAuth(fbApp);
     db = getFirestore(fbApp);
@@ -38,8 +35,6 @@ async function initFirebaseSync() {
     window.db = db;
     window.fbStorage = fbStorage;
     window.firebaseUser = firebaseUser;
-
-    updateCloudSyncBadge('Cloud: Terhubung', true);
 
     const projCol = collection(db, 'artifacts', firebaseAppId, 'public', 'data', 'projects');
     onSnapshot(projCol, (snap) => {
@@ -64,19 +59,6 @@ async function initFirebaseSync() {
         if (appState.currentPage === 'client') renderClientWorkspace();
         if (appState.currentPage === 'admin' && appState.isAdminAuthenticated) renderAdminDashboard();
       }
-    }, () => { updateCloudSyncBadge('Mode Mandiri (GitHub Pages)', false); });
-
-    const usersCol = collection(db, 'artifacts', firebaseAppId, 'public', 'data', 'users');
-    onSnapshot(usersCol, (snap) => {
-      if (!snap.empty) {
-        const userMap = new Map(appState.users.map(u => [u.email, u]));
-        snap.forEach(d => {
-          const u = d.data();
-          if (u && u.email) userMap.set(u.email, u);
-        });
-        appState.users = Array.from(userMap.values());
-        persistLocalState();
-      }
     }, () => {});
 
     const configDoc = doc(db, 'artifacts', firebaseAppId, 'public', 'data', 'studio_config', 'main');
@@ -89,11 +71,9 @@ async function initFirebaseSync() {
         if (appState.currentPage === 'portfolio') renderPortfolioGrid();
       }
     }, () => {});
-  } catch (_) {
-    updateCloudSyncBadge('Mode Mandiri (GitHub Pages)', false);
-  }
+  } catch (_) {}
 }
-// ... (sisa kode fungsi syncProjectToCloud, syncUserToCloud, syncStudioConfigToCloud, uploadFileToFirebaseStorage tetap sama seperti sebelumnya)
+
 async function uploadFileToFirebaseStorage(path, file) {
   if (!fbStorage || !firebaseUser || !file) return '';
   try {
@@ -101,10 +81,9 @@ async function uploadFileToFirebaseStorage(path, file) {
     const sRef = storageRef(fbStorage, `artifacts/${firebaseAppId}/public/${path}`);
     await uploadBytes(sRef, file);
     return await getDownloadURL(sRef);
-  } catch (_) {
-    return '';
-  }
+  } catch (_) { return ''; }
 }
+
 async function syncProjectToCloud(proj) {
   persistLocalState();
   if (!db || !firebaseUser) return;
@@ -114,6 +93,7 @@ async function syncProjectToCloud(proj) {
     await setDoc(ref, prepareProjectForFirestore(proj));
   } catch (_) {}
 }
+
 async function syncUserToCloud(userObj) {
   persistLocalState();
   if (!db || !firebaseUser || !userObj?.email) return;
@@ -123,6 +103,7 @@ async function syncUserToCloud(userObj) {
     await setDoc(ref, userObj);
   } catch (_) {}
 }
+
 async function syncStudioConfigToCloud() {
   persistLocalState();
   if (!db || !firebaseUser) return;
