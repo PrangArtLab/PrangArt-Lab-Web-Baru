@@ -1,16 +1,59 @@
+function initTheme() {
+  const savedTheme = localStorage.getItem('prangart_theme') || 'auto';
+  setTheme(savedTheme, false);
+}
+function setTheme(mode, triggerUIUpdate = true) {
+  localStorage.setItem('prangart_theme', mode);
+  const applyTheme = () => {
+    const isDark = mode === 'dark' || (mode === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    if (isDark) document.documentElement.classList.add('dark');
+    else document.documentElement.classList.remove('dark');
+    if (triggerUIUpdate) updateThemeIcon(mode);
+    document.getElementById('theme-dropdown').classList.add('hidden');
+  };
+  applyTheme();
+  if (!window.themeMediaQuery) {
+    window.themeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    window.themeMediaQuery.addEventListener('change', (e) => {
+      if (localStorage.getItem('prangart_theme') === 'auto') {
+        if (e.matches) document.documentElement.classList.add('dark');
+        else document.documentElement.classList.remove('dark');
+      }
+    });
+  }
+}
+function toggleThemeDropdown() {
+  document.getElementById('theme-dropdown').classList.toggle('hidden');
+}
+function updateThemeIcon(mode) {
+  document.getElementById('theme-icon-dark').classList.add('hidden');
+  document.getElementById('theme-icon-light').classList.add('hidden');
+  document.getElementById('theme-icon-auto').classList.add('hidden');
+  if (mode === 'dark') document.getElementById('theme-icon-dark').classList.remove('hidden');
+  else if (mode === 'light') document.getElementById('theme-icon-light').classList.remove('hidden');
+  else document.getElementById('theme-icon-auto').classList.remove('hidden');
+}
+document.addEventListener('click', function(event) {
+  const dd = document.getElementById('theme-dropdown');
+  const btn = dd?.previousElementSibling;
+  if (dd && !dd.classList.contains('hidden') && !dd.contains(event.target) && !btn.contains(event.target)) {
+    dd.classList.add('hidden');
+  }
+});
+
 function showToast(title, message, type = 'success') {
   const container = document.getElementById('toast-container');
   if (!container) return;
   const borderColor = type === 'error' ? 'border-l-red-500' : type === 'warning' ? 'border-l-amber-400' : 'border-l-emerald-400';
   const el = document.createElement('div');
-  el.className = `pointer-events-auto bg-charcoal border border-borderline border-l-4 ${borderColor} rounded-xl p-3.5 shadow-2xl text-xs transition-all duration-200`;
+  el.className = `pointer-events-auto bg-surface border border-border border-l-4 ${borderColor} rounded-xl p-4 shadow-2xl text-sm transition-all duration-200`;
   el.innerHTML = `
-    <div class="flex items-start justify-between gap-2">
+    <div class="flex items-start justify-between gap-3">
       <div>
-        <strong class="text-ivory block">${title}</strong>
-        <span class="text-ash block mt-0.5 leading-relaxed">${message}</span>
+        <strong class="text-textMain block font-bold">${title}</strong>
+        <span class="text-textMuted block mt-1 leading-relaxed">${message}</span>
       </div>
-      <button type="button" onclick="this.parentElement.parentElement.remove()" class="text-ash hover:text-ivory text-xs">×</button>
+      <button type="button" onclick="this.parentElement.parentElement.remove()" class="text-textMuted hover:text-textMain text-lg">×</button>
     </div>
   `;
   container.appendChild(el);
@@ -77,12 +120,7 @@ function loadImageElement(src) {
 }
 
 function updateCloudSyncBadge(statusText, isOnline) {
-  const badge = document.getElementById('firebase-sync-badge');
-  if (!badge) return;
-  badge.textContent = statusText;
-  badge.className = isOnline
-    ? 'px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/40 text-emerald-400'
-    : 'px-2.5 py-0.5 rounded-full bg-acoustic border border-borderline text-ash';
+  // Fungsi ini dikosongkan karena elemen badge dihapus sesuai permintaan
 }
 
 function sanitizeDocId(raw) {
