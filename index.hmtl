@@ -692,4 +692,4 @@ tailwind.config = {
 <script src="js/12-admin.js"></script>
 <script src="js/13-boot.js"></script>
 </body>
-</html>
+</html> 
