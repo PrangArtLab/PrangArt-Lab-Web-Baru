@@ -5,8 +5,8 @@ function refreshOrderPageUI() {
       const u = appState.currentClientUser;
       banner.innerHTML = `
         <div class="flex items-center gap-2.5">
-          <span class="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 font-mono text-[11px] font-bold">✓ Akun Aktif</span>
-          <span>Pemesan: <strong>${u.name}</strong> (${u.instansi} - ${u.kota})</span>
+          <span class="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 font-mono text-[11px] font-bold">✓ Akun Klien Aktif</span>
+          <span>Pemesan: <strong>${u.name}</strong></span>
         </div>
       `;
       const setIfEmpty = (id, val) => {
@@ -16,16 +16,11 @@ function refreshOrderPageUI() {
       setIfEmpty('field-nama', u.name);
       setIfEmpty('field-email', u.email);
       setIfEmpty('field-wa', u.wa);
-      setIfEmpty('field-instansi', u.instansi);
-      setIfEmpty('field-kota', u.kota);
-      setIfEmpty('field-alamat', u.alamat);
-      setIfEmpty('field-nik', u.nik);
     } else {
+      // Just in case someone bypasses the flow
       banner.innerHTML = `
-        <div class="flex flex-wrap items-center gap-2">
-          <span class="px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 font-mono text-[11px] font-bold">Akun Klien</span>
-          <span>Buat akun singkat (30 detik) agar progres penawaran &amp; dokumen tersimpan di akun Anda.</span>
-          <button type="button" onclick="openClientAuthModal('register')" class="text-gold font-bold underline">Daftar / Masuk Sekarang</button>
+        <div class="flex flex-wrap items-center gap-2 text-red-400 font-bold">
+          Anda belum masuk. Silakan <button type="button" onclick="openClientAuthModal('login')" class="underline">Masuk</button> terlebih dahulu.
         </div>
       `;
     }
@@ -318,6 +313,7 @@ function copyBankAccount() {
   tmp.remove();
   showToast('Rekening Disalin', txt);
 }
+
 async function generateAISynopsis(isVariation = false) {
   const judul = document.getElementById('field-judul')?.value.trim();
   const jenis = document.getElementById('field-jenis-tari')?.value.trim();
@@ -422,8 +418,8 @@ function collectOrderMusicalSpec() {
 async function handleOrderFormSubmit(e) {
   e.preventDefault();
   if (!appState.currentClientUser) {
-    showToast('Buat Akun Terlebih Dahulu', 'Silakan daftar atau masuk akun singkat agar progres dapat dipantau.', 'warning');
-    openClientAuthModal('register');
+    showToast('Masuk Terlebih Dahulu', 'Silakan masuk ke akun Anda untuk melanjutkan.', 'warning');
+    navigateTo('client');
     return;
   }
 
@@ -447,82 +443,4 @@ async function handleOrderFormSubmit(e) {
   const svcObj = appState.serviceCatalog[appState.selectedServiceLine];
   const pkgObj = svcObj.packages[appState.selectedPackage];
   const addonSelected = Boolean(document.getElementById('field-addon-vocal')?.checked);
-  const addonPrice = addonSelected ? svcObj.addonPrice : 0;
-  const totalPrice = pkgObj.price + addonPrice;
-  const dpAmount = paymentScheme === 'DP 50%' ? Math.round(totalPrice * 0.5) : totalPrice;
-
-  const seqNum = String(Math.floor(100 + Math.random() * 899));
-  const ticketId = `PAL-2026-${seqNum}`;
-  const nowDate = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
-  const musicalSpec = collectOrderMusicalSpec();
-  const defaultRev = appState.selectedPackage === 'dasar' ? '3' : appState.selectedPackage === 'standar' ? '6' : 'Sesuai kesepakatan';
-
-  const newProject = {
-    id: ticketId,
-    createdTs: Date.now(),
-    createdAt: nowDate,
-    entryPath,
-    clientEmail: email,
-    clientName: nama,
-    instansi, kota, alamat, nik, wa,
-    serviceLine: appState.selectedServiceLine,
-    serviceLineLabel: svcObj.label,
-    packageKey: appState.selectedPackage,
-    packageName: pkgObj.label,
-    addonSelected,
-    addonLabel: svcObj.addonLabel,
-    addonPrice: svcObj.addonPrice,
-    basePrice: pkgObj.price,
-    totalPrice, dpAmount, paymentScheme,
-    judul, koreografer, jenisTari, budaya, durasi, referensi, sinopsis,
-    musicalSpec,
-    contractNumber: `${seqNum}/PAL-SPK/XI/2026`,
-    composerRole: 'Composer & Arranger',
-    musicFileTitle: judul.replace(/\s+/g, '_') + '_Final',
-    deliverableFormat: appState.selectedServiceLine === 'transkripsi' ? 'PDF Partitur & Audio Panduan' : 'WAV 24-bit & MP3 320kbps',
-    revisionQuota: defaultRev,
-    thirdPartyMaterial: 'Tidak ada',
-    collaboratorNotes: 'Tidak ada kontributor tambahan',
-    rawFilesIncluded: false,
-    rawFilesDetail: '',
-    extraAttachmentNotes: '-',
-    courtCity: 'Samarinda',
-    quoteStatus: 'Menunggu Pemeriksaan',
-    quoteDurationDays: '7-10 Hari Kerja',
-    quoteDeliverables: 'Sesuai Lampiran A & paket yang disepakati',
-    quoteNotes: '',
-    agreementSigned: false,
-    agreementSignedAt: '',
-    dpStatus: 'Belum Dibayar',
-    dpRejectReason: '',
-    dpProofName: '',
-    dpProofDataUrl: '',
-    pelunasanStatus: paymentScheme === 'Pembayaran Penuh 100%' ? 'Tidak Perlu (Skema Penuh)' : 'Belum Lunas',
-    pelunasanProofName: '',
-    pelunasanProofDataUrl: '',
-    productionStatus: TRACKER_MILESTONES[0],
-    previewAudioName: '',
-    previewAudioUrl: '',
-    masterFileName: '',
-    masterFileUrl: '',
-    clientAcceptedFinal: false
-  };
-
-  appState.projects.unshift(newProject);
-  appState.activeBriefProjectId = ticketId;
-  appState.selectedClientProjectId = ticketId;
-  appState.selectedAdminProjectId = ticketId;
-  await syncProjectToCloud(newProject);
-
-  const briefDataUrl = await generateBriefCardPNGDataUrl(newProject);
-  document.getElementById('success-ticket-id').textContent = ticketId;
-  document.getElementById('brief-card-preview-img').src = briefDataUrl;
-
-  document.getElementById('order-form-container').classList.add('hidden');
-  document.getElementById('mobile-sticky-bar')?.classList.add('hidden');
-  document.getElementById('order-success-container').classList.remove('hidden');
-
-  triggerPngFileDownload(briefDataUrl, `Kartu-Brief-PrangArt-${ticketId}.png`);
-  showToast('Kartu Brief Terunduh!', 'Kirim Kartu Brief PNG ke WhatsApp Produser untuk pemeriksaan & penawaran.');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
+  const addonPrice
