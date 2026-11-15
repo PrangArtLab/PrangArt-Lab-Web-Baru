@@ -1,18 +1,42 @@
+/* Variabel Warna untuk Light Mode (Default) */
+:root {
+  --obsidian: 244 244 245;    /* bg utama: putih keabuan */
+  --charcoal: 228 228 231;    /* bg card: abu terang */
+  --acoustic: 212 212 216;    /* bg dalam card: abu medium */
+  --ivory: 9 9 11;            /* text utama: hitam */
+  --ash: 82 82 91;            /* text sekunder: abu gelap */
+  --borderline: 161 161 170;  /* border: abu */
+}
+
+/* Variabel Warna untuk Dark Mode */
+.dark {
+  --obsidian: 9 9 11;         /* bg utama: hitam pekat */
+  --charcoal: 18 18 21;       /* bg card: hitam keabuan */
+  --acoustic: 26 26 31;       /* bg dalam card: hitam terang */
+  --ivory: 244 244 245;       /* text utama: putih */
+  --ash: 161 161 170;         /* text sekunder: abu terang */
+  --borderline: 39 39 42;     /* border: abu gelap */
+}
+
 * { box-sizing: border-box; }
 html, body {
-  background-color: #09090b;
-  color: #f4f4f5;
+  background-color: rgb(var(--obsidian));
+  color: rgb(var(--ivory));
   font-family: 'Plus Jakarta Sans', sans-serif;
-  overflow-x: hidden;
+  /* overflow-x: hidden dihapus karena merusak sticky header di beberapa browser */
   scroll-behavior: smooth;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
+
+/* Scrollbar */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #09090b; }
-::-webkit-scrollbar-thumb { background: #27272a; border-radius: 9999px; }
+::-webkit-scrollbar-track { background: rgb(var(--obsidian)); }
+::-webkit-scrollbar-thumb { background: rgb(var(--borderline)); border-radius: 9999px; }
 ::-webkit-scrollbar-thumb:hover { background: #d4af37; }
+
 .btn-gold {
   background: linear-gradient(135deg, #d4af37 0%, #c59b27 100%);
-  color: #09090b;
+  color: #09090b; /* Teks pada tombol emas selalu hitam */
   transition: all 0.2s ease;
 }
 .btn-gold:hover:not(:disabled) {
@@ -21,6 +45,7 @@ html, body {
   transform: translateY(-1px);
 }
 .btn-gold:disabled { opacity: 0.45; cursor: not-allowed; }
+
 .btn-ghost-gold {
   border: 1px solid rgba(212, 175, 55, 0.45);
   color: #d4af37;
@@ -31,17 +56,20 @@ html, body {
   background: rgba(212, 175, 55, 0.14);
   border-color: #d4af37;
 }
+
 .page-dissolve { animation: pageDissolve 0.25s ease-out forwards; }
 @keyframes pageDissolve {
   from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
 .shake-error { animation: shakeX 0.32s ease-in-out; }
 @keyframes shakeX {
   0%, 100% { transform: translateX(0); }
   25% { transform: translateX(-5px); }
   75% { transform: translateX(5px); }
 }
+
 @media print {
   body * { visibility: hidden; }
   #official-doc-modal:not(.hidden) #official-doc-canvas,
