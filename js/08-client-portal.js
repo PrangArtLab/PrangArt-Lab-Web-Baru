@@ -18,12 +18,11 @@ function renderClientWorkspace() {
 
   if (!myProjects.length) {
     ws.innerHTML = `
-      <div class="bg-charcoal border border-borderline rounded-2xl p-10 text-center max-w-lg mx-auto space-y-4">
+      <div class="bg-charcoal border border-borderline rounded-2xl p-10 text-center max-w-lg mx-auto space-y-4 transition-colors duration-300">
         <h3 class="text-lg font-bold text-ivory">Belum Ada Pengajuan Aktif</h3>
         <p class="text-xs text-ash">Mulai diskusi dengan Admin atau isi formulir pengajuan kebutuhan pertama Anda.</p>
         <div class="flex justify-center gap-2">
           <button type="button" onclick="openProducerWaModal()" class="btn-ghost-gold px-4 py-2.5 rounded-xl text-xs font-bold">Diskusi WA</button>
-          <!-- TOMBOL BARU KE FORMULIR -->
           <button type="button" onclick="navigateTo('order')" class="btn-gold px-4 py-2.5 rounded-xl text-xs font-bold">+ Buat Pengajuan Baru</button>
         </div>
       </div>
@@ -45,7 +44,7 @@ function renderClientWorkspace() {
   const isFullyPaid = isFullScheme ? isFirstPaymentVerified : (proj.pelunasanStatus === 'Lunas');
 
   ws.innerHTML = `
-    <div class="flex flex-wrap items-center justify-between gap-3 bg-charcoal border border-borderline rounded-2xl p-4">
+    <div class="flex flex-wrap items-center justify-between gap-3 bg-charcoal border border-borderline rounded-2xl p-4 transition-colors duration-300">
       <div>
         <span class="text-[11px] font-mono text-gold uppercase font-bold">Ruang Klien • ${appState.currentClientUser.name}</span>
         <h2 class="text-xl font-bold text-ivory">${proj.judul} <span class="text-xs font-mono text-ash">(${proj.id})</span></h2>
@@ -56,12 +55,11 @@ function renderClientWorkspace() {
             ${myProjects.map(p => `<option value="${p.id}" ${p.id === proj.id ? 'selected' : ''}>${p.id} - ${p.judul}</option>`).join('')}
           </select>
         ` : ''}
-        <!-- TOMBOL TAMBAH PENGAJUAN BARU -->
         <button type="button" onclick="navigateTo('order')" class="btn-gold px-3.5 py-2 rounded-xl text-xs font-bold">+ Buat Pengajuan Baru</button>
       </div>
     </div>
 
-    <div class="bg-charcoal border border-borderline rounded-2xl p-5 space-y-4">
+    <div class="bg-charcoal border border-borderline rounded-2xl p-5 space-y-4 transition-colors duration-300">
       <div class="flex flex-wrap items-center justify-between gap-2">
         <span class="text-xs font-mono uppercase text-gold font-bold">Progres Tahapan Produksi</span>
         <span class="px-2.5 py-0.5 rounded-full bg-gold/15 text-gold text-xs font-bold">${proj.productionStatus}</span>
@@ -70,7 +68,7 @@ function renderClientWorkspace() {
         ${TRACKER_MILESTONES.map((st, idx) => {
           const done = idx <= currentMilestoneIdx;
           return `
-            <div class="p-2.5 rounded-xl border ${done ? 'border-gold bg-gold/10' : 'border-borderline bg-acoustic/50 opacity-50'}">
+            <div class="p-2.5 rounded-xl border ${done ? 'border-gold bg-gold/10' : 'border-borderline bg-acoustic/50 opacity-50'} transition-colors duration-300">
               <span class="text-[10px] font-mono font-bold ${done ? 'text-gold' : 'text-ash'}">0${idx + 1}</span>
               <p class="text-[11px] font-semibold text-ivory mt-0.5 leading-snug">${st.replace(/^\d+\.\s*/, '')}</p>
             </div>
@@ -80,7 +78,7 @@ function renderClientWorkspace() {
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-      <div class="bg-charcoal border ${isQuoteIssued ? 'border-emerald-500/40' : 'border-borderline'} rounded-2xl p-5 space-y-3">
+      <div class="bg-charcoal border ${isQuoteIssued ? 'border-emerald-500/40' : 'border-borderline'} rounded-2xl p-5 space-y-3 transition-colors duration-300">
         <div class="flex items-center justify-between">
           <span class="text-[11px] font-mono font-bold text-gold uppercase">Tahap 6 • Penawaran Resmi</span>
           <span class="text-[11px] font-mono ${isQuoteIssued ? 'text-emerald-400' : 'text-amber-300'}">${proj.quoteStatus}</span>
@@ -98,7 +96,7 @@ function renderClientWorkspace() {
         `}
       </div>
 
-      <div class="bg-charcoal border ${isAgreementSigned ? 'border-emerald-500/40' : 'border-borderline'} rounded-2xl p-5 space-y-3">
+      <div class="bg-charcoal border ${isAgreementSigned ? 'border-emerald-500/40' : 'border-borderline'} rounded-2xl p-5 space-y-3 transition-colors duration-300">
         <div class="flex items-center justify-between">
           <span class="text-[11px] font-mono font-bold text-gold uppercase">Tahap 7 • Persetujuan Admin</span>
           <span class="text-[11px] font-mono ${isAgreementSigned ? 'text-emerald-400' : 'text-amber-300'}">${isAgreementSigned ? '✓ Disetujui' : 'Menunggu'}</span>
@@ -117,7 +115,7 @@ function renderClientWorkspace() {
         `}
       </div>
 
-      <div class="bg-charcoal border ${isFirstPaymentVerified ? 'border-emerald-500/40' : 'border-borderline'} rounded-2xl p-5 space-y-3">
+      <div class="bg-charcoal border ${isFirstPaymentVerified ? 'border-emerald-500/40' : 'border-borderline'} rounded-2xl p-5 space-y-3 transition-colors duration-300">
         <div class="flex items-center justify-between">
           <span class="text-[11px] font-mono font-bold text-gold uppercase">Tahap 8 • Pembayaran</span>
           <span class="text-[11px] font-mono ${isFirstPaymentVerified ? 'text-emerald-400' : 'text-amber-300'}">${proj.dpStatus}</span>
@@ -131,15 +129,30 @@ function renderClientWorkspace() {
                 <option value="Pembayaran Penuh 100%" ${isFullScheme ? 'selected' : ''}>Penuh 100% (${formatRupiah(proj.totalPrice)})</option>
               </select>
             </div>
-            <div class="bg-obsidian border border-borderline rounded-lg p-2.5 flex items-center justify-between gap-2">
-              <span class="font-mono text-[11px] text-ivory truncate">${appState.settings.bankAccount}</span>
-              <button type="button" onclick="copyBankAccount()" class="text-gold text-[11px] font-bold shrink-0">Salin</button>
-            </div>
+            
+            <!-- PEMILIHAN METODE PEMBAYARAN DINAMIS -->
+            ${!isFirstPaymentVerified ? `
+              <div class="space-y-1.5">
+                <label class="text-[11px] font-semibold text-ivory block">Pilih Metode Pembayaran:</label>
+                <select id="payment-method-select-${proj.id}" onchange="changePaymentMethodDisplay('${proj.id}')" class="w-full bg-acoustic border border-borderline rounded-lg px-3 py-2 text-xs text-ivory">
+                  ${appState.settings.paymentMethods.map(pm => `<option value="${pm.id}">${pm.name}</option>`).join('')}
+                </select>
+              </div>
+
+              <!-- BOKS DETAIL PEMBAYARAN -->
+              <div id="payment-detail-box-${proj.id}" class="bg-obsidian border border-borderline rounded-lg p-3">
+                <!-- Akan diisi oleh fungsi JS -->
+              </div>
+            ` : ''}
+
             ${proj.dpStatus === 'Ditolak' ? `<p class="text-[11px] text-red-400">${proj.dpRejectReason}</p>` : ''}
             ${!isFirstPaymentVerified ? `
-              <label class="btn-gold w-full py-2.5 rounded-xl text-xs font-bold text-center block cursor-pointer">Unggah Bukti Transfer (${formatRupiah(firstPayAmount)})<input type="file" accept="image/jpeg,image/png,application/pdf" onchange="uploadClientStagePayment('${proj.id}', 'dp', this.files[0])" class="hidden" /></label>
+              <label class="btn-gold w-full py-2.5 rounded-xl text-xs font-bold text-center block cursor-pointer mt-2">
+                Unggah Bukti Transfer (${formatRupiah(firstPayAmount)})
+                <input type="file" accept="image/jpeg,image/png,application/pdf" onchange="uploadClientStagePayment('${proj.id}', 'dp', this.files[0])" class="hidden" />
+              </label>
             ` : `
-              <p class="text-[11px] text-emerald-400 font-semibold">✓ Pembayaran Termin I telah diverifikasi oleh PrangArt Lab.</p>
+              <p class="text-[11px] text-emerald-400 font-semibold">✓ Pembayaran Termin I telah diverifikasi.</p>
             `}
           </div>
         ` : `
@@ -149,13 +162,13 @@ function renderClientWorkspace() {
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-      <div class="lg:col-span-7 bg-charcoal border border-borderline rounded-2xl p-5 space-y-4">
+      <div class="lg:col-span-7 bg-charcoal border border-borderline rounded-2xl p-5 space-y-4 transition-colors duration-300">
         <div class="flex items-center justify-between border-b border-borderline pb-3">
           <h3 class="text-sm font-bold text-ivory">Tahap 11 • Pratinjau Audio &amp; Catatan Revisi</h3>
           <span class="text-[11px] font-mono text-gold">Kuota: ${proj.revisionQuota || '6'}x revisi ringan</span>
         </div>
         ${proj.previewAudioName ? `
-          <div class="bg-acoustic border border-gold/30 rounded-xl p-4 space-y-2.5">
+          <div class="bg-acoustic border border-gold/30 rounded-xl p-4 space-y-2.5 transition-colors duration-300">
             <div class="flex items-center justify-between text-xs">
               <strong class="text-ivory">${proj.previewAudioName}</strong>
               <span class="text-[11px] font-mono text-emerald-400">Draf Studio Tersedia</span>
@@ -167,27 +180,27 @@ function renderClientWorkspace() {
             `}
           </div>
         ` : `
-          <div class="bg-acoustic/60 border border-borderline rounded-xl p-4 text-xs text-ash">Audio pratinjau akan muncul di sini setelah proses produksi studio selesai dikerjakan.</div>
+          <div class="bg-acoustic/60 border border-borderline rounded-xl p-4 text-xs text-ash transition-colors duration-300">Audio pratinjau akan muncul di sini setelah proses produksi studio selesai dikerjakan.</div>
         `}
         <div class="space-y-2">
           <label class="block text-xs font-semibold text-ivory">Kirim Catatan Revisi / Masukan ke Admin:</label>
-          <textarea id="client-revision-note" rows="2" placeholder="Tuliskan timestamp & detail perbaikan ringan (misal: 01:20 transisi kendang diperhalus)..." class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3.5 py-2 text-xs text-ivory focus:outline-none"></textarea>
+          <textarea id="client-revision-note" rows="2" placeholder="Tuliskan timestamp & detail perbaikan ringan (misal: 01:20 transisi kendang diperhalus)..." class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3.5 py-2 text-xs text-ivory focus:outline-none transition-colors duration-300"></textarea>
           <div class="flex flex-wrap gap-2">
             <button type="button" onclick="sendClientRevisionNoteToWA('${proj.id}')" class="btn-ghost-gold px-4 py-2 rounded-xl text-xs font-bold">Kirim Catatan Revisi ke WA Admin</button>
           </div>
         </div>
       </div>
 
-      <div class="lg:col-span-5 bg-charcoal border border-borderline rounded-2xl p-5 space-y-4">
+      <div class="lg:col-span-5 bg-charcoal border border-borderline rounded-2xl p-5 space-y-4 transition-colors duration-300">
         <h3 class="text-sm font-bold text-ivory">Dokumen, Pelunasan &amp; Hasil Akhir</h3>
         <div class="grid grid-cols-2 gap-2">
           <button type="button" onclick="openOfficialDocModal('${proj.id}', 'invoice', '${isFullScheme ? 'full' : (isFullyPaid ? 'lunas' : 'dp')}')" class="btn-ghost-gold py-2 rounded-lg text-xs font-bold">Invoice</button>
           <button type="button" onclick="openOfficialDocModal('${proj.id}', 'kuitansi', '${isFullScheme ? 'full' : (isFullyPaid ? 'lunas' : 'dp')}')" class="btn-ghost-gold py-2 rounded-lg text-xs font-bold">Kuitansi</button>
-          <button type="button" onclick="openBriefCardModal('${proj.id}')" class="py-2 rounded-lg bg-acoustic border border-gold/40 text-gold text-xs font-bold hover:border-gold">Kartu Brief</button>
-          <button type="button" onclick="openContractDocModal('${proj.id}', false)" class="py-2 rounded-lg bg-acoustic border border-gold/40 text-gold text-xs font-bold hover:border-gold">Perjanjian</button>
+          <button type="button" onclick="openBriefCardModal('${proj.id}')" class="py-2 rounded-lg bg-acoustic border border-gold/40 text-gold text-xs font-bold hover:border-gold transition-colors duration-300">Kartu Brief</button>
+          <button type="button" onclick="openContractDocModal('${proj.id}', false)" class="py-2 rounded-lg bg-acoustic border border-gold/40 text-gold text-xs font-bold hover:border-gold transition-colors duration-300">Perjanjian</button>
         </div>
         ${!isFullScheme && !isFullyPaid && isFirstPaymentVerified ? `
-          <div class="bg-obsidian border border-gold/30 rounded-xl p-3.5 space-y-2.5">
+          <div class="bg-obsidian border border-gold/30 rounded-xl p-3.5 space-y-2.5 transition-colors duration-300">
             <p class="text-[11px] text-ash">Tahap 12: Unggah bukti pelunasan sisa <strong>${formatRupiah(pelunasanAmount)}</strong> sebelum hasil akhir diserahkan:</p>
             <label class="btn-gold w-full py-2.5 rounded-xl text-xs font-bold text-center block cursor-pointer">Unggah Bukti Pelunasan (${formatRupiah(pelunasanAmount)})<input type="file" accept="image/jpeg,image/png,application/pdf" onchange="uploadClientStagePayment('${proj.id}', 'lunas', this.files[0])" class="hidden" /></label>
           </div>
@@ -207,6 +220,10 @@ function renderClientWorkspace() {
       </div>
     </div>
   `;
+
+  if (isAgreementSigned && !isFirstPaymentVerified) {
+    changePaymentMethodDisplay(proj.id);
+  }
 }
 
 async function changeClientPaymentScheme(projId, scheme) {
@@ -217,6 +234,48 @@ async function changeClientPaymentScheme(projId, scheme) {
   proj.pelunasanStatus = scheme === 'Pembayaran Penuh 100%' ? 'Tidak Perlu (Skema Penuh)' : 'Belum Lunas';
   await syncProjectToCloud(proj);
   renderClientWorkspace();
+}
+
+function changePaymentMethodDisplay(projId) {
+  const select = document.getElementById(`payment-method-select-${projId}`);
+  const box = document.getElementById(`payment-detail-box-${projId}`);
+  if (!select || !box) return;
+  
+  const selectedId = select.value;
+  const method = appState.settings.paymentMethods.find(m => m.id === selectedId);
+  if (!method) return;
+
+  if (method.type === 'bank') {
+    box.innerHTML = `
+      <div class="flex items-center gap-3">
+        <img src="${method.logo}" class="h-6 object-contain" />
+        <div class="flex-1">
+          <p class="font-mono text-sm font-bold text-ivory">${method.number}</p>
+          <p class="text-[10px] text-ash">a.n. ${method.holder}</p>
+        </div>
+        <button type="button" onclick="copyBankAccountNumber('${method.number}')" class="text-gold text-[11px] font-bold px-2 py-1 bg-gold/10 rounded">Salin</button>
+      </div>
+    `;
+  } else if (method.type === 'qris') {
+    box.innerHTML = `
+      <div class="text-center space-y-2">
+        <p class="text-[10px] text-ash">Scan QRIS (Shopee/DANA/OVO/GoPay)</p>
+        <img src="${method.logo}" class="w-32 h-32 object-contain mx-auto rounded-lg border border-borderline" />
+        <p class="text-xs font-bold text-ivory">${method.name}</p>
+        <p class="text-[10px] text-ash">a.n. ${method.holder}</p>
+      </div>
+    `;
+  }
+}
+
+function copyBankAccountNumber(number) {
+  const tmp = document.createElement('textarea');
+  tmp.value = number;
+  document.body.appendChild(tmp);
+  tmp.select();
+  document.execCommand('copy');
+  tmp.remove();
+  showToast('Nomor Disalin', number);
 }
 
 function uploadClientStagePayment(projId, kind, file) {
