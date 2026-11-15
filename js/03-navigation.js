@@ -66,10 +66,18 @@ function updateHeaderAuthBadge() {
   }
 }
 
+// Fungsi ini mengarahkan klien untuk MASUK dulu sebelum mengisi form
 function selectServiceAndGoOrder(svcKey) {
   appState.selectedServiceLine = svcKey;
   appState.selectedPackage = 'standar';
-  navigateTo('order');
+  
+  if (!appState.currentClientUser) {
+    showToast('Masuk ke Akun', 'Silakan masuk atau daftar untuk mengisi formulir pengajuan.', 'warning');
+    navigateTo('client');
+    openClientAuthModal('register');
+  } else {
+    navigateTo('order');
+  }
 }
 
 function renderSop14Grid() {
