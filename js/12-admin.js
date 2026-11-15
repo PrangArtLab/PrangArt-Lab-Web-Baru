@@ -103,15 +103,19 @@ function renderAdminDashboard() {
             <option value="Transkripsi Musik">Transkripsi Musik</option>
           </select>
           <input type="text" id="pf-new-culture" required placeholder="Latar budaya / format..." class="bg-acoustic border border-borderline rounded-xl px-3 py-2 text-ivory" />
-          <button type="submit" class="btn-ghost-gold rounded-xl py-2 font-bold">+ Tambah Karya</button>
+          <input type="url" id="pf-new-url" placeholder="Link YouTube atau Drive (Opsional)..." class="bg-acoustic border border-borderline rounded-xl px-3 py-2 text-ivory" />
+          <input type="text" id="pf-new-desc" placeholder="Deskripsi singkat..." class="bg-acoustic border border-borderline rounded-xl px-3 py-2 text-ivory sm:col-span-2" />
+          <button type="submit" class="btn-ghost-gold rounded-xl py-2 font-bold sm:col-span-2">+ Tambah Karya ke Portofolio</button>
         </form>
-        <div class="space-y-1.5 max-h-36 overflow-y-auto">
+        <div class="space-y-1.5 max-h-48 overflow-y-auto">
           ${appState.portfolioItems.map((item, idx) => `
             <div class="flex items-center justify-between bg-acoustic rounded-lg px-3 py-2 text-xs">
-              <span><strong>${item.title}</strong> <span class="text-ash">(${item.category})</span></span>
-              <button type="button" onclick="removePortfolioItem(${idx})" class="text-red-400 hover:underline">Hapus</button>
+              <div>
+                <strong class="text-ivory">${item.title}</strong> <span class="text-ash text-[10px] block">${item.category} ${item.mediaUrl ? '• Link Tersedia' : ''}</span>
+              </div>
+              <button type="button" onclick="removePortfolioItem(${idx})" class="text-red-400 hover:underline px-2 py-1 bg-red-400/10 rounded">Hapus</button>
             </div>
-          `).join('')}
+          `).join('') || '<p class="text-xs text-ash text-center py-4">Belum ada karya portofolio.</p>'}
         </div>
       </div>
     </div>
@@ -127,6 +131,47 @@ function renderAdminInspector() {
   if (!proj) {
     panel.innerHTML = `<div class="bg-charcoal border border-borderline rounded-2xl p-8 text-center text-xs text-ash">Pilih proyek di sebelah kiri untuk memeriksa detail.</div>`;
     return;
+  }
+
+  // RENDER DETAIL SPESIFIKASI MUSIK & LINK
+  let specHtml = '';
+  if (proj.musicalSpec) {
+    const spec = proj.musicalSpec;
+    if (spec.mode === 'standar' && spec.structures) {
+      specHtml = spec.structures.map(s => `
+        <div class="mb-2 last:mb-0">
+          <strong class="text-ivory">[${s.time}] ${s.name}:</strong>
+          <p class="text-ash text-[11px]">${s.detail}</p>
+          ${s.link ? `<a href="${s.link}" target="_blank" class="text-gold underline text-[10px] break-all block mt-1">${s.link}</a>` : ''}
+        </div>
+      `).join('');
+    } else if (spec.mode === 'pro' && spec.scenes) {
+      specHtml = spec.scenes.map(s => `
+        <div class="mb-2 last:mb-0">
+          <strong class="text-ivory">${s.title}:</strong>
+          <p class="text-ash text-[11px]">${s.detail}</p>
+          ${s.link ? `<a href="${s.link}" target="_blank" class="text-gold underline text-[10px] break-all block mt-1">${s.link}</a>` : ''}
+        </div>
+      `).join('');
+    } else if (spec.mode === 'dasar') {
+      specHtml = `
+        <p><strong class="text-ivory">Tempo:</strong> <span class="text-ash">${spec.bpm} BPM (${spec.mood})</span></p>
+        <p><strong class="text-ivory">Instrumen:</strong> <span class="text-ash">${(spec.instruments || []).join(', ')}</span></p>
+      `;
+    } else if (spec.mode === 'transkripsi') {
+      specHtml = `
+        <p><strong class="text-ivory">Format:</strong> <span class="text-ash">${spec.format}</span></p>
+        <p><strong class="text-ivory">Detail:</strong> <span class="text-ash">${spec.key}</span></p>
+        <p><strong class="text-ivory">Hasil:</strong> <span class="text-ash">${spec.meter}</span></p>
+        <p><strong class="text-ivory">Catatan:</strong> <span class="text-ash">${spec.detail}</span></p>
+      `;
+    } else if (spec.mode === 'digital') {
+      specHtml = `
+        <p><strong class="text-ivory">Genre:</strong> <span class="text-ash">${spec.genre}</span></p>
+        <p><strong class="text-ivory">Tempo/Nada:</strong> <span class="text-ash">${spec.tempo}</span></p>
+        <p><strong class="text-ivory">Catatan:</strong> <span class="text-ash">${spec.detail}</span></p>
+      `;
+    }
   }
 
   panel.innerHTML = `
@@ -217,10 +262,18 @@ function renderAdminInspector() {
         </label>
       </div>
 
-      <div class="bg-obsidian border border-borderline rounded-xl p-4 space-y-2 text-xs">
-        <strong class="text-gold block">Sinopsis &amp; Referensi Klien:</strong>
-        <p class="text-ash leading-relaxed">${proj.sinopsis}</p>
-        <p class="text-[11px] font-mono text-ivory truncate">Ref: ${proj.referensi}</p>
+      <div class="bg-obsidian border border-borderline rounded-xl p-4 space-y-3 text-xs">
+        <strong class="text-gold block border-b border-borderline pb-2">Rincian Brief &amp; Link Referensi Klien:</strong>
+        <div class="space-y-2 text-[11px]">
+          <p><strong class="text-ivory">Sinopsis:</strong> <span class="text-ash leading-relaxed">${proj.sinopsis}</span></p>
+          <p><strong class="text-ivory">Link Referensi Utama:</strong> <a href="${proj.referensi}" target="_blank" class="text-gold underline break-all">${proj.referensi}</a></p>
+          
+          <div class="pt-2 mt-2 border-t border-borderline">
+            <strong class="text-ivory block mb-1.5">Spesifikasi Teknis &amp; Link Bagian:</strong>
+            <div class="text-ash leading-relaxed space-y-1">${specHtml || 'Tidak ada spesifikasi detail.'}</div>
+          </div>
+        </div>
+
         <div class="pt-2 flex flex-wrap gap-2">
           <a href="https://wa.me/${proj.wa.replace(/^0/, '62')}?text=${encodeURIComponent(`Halo ${proj.clientName}, saya dari PrangArt Lab terkait karya "${proj.judul}" (${proj.id}). Penawaran resmi dan dokumen perjanjian sudah siap.`)}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold">Hubungi WhatsApp Klien (${proj.wa})</a>
         </div>
@@ -335,13 +388,28 @@ function addPortfolioItem(e) {
   const title = document.getElementById('pf-new-title').value.trim();
   const category = document.getElementById('pf-new-cat').value;
   const culture = document.getElementById('pf-new-culture').value.trim();
+  const mediaUrl = document.getElementById('pf-new-url').value.trim();
+  const desc = document.getElementById('pf-new-desc').value.trim();
+
   appState.portfolioItems.unshift({
-    id: `PF-${Date.now()}`, title, category, culture, duration: '04:30',
-    desc: `Karya ${category} oleh PrangArt Lab (${culture}).`, freq: 293.66
+    id: `PF-${Date.now()}`, 
+    title, 
+    category, 
+    culture, 
+    mediaUrl,
+    desc: desc || `Karya ${category} oleh PrangArt Lab.`, 
+    duration: '--:--',
+    freq: 293.66
   });
+  
   syncStudioConfigToCloud();
   renderAdminDashboard();
   showToast('Portofolio Ditambahkan', `"${title}" tampil di halaman Portofolio.`);
+  
+  document.getElementById('pf-new-title').value = '';
+  document.getElementById('pf-new-culture').value = '';
+  document.getElementById('pf-new-url').value = '';
+  document.getElementById('pf-new-desc').value = '';
 }
 
 function removePortfolioItem(idx) {
