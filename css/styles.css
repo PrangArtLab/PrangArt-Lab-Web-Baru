@@ -1,65 +1,71 @@
-/* Variabel Warna untuk Light Mode (Default) */
+/* Light Mode */
 :root {
-  --obsidian: 244 244 245;    /* bg utama: putih keabuan */
-  --charcoal: 228 228 231;    /* bg card: abu terang */
-  --acoustic: 212 212 216;    /* bg dalam card: abu medium */
-  --ivory: 9 9 11;            /* text utama: hitam */
-  --ash: 82 82 91;            /* text sekunder: abu gelap */
-  --borderline: 161 161 170;  /* border: abu */
+  --base: 248 250 252;       /* Slate 50 (Background) */
+  --surface: 255 255 255;    /* White (Cards) */
+  --panel: 241 245 249;      /* Slate 100 (Inner Cards) */
+  --primary: 79 70 229;      /* Indigo 600 (Primary) */
+  --text-main: 15 23 42;     /* Slate 900 */
+  --text-muted: 100 116 139; /* Slate 500 */
+  --border: 226 232 240;     /* Slate 200 */
 }
 
-/* Variabel Warna untuk Dark Mode */
+/* Dark Mode */
 .dark {
-  --obsidian: 9 9 11;         /* bg utama: hitam pekat */
-  --charcoal: 18 18 21;       /* bg card: hitam keabuan */
-  --acoustic: 26 26 31;       /* bg dalam card: hitam terang */
-  --ivory: 244 244 245;       /* text utama: putih */
-  --ash: 161 161 170;         /* text sekunder: abu terang */
-  --borderline: 39 39 42;     /* border: abu gelap */
+  --base: 2 6 23;            /* Slate 950 (Background) */
+  --surface: 15 23 42;       /* Slate 900 (Cards) */
+  --panel: 30 41 59;         /* Slate 800 (Inner Cards) */
+  --primary: 139 92 246;     /* Violet 500 (Primary) */
+  --text-main: 248 250 252;  /* Slate 50 */
+  --text-muted: 148 163 184; /* Slate 400 */
+  --border: 51 65 85;        /* Slate 700 */
 }
 
 * { box-sizing: border-box; }
 html, body {
-  background-color: rgb(var(--obsidian));
-  color: rgb(var(--ivory));
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  /* overflow-x: hidden dihapus karena merusak sticky header di beberapa browser */
+  background-color: rgb(var(--base));
+  color: rgb(var(--text-main));
+  font-family: 'Outfit', sans-serif;
   scroll-behavior: smooth;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: rgb(var(--obsidian)); }
-::-webkit-scrollbar-thumb { background: rgb(var(--borderline)); border-radius: 9999px; }
-::-webkit-scrollbar-thumb:hover { background: #d4af37; }
+/* Typography */
+h1, h2, h3, h4, .font-display { font-family: 'Space Grotesk', sans-serif; }
 
-.btn-gold {
-  background: linear-gradient(135deg, #d4af37 0%, #c59b27 100%);
-  color: #09090b; /* Teks pada tombol emas selalu hitam */
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: rgb(var(--base)); }
+::-webkit-scrollbar-thumb { background: rgb(var(--border)); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: rgb(var(--primary)); }
+
+/* Buttons */
+.btn-primary {
+  background: rgb(var(--primary));
+  color: #ffffff;
   transition: all 0.2s ease;
 }
-.btn-gold:hover:not(:disabled) {
-  background: linear-gradient(135deg, #e6c34d 0%, #d4af37 100%);
-  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.25);
+.btn-primary:hover:not(:disabled) {
+  background: rgba(var(--primary), 0.85);
+  box-shadow: 0 4px 15px rgba(var(--primary), 0.3);
   transform: translateY(-1px);
 }
-.btn-gold:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
-.btn-ghost-gold {
-  border: 1px solid rgba(212, 175, 55, 0.45);
-  color: #d4af37;
-  background: rgba(212, 175, 55, 0.04);
+.btn-outline {
+  border: 1px solid rgb(var(--border));
+  color: rgb(var(--text-main));
+  background: rgb(var(--surface));
   transition: all 0.2s ease;
 }
-.btn-ghost-gold:hover {
-  background: rgba(212, 175, 55, 0.14);
-  border-color: #d4af37;
+.btn-outline:hover {
+  border-color: rgb(var(--primary));
+  color: rgb(var(--primary));
 }
 
-.page-dissolve { animation: pageDissolve 0.25s ease-out forwards; }
+/* Animations */
+.page-dissolve { animation: pageDissolve 0.3s ease-out forwards; }
 @keyframes pageDissolve {
-  from { opacity: 0; transform: translateY(6px); }
+  from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -70,6 +76,7 @@ html, body {
   75% { transform: translateX(5px); }
 }
 
+/* Print */
 @media print {
   body * { visibility: hidden; }
   #official-doc-modal:not(.hidden) #official-doc-canvas,
