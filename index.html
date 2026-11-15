@@ -35,10 +35,10 @@ tailwind.config = {
         <span class="text-[10px] font-mono uppercase tracking-widest text-ash block mt-1">Music Production Studio</span>
       </div>
     </button>
+    <!-- NAVIGASI DESKTOP (Formulir dihapus dari sini) -->
     <nav class="hidden md:flex items-center gap-1 bg-charcoal border border-borderline rounded-xl p-1">
       <button type="button" id="nav-home" onclick="navigateTo('home')" class="nav-pill px-3.5 py-1.5 rounded-lg text-xs font-semibold transition">Beranda &amp; Alur</button>
       <button type="button" id="nav-portfolio" onclick="navigateTo('portfolio')" class="nav-pill px-3.5 py-1.5 rounded-lg text-xs font-semibold transition">Portofolio</button>
-      <button type="button" id="nav-order" onclick="navigateTo('order')" class="nav-pill px-3.5 py-1.5 rounded-lg text-xs font-semibold transition">Formulir Kebutuhan</button>
       <button type="button" id="nav-client" onclick="navigateTo('client')" class="nav-pill px-3.5 py-1.5 rounded-lg text-xs font-semibold transition">Ruang Klien</button>
       <button type="button" id="nav-admin" onclick="navigateTo('admin')" class="nav-pill px-3.5 py-1.5 rounded-lg text-xs font-semibold transition">Admin</button>
     </nav>
@@ -51,426 +51,436 @@ tailwind.config = {
       </button>
     </div>
   </div>
+  <!-- NAVIGASI MOBILE (Formulir dihapus dari sini) -->
   <div class="md:hidden border-t border-borderline bg-charcoal/95 px-2 py-1.5 flex items-center justify-around gap-1 overflow-x-auto">
     <button type="button" id="mnav-home" onclick="navigateTo('home')" class="mnav-pill px-2.5 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap">Beranda</button>
     <button type="button" id="mnav-portfolio" onclick="navigateTo('portfolio')" class="mnav-pill px-2.5 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap">Portofolio</button>
-    <button type="button" id="mnav-order" onclick="navigateTo('order')" class="mnav-pill px-2.5 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap">Formulir</button>
-    <button type="button" id="mnav-client" onclick="navigateTo('client')" class="mnav-pill px-2.5 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap">Klien</button>
+    <button type="button" id="mnav-client" onclick="navigateTo('client')" class="mnav-pill px-2.5 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap">Ruang Klien</button>
     <button type="button" id="mnav-admin" onclick="navigateTo('admin')" class="mnav-pill px-2.5 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap">Admin</button>
   </div>
 </header>
 
 <main class="flex-1">
-
-<section id="page-home" class="page-section page-dissolve">
-  <div class="relative border-b border-borderline bg-gradient-to-b from-charcoal via-obsidian to-obsidian">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-        <div class="lg:col-span-7 space-y-5">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-charcoal border border-gold/30 text-gold text-xs font-mono">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>PrangArt Lab • Produksi Musik Tari, Non-Tari &amp; Transkripsi</span>
-          </div>
-          <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-ivory leading-[1.15]">Diskusi Jelas di Awal, <span class="text-gold">Hasil Musik Presisi</span></h1>
-          <p class="text-sm sm:text-base text-ash leading-relaxed max-w-2xl">PrangArt Lab menempatkan sesi diskusi kebutuhan sebagai tahap awal sebelum penawaran harga dan pembayaran. Konsultasikan konsep karya Anda terlebih dahulu, lalu dokumentasikan melalui formulir terstruktur.</p>
-          <div class="flex flex-wrap items-center gap-3 pt-1">
-            <button type="button" onclick="openProducerWaModal('Diskusi awal kebutuhan karya sebelum pemesanan')" class="btn-gold px-6 py-3.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-              <span>Jalur A: Diskusi via WhatsApp Dulu</span>
-            </button>
-            <button type="button" onclick="navigateTo('order')" class="btn-ghost-gold px-6 py-3.5 rounded-xl text-xs sm:text-sm font-bold">Jalur B: Isi Formulir Kebutuhan →</button>
-          </div>
-          <p class="text-[11px] text-ash">*Catatan: Diskusi awal &amp; pengisian formulir kebutuhan tidak langsung mengikat atau mewajibkan pembayaran. Pembayaran dilakukan setelah penawaran &amp; persetujuan administrasi.</p>
-        </div>
-        <div class="lg:col-span-5 bg-charcoal border border-gold/40 rounded-2xl p-5 sm:p-6 space-y-4">
-          <span class="text-[11px] font-mono uppercase tracking-wider text-gold font-bold block">2 Jalur Masuk Klien</span>
-          <div class="space-y-3 text-xs">
-            <div class="bg-acoustic border border-borderline rounded-xl p-3.5">
-              <strong class="text-gold block">Jalur A — Klien Melalui WhatsApp (Disarankan)</strong>
-              <p class="text-ash mt-1">1. Kontak awal → 2. Diskusi kebutuhan → 3. Isi formulir pemesanan</p>
+  <!-- HALAMAN BERANDA -->
+  <section id="page-home" class="page-section page-dissolve">
+    <div class="relative border-b border-borderline bg-gradient-to-b from-charcoal via-obsidian to-obsidian">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div class="lg:col-span-7 space-y-5">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-charcoal border border-gold/30 text-gold text-xs font-mono">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>PrangArt Lab • Produksi Musik Tari, Non-Tari &amp; Transkripsi</span>
             </div>
-            <div class="bg-acoustic border border-borderline rounded-xl p-3.5">
-              <strong class="text-ivory block">Jalur B — Klien Melalui Website</strong>
-              <p class="text-ash mt-1">1. Akses website → 2. Isi formulir pengajuan kebutuhan → 3. Diskusi &amp; konsultasi</p>
-            </div>
-            <div class="bg-obsidian border border-gold/30 rounded-xl p-3 text-center">
-              <span class="text-[11px] font-mono text-emerald-400 font-semibold">Keduanya bertemu di tahap yang sama:</span>
-              <p class="text-xs font-bold text-ivory mt-0.5">Pemeriksaan → Penawaran → Persetujuan → Pembayaran</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 space-y-8">
-    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
-      <div>
-        <span class="text-xs font-mono uppercase tracking-wider text-gold font-bold">Layanan Studio</span>
-        <h2 class="text-2xl sm:text-3xl font-bold text-ivory mt-1">3 Kategori Layanan PrangArt Lab</h2>
-      </div>
-      <p class="text-xs text-ash">Estimasi paket referensi sebelum penawaran resmi.</p>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div class="bg-charcoal border border-gold/50 rounded-2xl p-6 flex flex-col justify-between relative shadow-lg">
-        <span class="absolute -top-3 right-5 bg-gold text-obsidian text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full">Layanan Utama</span>
-        <div class="space-y-4">
-          <div class="flex items-center justify-between">
-            <span class="w-10 h-10 rounded-xl bg-gold/15 border border-gold/40 flex items-center justify-center text-gold">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-            </span>
-            <span class="text-xs font-mono text-gold font-bold bg-gold/10 px-2.5 py-1 rounded-lg">Mulai Rp1.000.000</span>
-          </div>
-          <div>
-            <h3 class="text-lg font-bold text-ivory">Produksi Musik Tari</h3>
-            <p class="text-xs text-ash mt-1 leading-relaxed">Komposisi, aransemen, mixing, dan mastering musik iringan tari tradisi, kreasi baru, maupun kontemporer.</p>
-          </div>
-          <ul class="space-y-1.5 text-xs text-ivory/90 border-t border-borderline pt-3.5">
-            <li>• Paket Dasar (1jt • 3x revisi ringan)</li>
-            <li>• Paket Standar (1,5jt • struktur &amp; timestamp • 6x revisi)</li>
-            <li>• Paket Pro (2jt • alur kompleks • bebas revisi)</li>
-            <li>• Persetujuan via <strong>Perjanjian Produksi Musik</strong></li>
-          </ul>
-        </div>
-        <button type="button" onclick="selectServiceAndGoOrder('tari')" class="btn-gold w-full py-2.5 rounded-xl text-xs font-bold mt-6">Ajukan Produksi Musik Tari →</button>
-      </div>
-
-      <div class="bg-charcoal border border-borderline hover:border-gold/50 rounded-2xl p-6 flex flex-col justify-between transition">
-        <div class="space-y-4">
-          <div class="flex items-center justify-between">
-            <span class="w-10 h-10 rounded-xl bg-acoustic border border-gold/30 flex items-center justify-center text-gold">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
-            </span>
-            <span class="text-xs font-mono text-gold font-bold bg-gold/10 px-2.5 py-1 rounded-lg">Mulai Rp750.000</span>
-          </div>
-          <div>
-            <h3 class="text-lg font-bold text-ivory">Produksi Musik Non-Tari</h3>
-            <p class="text-xs text-ash mt-1 leading-relaxed">Aransemen lagu orisinal, musik ilustrasi teater/film, jingle instansi, dan produksi audio digital.</p>
-          </div>
-          <ul class="space-y-1.5 text-xs text-ivory/90 border-t border-borderline pt-3.5">
-            <li>• Paket Dasar (750rb), Standar (1,2jt), Pro (1,8jt)</li>
-            <li>• Opsi rekaman vokal soloist (+Rp50.000)</li>
-            <li>• Sudah termasuk pengalihan hak ekonomi (Pasal 3)</li>
-            <li>• Persetujuan via <strong>Perjanjian Produksi Musik</strong></li>
-          </ul>
-        </div>
-        <button type="button" onclick="selectServiceAndGoOrder('digital')" class="btn-ghost-gold w-full py-2.5 rounded-xl text-xs font-bold mt-6">Ajukan Musik Non-Tari →</button>
-      </div>
-
-      <div class="bg-charcoal border border-borderline hover:border-gold/50 rounded-2xl p-6 flex flex-col justify-between transition">
-        <div class="space-y-4">
-          <div class="flex items-center justify-between">
-            <span class="w-10 h-10 rounded-xl bg-acoustic border border-gold/30 flex items-center justify-center text-gold">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
-            </span>
-            <span class="text-xs font-mono text-gold font-bold bg-gold/10 px-2.5 py-1 rounded-lg">Mulai Rp350.000</span>
-          </div>
-          <div>
-            <h3 class="text-lg font-bold text-ivory">Transkripsi Musik</h3>
-            <p class="text-xs text-ash mt-1 leading-relaxed">Penulisan ulang sumber audio/video menjadi partitur rapi dalam format Not Angka, Not Balok, atau keduanya.</p>
-          </div>
-          <ul class="space-y-1.5 text-xs text-ivory/90 border-t border-borderline pt-3.5">
-            <li>• Paket Dasar (350rb), Standar (600rb), Pro (1jt)</li>
-            <li>• Melodi tunggal hingga skor ansambel lengkap</li>
-            <li>• Format PDF siap cetak + audio panduan</li>
-            <li>• Persetujuan penawaran &amp; ketentuan layanan</li>
-          </ul>
-        </div>
-        <button type="button" onclick="selectServiceAndGoOrder('transkripsi')" class="btn-ghost-gold w-full py-2.5 rounded-xl text-xs font-bold mt-6">Ajukan Transkripsi Musik →</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="border-y border-borderline bg-charcoal/40">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 space-y-10">
-      <div class="space-y-2">
-        <span class="text-xs font-mono uppercase tracking-wider text-gold font-bold">Panduan Sesi Konsultasi</span>
-        <h2 class="text-2xl font-bold text-ivory">Materi Diskusi per Layanan &amp; Poin Kesepakatan</h2>
-        <p class="text-xs text-ash">Diskusi dilakukan via WhatsApp atau pertemuan daring (dapat lebih dari satu kali untuk karya kompleks).</p>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <div class="bg-charcoal border border-borderline rounded-2xl p-5 space-y-3">
-          <h3 class="text-sm font-bold text-gold border-b border-borderline pb-2.5">1. Produksi Musik Tari</h3>
-          <ul class="space-y-2 text-xs text-ivory/90"><li>• Konsep dan karakter tari</li><li>• Alur dan struktur tari</li><li>• Referensi musik</li><li>• Durasi dan tempo</li><li>• Kebutuhan produksi</li></ul>
-        </div>
-        <div class="bg-charcoal border border-borderline rounded-2xl p-5 space-y-3">
-          <h3 class="text-sm font-bold text-gold border-b border-borderline pb-2.5">2. Produksi Musik Non-Tari</h3>
-          <ul class="space-y-2 text-xs text-ivory/90"><li>• Konsep dan genre musik</li><li>• Karakter dan suasana</li><li>• Instrumen dan vokal</li><li>• Durasi dan tempo</li><li>• Kebutuhan rekaman</li></ul>
-        </div>
-        <div class="bg-charcoal border border-borderline rounded-2xl p-5 space-y-3">
-          <h3 class="text-sm font-bold text-gold border-b border-borderline pb-2.5">3. Transkripsi Musik</h3>
-          <ul class="space-y-2 text-xs text-ivory/90"><li>• Jenis notasi (Angka / Balok)</li><li>• Sumber audio / video</li><li>• Instrumen yang ditranskripsikan</li><li>• Tingkat detail notasi</li><li>• Format hasil akhir</li></ul>
-        </div>
-      </div>
-      <div class="bg-charcoal border border-gold/30 rounded-2xl p-5 sm:p-6 space-y-4">
-        <div class="flex flex-wrap items-center justify-between gap-2">
-          <h3 class="text-sm sm:text-base font-bold text-ivory">7 Hal yang Dipastikan Sebelum Sesi Diskusi Selesai:</h3>
-          <button type="button" onclick="openProducerWaModal('Saya ingin menjadwalkan diskusi kebutuhan karya')" class="btn-gold px-4 py-2 rounded-xl text-xs font-bold">Mulai Diskusi Sekarang</button>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs text-ivory/90">
-          <div class="bg-acoustic rounded-xl p-3 border border-borderline">1. Apa yang sebenarnya ingin dibuat/dikerjakan klien</div>
-          <div class="bg-acoustic rounded-xl p-3 border border-borderline">2. Ruang lingkup pekerjaan yang termasuk layanan</div>
-          <div class="bg-acoustic rounded-xl p-3 border border-borderline">3. Karakter dan spesifikasi hasil yang diinginkan</div>
-          <div class="bg-acoustic rounded-xl p-3 border border-borderline">4. Perkiraan durasi karya &amp; waktu penyelesaian</div>
-          <div class="bg-acoustic rounded-xl p-3 border border-borderline">5. Besaran biaya &amp; skema pembayaran (DP 50% / Penuh)</div>
-          <div class="bg-acoustic rounded-xl p-3 border border-borderline">6. Ketentuan kuota revisi dan penyerahan hasil</div>
-          <div class="bg-acoustic rounded-xl p-3 border border-borderline sm:col-span-2">7. Pengaturan kredit komposer &amp; hak cipta (khusus produksi musik)</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 space-y-8">
-    <div>
-      <span class="text-xs font-mono uppercase tracking-wider text-gold font-bold">Standar Operasional Studio</span>
-      <h2 class="text-2xl font-bold text-ivory mt-1">Alur Pemesanan Lengkap PrangArt Lab (14 Tahap)</h2>
-    </div>
-    <div id="sop-14-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5"></div>
-  </div>
-
-  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 space-y-6">
-    <div class="text-center">
-      <span class="text-xs font-mono uppercase tracking-wider text-gold font-bold">Informasi Umum</span>
-      <h2 class="text-2xl font-bold text-ivory mt-1">Pertanyaan yang Sering Diajukan</h2>
-    </div>
-    <div id="faq-accordion-list" class="space-y-3"></div>
-  </div>
-</section>
-
-<section id="page-portfolio" class="page-section hidden page-dissolve">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
-    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-borderline pb-6">
-      <div>
-        <span class="text-xs font-mono uppercase tracking-wider text-gold font-bold">Arsip Karya</span>
-        <h2 class="text-2xl sm:text-3xl font-bold text-ivory mt-1">Portofolio PrangArt Lab</h2>
-        <p class="text-xs text-ash mt-1">Cuplikan produksi musik tari, musik non-tari, dan transkripsi partitur.</p>
-      </div>
-      <div class="flex flex-wrap gap-2">
-        <button type="button" onclick="filterPortfolio('Semua')" class="pf-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold bg-gold text-obsidian">Semua</button>
-        <button type="button" onclick="filterPortfolio('Produksi Musik Tari')" class="pf-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-charcoal text-ash border border-borderline">Produksi Musik Tari</button>
-        <button type="button" onclick="filterPortfolio('Produksi Musik Non-Tari')" class="pf-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-charcoal text-ash border border-borderline">Produksi Musik Non-Tari</button>
-        <button type="button" onclick="filterPortfolio('Transkripsi Musik')" class="pf-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-charcoal text-ash border border-borderline">Transkripsi Musik</button>
-      </div>
-    </div>
-    <div id="portfolio-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-  </div>
-</section>
-
-<section id="page-order" class="page-section hidden page-dissolve">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pb-28 lg:pb-14">
-    <div id="order-form-container">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-charcoal border border-borderline rounded-2xl p-4 sm:p-5 mb-6">
-        <div id="order-account-banner" class="text-xs text-ivory"></div>
-        <button type="button" onclick="openProducerWaModal('Konsultasi kebutuhan karya sebelum/saat mengisi formulir')" class="btn-ghost-gold px-4 py-2 rounded-xl text-xs font-bold shrink-0">Diskusi Dulu via WhatsApp</button>
-      </div>
-
-      <div class="bg-charcoal border border-gold/40 rounded-2xl p-5 mb-6 space-y-3">
-        <div class="flex flex-wrap items-center justify-between gap-2">
-          <div>
-            <span class="text-[10px] font-mono uppercase tracking-wider text-gold font-bold block">Tahap 2 &amp; 3 • Jalur Pengajuan</span>
-            <h3 class="text-base font-bold text-ivory">Apakah Anda Sudah Melakukan Diskusi Awal dengan Produser?</h3>
-          </div>
-          <button type="button" onclick="openDraftContractPreviewModal()" class="px-3 py-1.5 rounded-lg bg-acoustic border border-gold/40 text-gold text-[11px] font-semibold hover:border-gold">Lihat Ketentuan Layanan</button>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <label class="flex items-start gap-3 p-3.5 rounded-xl bg-acoustic border border-borderline hover:border-gold cursor-pointer">
-            <input type="radio" name="entry-path" value="Jalur A (Sudah Diskusi WA)" checked class="mt-0.5 accent-[#d4af37]" />
-            <div class="text-xs"><strong class="text-gold block">Jalur A — Sudah Diskusi Awal via WhatsApp</strong><span class="text-ash">Formulir ini mendokumentasikan hasil diskusi untuk pemeriksaan &amp; penerbitan penawaran resmi.</span></div>
-          </label>
-          <label class="flex items-start gap-3 p-3.5 rounded-xl bg-acoustic border border-borderline hover:border-gold cursor-pointer">
-            <input type="radio" name="entry-path" value="Jalur B (Ajukan Form Dulu)" class="mt-0.5 accent-[#d4af37]" />
-            <div class="text-xs"><strong class="text-ivory block">Jalur B — Ajukan Kebutuhan Dulu via Website</strong><span class="text-ash">Isi spesifikasi awal di bawah; Produser akan memeriksa materi dan mengajak diskusi sebelum penawaran harga.</span></div>
-          </label>
-        </div>
-      </div>
-
-      <form id="prangart-order-form" onsubmit="handleOrderFormSubmit(event)" class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        <div class="lg:col-span-8 space-y-6">
-          <div class="bg-charcoal border border-borderline rounded-2xl p-5 sm:p-6 space-y-4">
-            <div><span class="text-[11px] font-mono text-gold font-bold uppercase">Bagian 1</span><h3 class="text-lg font-bold text-ivory">Pilih Layanan &amp; Paket Referensi</h3></div>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-              <button type="button" id="svc-tab-tari" onclick="selectServiceLine('tari')" class="svc-tab-btn p-3 rounded-xl border text-left transition">
-                <span class="text-xs font-bold block">Produksi Musik Tari</span><span class="text-[11px] opacity-80 block mt-0.5">Mulai Rp1.000.000</span>
+            <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-ivory leading-[1.15]">Diskusi Jelas di Awal, <span class="text-gold">Hasil Musik Presisi</span></h1>
+            <p class="text-sm sm:text-base text-ash leading-relaxed max-w-2xl">PrangArt Lab menempatkan sesi diskusi kebutuhan sebagai tahap awal sebelum penawaran harga dan pembayaran. Konsultasikan konsep karya Anda terlebih dahulu, lalu dokumentasikan melalui formulir terstruktur.</p>
+            <div class="flex flex-wrap items-center gap-3 pt-1">
+              <button type="button" onclick="openProducerWaModal('Diskusi awal kebutuhan karya sebelum pemesanan')" class="btn-gold px-6 py-3.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <span>Jalur A: Diskusi via WhatsApp Dulu</span>
               </button>
-              <button type="button" id="svc-tab-digital" onclick="selectServiceLine('digital')" class="svc-tab-btn p-3 rounded-xl border text-left transition">
-                <span class="text-xs font-bold block">Produksi Musik Non-Tari</span><span class="text-[11px] opacity-80 block mt-0.5">Mulai Rp750.000</span>
-              </button>
-              <button type="button" id="svc-tab-transkripsi" onclick="selectServiceLine('transkripsi')" class="svc-tab-btn p-3 rounded-xl border text-left transition">
-                <span class="text-xs font-bold block">Transkripsi Musik</span><span class="text-[11px] opacity-80 block mt-0.5">Mulai Rp350.000</span>
-              </button>
+              <!-- JALUR B DIALIHKAN KE RUANG KLIEN -->
+              <button type="button" onclick="navigateTo('client')" class="btn-ghost-gold px-6 py-3.5 rounded-xl text-xs sm:text-sm font-bold">Jalur B: Masuk Ruang Klien →</button>
             </div>
-            <div id="package-cards-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1"></div>
+            <p class="text-[11px] text-ash">*Catatan: Diskusi awal &amp; pengisian formulir kebutuhan tidak langsung mengikat atau mewajibkan pembayaran. Pembayaran dilakukan setelah penawaran &amp; persetujuan administrasi.</p>
           </div>
+          <div class="lg:col-span-5 bg-charcoal border border-gold/40 rounded-2xl p-5 sm:p-6 space-y-4">
+            <span class="text-[11px] font-mono uppercase tracking-wider text-gold font-bold block">2 Jalur Masuk Klien</span>
+            <div class="space-y-3 text-xs">
+              <div class="bg-acoustic border border-borderline rounded-xl p-3.5">
+                <strong class="text-gold block">Jalur A — Klien Melalui WhatsApp (Disarankan)</strong>
+                <p class="text-ash mt-1">1. Kontak awal → 2. Diskusi kebutuhan → 3. Isi formulir pemesanan di Ruang Klien</p>
+              </div>
+              <div class="bg-acoustic border border-borderline rounded-xl p-3.5">
+                <strong class="text-ivory block">Jalur B — Klien Melalui Website</strong>
+                <p class="text-ash mt-1">1. Daftar/Masuk Ruang Klien → 2. Isi formulir pengajuan kebutuhan → 3. Diskusi &amp; konsultasi</p>
+              </div>
+              <div class="bg-obsidian border border-gold/30 rounded-xl p-3 text-center">
+                <span class="text-[11px] font-mono text-emerald-400 font-semibold">Keduanya bertemu di tahap yang sama:</span>
+                <p class="text-xs font-bold text-ivory mt-0.5">Pemeriksaan → Penawaran → Persetujuan → Pembayaran</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-          <div class="bg-charcoal border border-borderline rounded-2xl p-5 sm:p-6 space-y-5">
-            <div><span class="text-[11px] font-mono text-gold font-bold uppercase">Bagian 2</span><h3 class="text-lg font-bold text-ivory">Informasi Pemesan &amp; Identitas Karya</h3></div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div><label class="block text-xs font-semibold text-ivory mb-1.5">Nama Lengkap Pemesan *</label><input type="text" id="field-nama" required placeholder="Contoh: Siti Rahmawati" class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3.5 py-2.5 text-xs text-ivory focus:outline-none" /></div>
-              <div><label class="block text-xs font-semibold text-ivory mb-1.5">Email Aktif *</label><input type="email" id="field-email" required placeholder="nama@sanggar.id" class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3.5 py-2.5 text-xs text-ivory focus:outline-none" /></div>
-              <div><label class="block text-xs font-semibold text-ivory mb-1.5">Nomor WhatsApp Aktif *</label><input type="tel" id="field-wa" required placeholder="081234567890" class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3.5 py-2.5 text-xs text-ivory focus:outline-none" /></div>
-              <div><label class="block text-xs font-semibold text-ivory mb-1.5">Asal Pemesan (Kota / Daerah) *</label><input type="text" id="field-kota" required placeholder="Contoh: Samarinda, Kalimantan Timur" class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3.5 py-2.5 text-xs text-ivory focus:outline-none" /></div>
-              <div><label class="block text-xs font-semibold text-ivory mb-1.5">Alamat Lengkap Pemesan (Untuk Perjanjian) *</label><input type="text" id="field-alamat" required placeholder="Contoh: Jl. Pahlawan No. 12, Samarinda" class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3.5 py-2.5 text-xs text-ivory focus:outline-none" /></div>
-              <div><label class="block text-xs font-semibold text-ivory mb-1.5">Nomor Identitas / NIK (Opsional)</label><input type="text" id="field-nik" placeholder="NIK KTP (dapat dilengkapi saat perjanjian)" class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3.5 py-2.5 text-xs font-mono text-ivory focus:outline-none" /></div>
-              <div><label class="block text-xs font-semibold text-ivory mb-1.5">Nama Sanggar / Komunitas / Instansi / Individu *</label><input type="text" id="field-instansi" required placeholder="Contoh: Sanggar Pesona Mahakam" class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3.5 py-2.5 text-xs text-ivory focus:outline-none" /></div>
-              <div><label class="block text-xs font-semibold text-ivory mb-1.5">Nama Koreografer / Pencipta Karya *</label><input type="text" id="field-koreografer" required placeholder="Contoh: Rina Puspitasari, S.Sn" class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3.5 py-2.5 text-xs text-ivory focus:outline-none" /></div>
-              <div><label class="block text-xs font-semibold text-ivory mb-1.5">Judul / Nama Karya *</label><input type="text" id="field-judul" required placeholder="Contoh: Gema Enggang Mahakam" class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3.5 py-2.5 text-xs text-ivory focus:outline-none" /></div>
-              <div><label class="block text-xs font-semibold text-ivory mb-1.5">Jenis Tari / Kategori Karya *</label><input type="text" id="field-jenis-tari" required placeholder="Contoh: Tari Kreasi Tradisi / Lagu Orisinal" class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3.5 py-2.5 text-xs text-ivory focus:outline-none" /></div>
-              <div><label class="block text-xs font-semibold text-ivory mb-1.5">Latar Budaya / Konsep Utama *</label><input type="text" id="field-budaya" required placeholder="Contoh: Etnis Dayak Kenyah &amp; Pesisir Kutai" class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3.5 py-2.5 text-xs text-ivory focus:outline-none" /></div>
-              <div><label class="block text-xs font-semibold text-ivory mb-1.5">Estimasi Durasi (MM:SS) *</label><input type="text" id="field-durasi" required placeholder="05:30" class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3.5 py-2.5 text-xs font-mono text-ivory focus:outline-none" /></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 space-y-8">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+        <div>
+          <span class="text-xs font-mono uppercase tracking-wider text-gold font-bold">Layanan Studio</span>
+          <h2 class="text-2xl sm:text-3xl font-bold text-ivory mt-1">3 Kategori Layanan PrangArt Lab</h2>
+        </div>
+        <p class="text-xs text-ash">Estimasi paket referensi sebelum penawaran resmi.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-charcoal border border-gold/50 rounded-2xl p-6 flex flex-col justify-between relative shadow-lg">
+          <span class="absolute -top-3 right-5 bg-gold text-obsidian text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full">Layanan Utama</span>
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <span class="w-10 h-10 rounded-xl bg-gold/15 border border-gold/40 flex items-center justify-center text-gold">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+              </span>
+              <span class="text-xs font-mono text-gold font-bold bg-gold/10 px-2.5 py-1 rounded-lg">Mulai Rp1.000.000</span>
             </div>
             <div>
-              <label class="block text-xs font-semibold text-ivory mb-1.5">Link Google Drive / YouTube Materi &amp; Referensi *</label>
-              <input type="url" id="field-referensi" required placeholder="https://drive.google.com/drive/folders/..." class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3.5 py-2.5 text-xs text-ivory focus:outline-none" />
-              <p class="text-[11px] text-ash mt-1">Atur akses Google Drive ke <strong>"Siapa saja yang memiliki link (Viewer)"</strong> agar dapat diperiksa studio.</p>
+              <h3 class="text-lg font-bold text-ivory">Produksi Musik Tari</h3>
+              <p class="text-xs text-ash mt-1 leading-relaxed">Komposisi, aransemen, mixing, dan mastering musik iringan tari tradisi, kreasi baru, maupun kontemporer.</p>
+            </div>
+            <ul class="space-y-1.5 text-xs text-ivory/90 border-t border-borderline pt-3.5">
+              <li>• Paket Dasar (1jt • 3x revisi ringan)</li>
+              <li>• Paket Standar (1,5jt • struktur &amp; timestamp • 6x revisi)</li>
+              <li>• Paket Pro (2jt • alur kompleks • bebas revisi)</li>
+              <li>• Persetujuan via <strong>Perjanjian Produksi Musik</strong></li>
+            </ul>
+          </div>
+          <button type="button" onclick="selectServiceAndGoOrder('tari')" class="btn-gold w-full py-2.5 rounded-xl text-xs font-bold mt-6">Ajukan Produksi Musik Tari →</button>
+        </div>
+
+        <div class="bg-charcoal border border-borderline hover:border-gold/50 rounded-2xl p-6 flex flex-col justify-between transition">
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <span class="w-10 h-10 rounded-xl bg-acoustic border border-gold/30 flex items-center justify-center text-gold">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+              </span>
+              <span class="text-xs font-mono text-gold font-bold bg-gold/10 px-2.5 py-1 rounded-lg">Mulai Rp750.000</span>
             </div>
             <div>
-              <div class="flex flex-wrap items-center justify-between gap-2 mb-1.5">
-                <label class="block text-xs font-semibold text-ivory">Sinopsis / Konsep Karya *</label>
-                <button type="button" id="btn-ai-synopsis" onclick="generateAISynopsis()" class="px-3 py-1 rounded-lg bg-gold/15 border border-gold/40 text-gold text-[11px] font-bold hover:bg-gold/25 transition">✦ Generate Sinopsis AI</button>
-              </div>
-              <textarea id="field-sinopsis" rows="4" required placeholder="Tuliskan konsep, karakter karya, alur suasana, dan hasil akhir yang diharapkan..." class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3.5 py-2.5 text-xs text-ivory leading-relaxed focus:outline-none"></textarea>
-              <div id="ai-synopsis-toolbar" class="hidden flex-wrap items-center justify-between gap-2 mt-2 p-2.5 rounded-xl bg-acoustic border border-gold/30 text-[11px]">
-                <span class="text-gold font-semibold">Draf sinopsis AI diterapkan.</span>
-                <div class="flex items-center gap-2">
-                  <button type="button" onclick="generateAISynopsis(true)" class="text-ivory underline hover:text-gold">Variasi Lain</button>
-                  <button type="button" id="btn-ai-restore" onclick="restorePreviousSynopsis()" class="text-ash underline hover:text-ivory">Kembalikan Teks Lama</button>
-                </div>
-              </div>
+              <h3 class="text-lg font-bold text-ivory">Produksi Musik Non-Tari</h3>
+              <p class="text-xs text-ash mt-1 leading-relaxed">Aransemen lagu orisinal, musik ilustrasi teater/film, jingle instansi, dan produksi audio digital.</p>
             </div>
+            <ul class="space-y-1.5 text-xs text-ivory/90 border-t border-borderline pt-3.5">
+              <li>• Paket Dasar (750rb), Standar (1,2jt), Pro (1,8jt)</li>
+              <li>• Opsi rekaman vokal soloist (+Rp50.000)</li>
+              <li>• Sudah termasuk pengalihan hak ekonomi (Pasal 3)</li>
+              <li>• Persetujuan via <strong>Perjanjian Produksi Musik</strong></li>
+            </ul>
           </div>
-
-          <div class="bg-charcoal border border-borderline rounded-2xl p-5 sm:p-6 space-y-5">
-            <div><span class="text-[11px] font-mono text-gold font-bold uppercase">Bagian 3</span><h3 class="text-lg font-bold text-ivory">Uraian Spesifikasi Teknis &amp; Musikal</h3></div>
-            <div id="dynamic-spec-fields" class="space-y-4"></div>
-            <div id="addon-vocal-wrapper" class="pt-3 border-t border-borderline space-y-2.5">
-              <label class="flex items-center justify-between gap-3 p-3.5 rounded-xl bg-acoustic border border-borderline hover:border-gold/50 cursor-pointer">
-                <div>
-                  <span class="text-xs font-bold text-ivory block">Penambahan Vokal / Sinden / Partitur Lengkap</span>
-                  <span class="text-[11px] text-ash">Rekaman vokal live studio atau tambahan partitur lengkap.</span>
-                </div>
-                <div class="flex items-center gap-2.5 shrink-0">
-                  <span id="addon-vocal-price-label" class="text-xs font-mono font-bold text-gold">+Rp50.000</span>
-                  <input type="checkbox" id="field-addon-vocal" onchange="recalculateLivePrice()" class="w-4 h-4 accent-[#d4af37] rounded" />
-                </div>
-              </label>
-              <div class="p-3.5 rounded-xl bg-obsidian border border-gold/30 text-[11px] text-ash leading-relaxed">
-                <strong class="text-gold">Pengalihan Hak Ekonomi Otomatis (Pasal 3):</strong> Harga produksi sudah termasuk pengalihan hak ekonomi kepada Pihak Kedua setelah pelunasan dan penyerahan file final tanpa biaya tambahan.
-              </div>
-            </div>
-          </div>
-
-          <div class="bg-charcoal border border-borderline rounded-2xl p-5 sm:p-6 space-y-4">
-            <div><span class="text-[11px] font-mono text-gold font-bold uppercase">Bagian 4</span><h3 class="text-lg font-bold text-ivory">Rencana Skema Pembayaran &amp; Kirim Pengajuan</h3></div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <label class="flex items-start gap-2.5 p-3.5 rounded-xl bg-acoustic border border-borderline hover:border-gold cursor-pointer">
-                <input type="radio" name="payment-plan" value="DP 50%" checked onchange="recalculateLivePrice()" class="mt-0.5 accent-[#d4af37]" />
-                <div class="text-xs"><strong class="text-ivory block">Skema DP 50% + Pelunasan 50%</strong><span class="text-ash">DP dibayar setelah Penawaran &amp; Persetujuan Administrasi.</span></div>
-              </label>
-              <label class="flex items-start gap-2.5 p-3.5 rounded-xl bg-acoustic border border-borderline hover:border-gold cursor-pointer">
-                <input type="radio" name="payment-plan" value="Pembayaran Penuh 100%" onchange="recalculateLivePrice()" class="mt-0.5 accent-[#d4af37]" />
-                <div class="text-xs"><strong class="text-ivory block">Skema Pembayaran Penuh 100%</strong><span class="text-ash">Dibayarkan penuh setelah Penawaran &amp; Persetujuan Administrasi.</span></div>
-              </label>
-            </div>
-            <div class="bg-obsidian border border-gold/30 rounded-xl p-3.5 text-xs text-ash leading-relaxed">
-              <strong class="text-gold block mb-1">Belum Ada Transfer Uang di Tahap Ini</strong>
-              Setelah formulir dikirim, sistem mencetak <strong>Kartu Brief Visual</strong> untuk dikirim ke WhatsApp Produser (<span class="font-mono text-ivory">08977230597</span>). PrangArt Lab akan memeriksa materi, melakukan diskusi jika perlu, lalu menerbitkan <strong>Penawaran Resmi &amp; Perjanjian Produksi Musik</strong> sebelum tahap pembayaran dibuka.
-            </div>
-            <button type="submit" class="btn-gold w-full py-4 rounded-xl text-sm font-extrabold tracking-wide shadow-lg">Kirim Pengajuan &amp; Cetak Kartu Brief →</button>
-          </div>
+          <button type="button" onclick="selectServiceAndGoOrder('digital')" class="btn-ghost-gold w-full py-2.5 rounded-xl text-xs font-bold mt-6">Ajukan Musik Non-Tari →</button>
         </div>
 
-        <div class="lg:col-span-4 lg:sticky lg:top-22 space-y-4">
-          <div class="bg-charcoal border border-gold/40 rounded-2xl p-5 shadow-xl space-y-4">
-            <div class="flex items-center justify-between border-b border-borderline pb-3">
-              <span class="text-xs font-mono uppercase tracking-wider text-gold font-bold">Estimasi Biaya</span>
-              <span class="text-[10px] px-2 py-0.5 rounded bg-gold/15 text-gold font-mono">Referensi</span>
+        <div class="bg-charcoal border border-borderline hover:border-gold/50 rounded-2xl p-6 flex flex-col justify-between transition">
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <span class="w-10 h-10 rounded-xl bg-acoustic border border-gold/30 flex items-center justify-center text-gold">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+              </span>
+              <span class="text-xs font-mono text-gold font-bold bg-gold/10 px-2.5 py-1 rounded-lg">Mulai Rp350.000</span>
             </div>
-            <div class="space-y-2 text-xs">
-              <div class="flex justify-between text-ash"><span>Layanan</span><span id="calc-service-name" class="font-semibold text-ivory text-right">Produksi Musik Tari</span></div>
-              <div class="flex justify-between text-ash"><span id="calc-pkg-name">Paket Standar (1,5 Juta)</span><span id="calc-pkg-price" class="font-mono text-ivory tabular-nums">Rp1.500.000</span></div>
-              <div id="calc-addon-row" class="hidden justify-between text-ash"><span id="calc-addon-label">Tambahan Vokal</span><span id="calc-addon-price" class="font-mono text-gold tabular-nums">+Rp50.000</span></div>
+            <div>
+              <h3 class="text-lg font-bold text-ivory">Transkripsi Musik</h3>
+              <p class="text-xs text-ash mt-1 leading-relaxed">Penulisan ulang sumber audio/video menjadi partitur rapi dalam format Not Angka, Not Balok, atau keduanya.</p>
             </div>
-            <div class="border-t border-borderline pt-3 space-y-1">
-              <div class="flex items-baseline justify-between"><span class="text-xs font-semibold text-ash">Estimasi Total Biaya</span><span id="calc-total-price" class="text-xl font-extrabold font-mono text-gold tabular-nums">Rp1.500.000</span></div>
-              <p id="calc-terbilang-total" class="text-[11px] italic text-ash">Terbilang: Satu Juta Lima Ratus Ribu Rupiah</p>
-            </div>
-            <div class="bg-obsidian border border-gold/30 rounded-xl p-3.5 space-y-1">
-              <div class="flex items-baseline justify-between"><span id="calc-plan-title" class="text-xs font-bold text-ivory">Opsi DP 50% (Setelah Penawaran)</span><span id="calc-dp-price" class="text-base font-extrabold font-mono text-emerald-400 tabular-nums">Rp750.000</span></div>
-              <p id="calc-terbilang-dp" class="text-[11px] italic text-emerald-300/80">Terbilang: Tujuh Ratus Lima Puluh Ribu Rupiah</p>
-            </div>
-            <p class="text-[11px] text-ash leading-relaxed">*Nominal final dan estimasi waktu pengerjaan akan dikonfirmasi resmi oleh Produser setelah pemeriksaan materi &amp; diskusi.</p>
+            <ul class="space-y-1.5 text-xs text-ivory/90 border-t border-borderline pt-3.5">
+              <li>• Paket Dasar (350rb), Standar (600rb), Pro (1jt)</li>
+              <li>• Melodi tunggal hingga skor ansambel lengkap</li>
+              <li>• Format PDF siap cetak + audio panduan</li>
+              <li>• Persetujuan penawaran &amp; ketentuan layanan</li>
+            </ul>
           </div>
-        </div>
-      </form>
-    </div>
-
-    <div id="order-success-container" class="hidden max-w-4xl mx-auto space-y-6 page-dissolve">
-      <div class="bg-charcoal border border-gold/50 rounded-2xl p-6 sm:p-8 text-center space-y-3">
-        <span class="inline-block px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-400 text-xs font-mono font-bold">✓ Pengajuan Kebutuhan Tercatat</span>
-        <h2 class="text-2xl sm:text-3xl font-extrabold text-ivory">Nomor Pengajuan: <span id="success-ticket-id" class="text-gold font-mono">PAL-2026-000</span></h2>
-        <p class="text-xs sm:text-sm text-ash max-w-xl mx-auto">Gambar <strong>Kartu Brief PrangArt Lab</strong> Anda telah otomatis terunduh. Kirimkan gambar tersebut ke WhatsApp Produser (<span class="text-gold font-mono">08977230597</span>) untuk tahap <strong>Pemeriksaan Materi, Diskusi &amp; Penawaran Harga</strong>.</p>
-      </div>
-      <div class="bg-charcoal border border-borderline rounded-2xl p-4 sm:p-6 space-y-4">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-mono uppercase text-gold font-bold">Pratinjau Kartu Brief Resmi (16:9 PNG)</span>
-          <span class="text-[11px] text-ash">Tahap Selanjutnya: Pemeriksaan &amp; Diskusi</span>
-        </div>
-        <div class="rounded-xl overflow-hidden border border-gold/40 bg-obsidian">
-          <img id="brief-card-preview-img" src="" alt="Kartu Brief PrangArt Lab" class="w-full h-auto block" />
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-          <button type="button" onclick="downloadCurrentBriefPNG()" class="btn-ghost-gold py-3 px-4 rounded-xl text-xs font-bold">↓ Unduh Kartu Brief (PNG)</button>
-          <button type="button" onclick="sendBriefCardToProducerWA()" class="py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition">→ Kirim Kartu Brief ke WA</button>
-          <button type="button" onclick="navigateTo('client')" class="btn-gold py-3 px-4 rounded-xl text-xs font-bold">Pantau di Ruang Klien →</button>
+          <button type="button" onclick="selectServiceAndGoOrder('transkripsi')" class="btn-ghost-gold w-full py-2.5 rounded-xl text-xs font-bold mt-6">Ajukan Transkripsi Musik →</button>
         </div>
       </div>
     </div>
-  </div>
-</section>
 
-<section id="page-client" class="page-section hidden page-dissolve">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-    <div id="client-login-wall" class="max-w-md mx-auto bg-charcoal border border-borderline rounded-2xl p-6 shadow-xl space-y-4">
+    <!-- SOP & FAQ tetap sama seperti sebelumnya -->
+    <div class="border-y border-borderline bg-charcoal/40">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 space-y-10">
+        <div class="space-y-2">
+          <span class="text-xs font-mono uppercase tracking-wider text-gold font-bold">Panduan Sesi Konsultasi</span>
+          <h2 class="text-2xl font-bold text-ivory">Materi Diskusi per Layanan &amp; Poin Kesepakatan</h2>
+          <p class="text-xs text-ash">Diskusi dilakukan via WhatsApp atau pertemuan daring (dapat lebih dari satu kali untuk karya kompleks).</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div class="bg-charcoal border border-borderline rounded-2xl p-5 space-y-3">
+            <h3 class="text-sm font-bold text-gold border-b border-borderline pb-2.5">1. Produksi Musik Tari</h3>
+            <ul class="space-y-2 text-xs text-ivory/90"><li>• Konsep dan karakter tari</li><li>• Alur dan struktur tari</li><li>• Referensi musik</li><li>• Durasi dan tempo</li><li>• Kebutuhan produksi</li></ul>
+          </div>
+          <div class="bg-charcoal border border-borderline rounded-2xl p-5 space-y-3">
+            <h3 class="text-sm font-bold text-gold border-b border-borderline pb-2.5">2. Produksi Musik Non-Tari</h3>
+            <ul class="space-y-2 text-xs text-ivory/90"><li>• Konsep dan genre musik</li><li>• Karakter dan suasana</li><li>• Instrumen dan vokal</li><li>• Durasi dan tempo</li><li>• Kebutuhan rekaman</li></ul>
+          </div>
+          <div class="bg-charcoal border border-borderline rounded-2xl p-5 space-y-3">
+            <h3 class="text-sm font-bold text-gold border-b border-borderline pb-2.5">3. Transkripsi Musik</h3>
+            <ul class="space-y-2 text-xs text-ivory/90"><li>• Jenis notasi (Angka / Balok)</li><li>• Sumber audio / video</li><li>• Instrumen yang ditranskripsikan</li><li>• Tingkat detail notasi</li><li>• Format hasil akhir</li></ul>
+          </div>
+        </div>
+        <div class="bg-charcoal border border-gold/30 rounded-2xl p-5 sm:p-6 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <h3 class="text-sm sm:text-base font-bold text-ivory">7 Hal yang Dipastikan Sebelum Sesi Diskusi Selesai:</h3>
+            <button type="button" onclick="openProducerWaModal('Saya ingin menjadwalkan diskusi kebutuhan karya')" class="btn-gold px-4 py-2 rounded-xl text-xs font-bold">Mulai Diskusi Sekarang</button>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs text-ivory/90">
+            <div class="bg-acoustic rounded-xl p-3 border border-borderline">1. Apa yang sebenarnya ingin dibuat/dikerjakan klien</div>
+            <div class="bg-acoustic rounded-xl p-3 border border-borderline">2. Ruang lingkup pekerjaan yang termasuk layanan</div>
+            <div class="bg-acoustic rounded-xl p-3 border border-borderline">3. Karakter dan spesifikasi hasil yang diinginkan</div>
+            <div class="bg-acoustic rounded-xl p-3 border border-borderline">4. Perkiraan durasi karya &amp; waktu penyelesaian</div>
+            <div class="bg-acoustic rounded-xl p-3 border border-borderline">5. Besaran biaya &amp; skema pembayaran (DP 50% / Penuh)</div>
+            <div class="bg-acoustic rounded-xl p-3 border border-borderline">6. Ketentuan kuota revisi dan penyerahan hasil</div>
+            <div class="bg-acoustic rounded-xl p-3 border border-borderline sm:col-span-2">7. Pengaturan kredit komposer &amp; hak cipta (khusus produksi musik)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 space-y-8">
+      <div>
+        <span class="text-xs font-mono uppercase tracking-wider text-gold font-bold">Standar Operasional Studio</span>
+        <h2 class="text-2xl font-bold text-ivory mt-1">Alur Pemesanan Lengkap PrangArt Lab (14 Tahap)</h2>
+      </div>
+      <div id="sop-14-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5"></div>
+    </div>
+
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 space-y-6">
       <div class="text-center">
-        <span class="text-xs font-mono uppercase text-gold font-semibold">Ruang Klien</span>
-        <h3 class="text-xl font-bold text-ivory mt-0.5">Masuk ke Akun Anda</h3>
-        <p class="text-xs text-ash mt-1">Lihat penawaran resmi, setujui perjanjian, unggah bukti pembayaran, dan unduh hasil akhir.</p>
+        <span class="text-xs font-mono uppercase tracking-wider text-gold font-bold">Informasi Umum</span>
+        <h2 class="text-2xl font-bold text-ivory mt-1">Pertanyaan yang Sering Diajukan</h2>
       </div>
-      <form onsubmit="handleClientPortalLogin(event)" class="space-y-3.5">
-        <div><label class="block text-xs font-semibold text-ivory mb-1">Email Terdaftar *</label><input type="email" id="portal-login-email" required placeholder="siti@sanggar.id" class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3.5 py-2.5 text-xs text-ivory focus:outline-none" /></div>
-        <div><label class="block text-xs font-semibold text-ivory mb-1">Kata Sandi *</label><input type="password" id="portal-login-pass" required placeholder="1234" class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3.5 py-2.5 text-xs text-ivory focus:outline-none" /></div>
-        <div class="flex items-center justify-between text-[11px] text-ash">
-          <span>Akun Demo: <span class="font-mono text-gold">siti@sanggar.id</span> / <span class="font-mono text-gold">1234</span></span>
-          <button type="button" onclick="openClientAuthModal('register')" class="text-gold font-semibold hover:underline">Daftar Baru</button>
-        </div>
-        <button type="submit" class="btn-gold w-full py-3 rounded-xl text-xs font-bold">Masuk Ruang Klien →</button>
-      </form>
+      <div id="faq-accordion-list" class="space-y-3"></div>
     </div>
-    <div id="client-workspace-content" class="hidden space-y-6"></div>
-  </div>
-</section>
+  </section>
 
-<section id="page-admin" class="page-section hidden page-dissolve">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-    <div id="admin-pin-gate" class="max-w-sm mx-auto bg-charcoal border border-borderline rounded-2xl p-6 shadow-xl space-y-4">
-      <div class="text-center">
-        <span class="text-xs font-mono uppercase text-gold font-semibold">Studio Command Center</span>
-        <h3 class="text-xl font-bold text-ivory mt-0.5">Akses Produser &amp; Admin</h3>
-        <p class="text-xs text-ash mt-1">Masukkan PIN Studio untuk menerbitkan penawaran, verifikasi pembayaran, &amp; rilis master.</p>
+  <!-- HALAMAN PORTOFOLIO -->
+  <section id="page-portfolio" class="page-section hidden page-dissolve">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-borderline pb-6">
+        <div>
+          <span class="text-xs font-mono uppercase tracking-wider text-gold font-bold">Arsip Karya</span>
+          <h2 class="text-2xl sm:text-3xl font-bold text-ivory mt-1">Portofolio PrangArt Lab</h2>
+          <p class="text-xs text-ash mt-1">Cuplikan produksi musik tari, musik non-tari, dan transkripsi partitur.</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button type="button" onclick="filterPortfolio('Semua')" class="pf-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold bg-gold text-obsidian">Semua</button>
+          <button type="button" onclick="filterPortfolio('Produksi Musik Tari')" class="pf-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-charcoal text-ash border border-borderline">Produksi Musik Tari</button>
+          <button type="button" onclick="filterPortfolio('Produksi Musik Non-Tari')" class="pf-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-charcoal text-ash border border-borderline">Produksi Musik Non-Tari</button>
+          <button type="button" onclick="filterPortfolio('Transkripsi Musik')" class="pf-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-charcoal text-ash border border-borderline">Transkripsi Musik</button>
+        </div>
       </div>
-      <form onsubmit="verifyAdminPin(event)" class="space-y-3.5">
-        <input type="password" id="admin-pin-input" required placeholder="Masukkan PIN Studio" class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-4 py-3 text-center text-sm font-mono tracking-widest text-ivory focus:outline-none" />
-        <p class="text-[11px] text-ash text-center">PIN Default: <span class="font-mono text-gold">2026</span></p>
-        <button type="submit" class="btn-gold w-full py-3 rounded-xl text-xs font-bold">Buka Panel Studio →</button>
-      </form>
+      <div id="portfolio-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
     </div>
-    <div id="admin-workspace-content" class="hidden space-y-6"></div>
-  </div>
-</section>
+  </section>
+
+  <!-- HALAMAN FORMULIR (TETAP ADA DI HTML, TAPI HANYA DIAKSES DARI RUANG KLIEN) -->
+  <section id="page-order" class="page-section hidden page-dissolve">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pb-28 lg:pb-14">
+      <div id="order-form-container">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-charcoal border border-borderline rounded-2xl p-4 sm:p-5 mb-6">
+          <div id="order-account-banner" class="text-xs text-ivory"></div>
+          <div class="flex gap-2">
+            <button type="button" onclick="navigateTo('client')" class="px-4 py-2 rounded-xl bg-acoustic border border-borderline hover:border-gold text-xs font-bold text-ivory">← Kembali ke Ruang Klien</button>
+            <button type="button" onclick="openProducerWaModal('Konsultasi kebutuhan karya sebelum/saat mengisi formulir')" class="btn-ghost-gold px-4 py-2 rounded-xl text-xs font-bold shrink-0">Diskusi WA</button>
+          </div>
+        </div>
+
+        <div class="bg-charcoal border border-gold/40 rounded-2xl p-5 mb-6 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <span class="text-[10px] font-mono uppercase tracking-wider text-gold font-bold block">Tahap 2 &amp; 3 • Jalur Pengajuan</span>
+              <h3 class="text-base font-bold text-ivory">Apakah Anda Sudah Melakukan Diskusi Awal dengan Admin?</h3>
+            </div>
+            <button type="button" onclick="openDraftContractPreviewModal()" class="px-3 py-1.5 rounded-lg bg-acoustic border border-gold/40 text-gold text-[11px] font-semibold hover:border-gold">Lihat Ketentuan Layanan</button>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <label class="flex items-start gap-3 p-3.5 rounded-xl bg-acoustic border border-borderline hover:border-gold cursor-pointer">
+              <input type="radio" name="entry-path" value="Jalur A (Sudah Diskusi WA)" checked class="mt-0.5 accent-[#d4af37]" />
+              <div class="text-xs"><strong class="text-gold block">Jalur A — Sudah Diskusi Awal via WhatsApp</strong><span class="text-ash">Formulir ini mendokumentasikan hasil diskusi untuk pemeriksaan &amp; penerbitan penawaran resmi.</span></div>
+            </label>
+            <label class="flex items-start gap-3 p-3.5 rounded-xl bg-acoustic border border-borderline hover:border-gold cursor-pointer">
+              <input type="radio" name="entry-path" value="Jalur B (Ajukan Form Dulu)" class="mt-0.5 accent-[#d4af37]" />
+              <div class="text-xs"><strong class="text-ivory block">Jalur B — Ajukan Kebutuhan Dulu via Website</strong><span class="text-ash">Isi spesifikasi awal di bawah; Admin akan memeriksa materi dan mengajak diskusi sebelum penawaran harga.</span></div>
+            </label>
+          </div>
+        </div>
+
+        <form id="prangart-order-form" onsubmit="handleOrderFormSubmit(event)" class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <div class="lg:col-span-8 space-y-6">
+            <div class="bg-charcoal border border-borderline rounded-2xl p-5 sm:p-6 space-y-4">
+              <div><span class="text-[11px] font-mono text-gold font-bold uppercase">Bagian 1</span><h3 class="text-lg font-bold text-ivory">Pilih Layanan &amp; Paket Referensi</h3></div>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                <button type="button" id="svc-tab-tari" onclick="selectServiceLine('tari')" class="svc-tab-btn p-3 rounded-xl border text-left transition">
+                  <span class="text-xs font-bold block">Produksi Musik Tari</span><span class="text-[11px] opacity-80 block mt-0.5">Mulai Rp1.000.000</span>
+                </button>
+                <button type="button" id="svc-tab-digital" onclick="selectServiceLine('digital')" class="svc-tab-btn p-3 rounded-xl border text-left transition">
+                  <span class="text-xs font-bold block">Produksi Musik Non-Tari</span><span class="text-[11px] opacity-80 block mt-0.5">Mulai Rp750.000</span>
+                </button>
+                <button type="button" id="svc-tab-transkripsi" onclick="selectServiceLine('transkripsi')" class="svc-tab-btn p-3 rounded-xl border text-left transition">
+                  <span class="text-xs font-bold block">Transkripsi Musik</span><span class="text-[11px] opacity-80 block mt-0.5">Mulai Rp350.000</span>
+                </button>
+              </div>
+              <div id="package-cards-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1"></div>
+            </div>
+
+            <div class="bg-charcoal border border-borderline rounded-2xl p-5 sm:p-6 space-y-5">
+              <div><span class="text-[11px] font-mono text-gold font-bold uppercase">Bagian 2</span><h3 class="text-lg font-bold text-ivory">Informasi Pemesan &amp; Identitas Karya</h3></div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div><label class="block text-xs font-semibold text-ivory mb-1.5">Nama Lengkap Pemesan *</label><input type="text" id="field-nama" required placeholder="Contoh: Siti Rahmawati" class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3.5 py-2.5 text-xs text-ivory focus:outline-none" /></div>
+                <div><label class="block text-xs font-semibold text-ivory mb-1.5">Email Aktif *</label><input type="email" id="field-email" required placeholder="nama@sanggar.id" class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3.5 py-2.5 text-xs text-ivory focus:outline-none" /></div>
+                <div><label class="block text-xs font-semibold text-ivory mb-1.5">Nomor WhatsApp Aktif *</label><input type="tel" id="field-wa" required placeholder="081234567890" class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3.5 py-2.5 text-xs text-ivory focus:outline-none" /></div>
+                <div><label class="block text-xs font-semibold text-ivory mb-1.5">Asal Pemesan (Kota / Daerah) *</label><input type="text" id="field-kota" required placeholder="Contoh: Samarinda, Kalimantan Timur" class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3.5 py-2.5 text-xs text-ivory focus:outline-none" /></div>
+                <div><label class="block text-xs font-semibold text-ivory mb-1.5">Alamat Lengkap Pemesan (Untuk Perjanjian) *</label><input type="text" id="field-alamat" required placeholder="Contoh: Jl. Pahlawan No. 12, Samarinda" class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3.5 py-2.5 text-xs text-ivory focus:outline-none" /></div>
+                <div><label class="block text-xs font-semibold text-ivory mb-1.5">Nomor Identitas / NIK (Opsional)</label><input type="text" id="field-nik" placeholder="NIK KTP (dapat dilengkapi saat perjanjian)" class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3.5 py-2.5 text-xs font-mono text-ivory focus:outline-none" /></div>
+                <div><label class="block text-xs font-semibold text-ivory mb-1.5">Nama Sanggar / Komunitas / Instansi / Individu *</label><input type="text" id="field-instansi" required placeholder="Contoh: Sanggar Pesona Mahakam" class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3.5 py-2.5 text-xs text-ivory focus:outline-none" /></div>
+                <div><label class="block text-xs font-semibold text-ivory mb-1.5">Nama Koreografer / Pencipta Karya *</label><input type="text" id="field-koreografer" required placeholder="Contoh: Rina Puspitasari, S.Sn" class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3.5 py-2.5 text-xs text-ivory focus:outline-none" /></div>
+                <div><label class="block text-xs font-semibold text-ivory mb-1.5">Judul / Nama Karya *</label><input type="text" id="field-judul" required placeholder="Contoh: Gema Enggang Mahakam" class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3.5 py-2.5 text-xs text-ivory focus:outline-none" /></div>
+                <div><label class="block text-xs font-semibold text-ivory mb-1.5">Jenis Tari / Kategori Karya *</label><input type="text" id="field-jenis-tari" required placeholder="Contoh: Tari Kreasi Tradisi / Lagu Orisinal" class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3.5 py-2.5 text-xs text-ivory focus:outline-none" /></div>
+                <div><label class="block text-xs font-semibold text-ivory mb-1.5">Latar Budaya / Konsep Utama *</label><input type="text" id="field-budaya" required placeholder="Contoh: Etnis Dayak Kenyah &amp; Pesisir Kutai" class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3.5 py-2.5 text-xs text-ivory focus:outline-none" /></div>
+                <div><label class="block text-xs font-semibold text-ivory mb-1.5">Estimasi Durasi (MM:SS) *</label><input type="text" id="field-durasi" required placeholder="05:30" class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3.5 py-2.5 text-xs font-mono text-ivory focus:outline-none" /></div>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-ivory mb-1.5">Link Google Drive / YouTube Materi &amp; Referensi *</label>
+                <input type="url" id="field-referensi" required placeholder="https://drive.google.com/drive/folders/..." class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3.5 py-2.5 text-xs text-ivory focus:outline-none" />
+                <p class="text-[11px] text-ash mt-1">Atur akses Google Drive ke <strong>"Siapa saja yang memiliki link (Viewer)"</strong> agar dapat diperiksa studio.</p>
+              </div>
+              <div>
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+                  <label class="block text-xs font-semibold text-ivory">Sinopsis / Konsep Karya *</label>
+                  <button type="button" id="btn-ai-synopsis" onclick="generateAISynopsis()" class="px-3 py-1 rounded-lg bg-gold/15 border border-gold/40 text-gold text-[11px] font-bold hover:bg-gold/25 transition">✦ Generate Sinopsis AI</button>
+                </div>
+                <textarea id="field-sinopsis" rows="4" required placeholder="Tuliskan konsep, karakter karya, alur suasana, dan hasil akhir yang diharapkan..." class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3.5 py-2.5 text-xs text-ivory leading-relaxed focus:outline-none"></textarea>
+                <div id="ai-synopsis-toolbar" class="hidden flex-wrap items-center justify-between gap-2 mt-2 p-2.5 rounded-xl bg-acoustic border border-gold/30 text-[11px]">
+                  <span class="text-gold font-semibold">Draf sinopsis AI diterapkan.</span>
+                  <div class="flex items-center gap-2">
+                    <button type="button" onclick="generateAISynopsis(true)" class="text-ivory underline hover:text-gold">Variasi Lain</button>
+                    <button type="button" id="btn-ai-restore" onclick="restorePreviousSynopsis()" class="text-ash underline hover:text-ivory">Kembalikan Teks Lama</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-charcoal border border-borderline rounded-2xl p-5 sm:p-6 space-y-5">
+              <div><span class="text-[11px] font-mono text-gold font-bold uppercase">Bagian 3</span><h3 class="text-lg font-bold text-ivory">Uraian Spesifikasi Teknis &amp; Musikal</h3></div>
+              <div id="dynamic-spec-fields" class="space-y-4"></div>
+              <div id="addon-vocal-wrapper" class="pt-3 border-t border-borderline space-y-2.5">
+                <label class="flex items-center justify-between gap-3 p-3.5 rounded-xl bg-acoustic border border-borderline hover:border-gold/50 cursor-pointer">
+                  <div>
+                    <span class="text-xs font-bold text-ivory block">Penambahan Vokal / Sinden / Partitur Lengkap</span>
+                    <span class="text-[11px] text-ash">Rekaman vokal live studio atau tambahan partitur lengkap.</span>
+                  </div>
+                  <div class="flex items-center gap-2.5 shrink-0">
+                    <span id="addon-vocal-price-label" class="text-xs font-mono font-bold text-gold">+Rp50.000</span>
+                    <input type="checkbox" id="field-addon-vocal" onchange="recalculateLivePrice()" class="w-4 h-4 accent-[#d4af37] rounded" />
+                  </div>
+                </label>
+                <div class="p-3.5 rounded-xl bg-obsidian border border-gold/30 text-[11px] text-ash leading-relaxed">
+                  <strong class="text-gold">Pengalihan Hak Ekonomi Otomatis (Pasal 3):</strong> Harga produksi sudah termasuk pengalihan hak ekonomi kepada Pihak Kedua setelah pelunasan dan penyerahan file final tanpa biaya tambahan.
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-charcoal border border-borderline rounded-2xl p-5 sm:p-6 space-y-4">
+              <div><span class="text-[11px] font-mono text-gold font-bold uppercase">Bagian 4</span><h3 class="text-lg font-bold text-ivory">Rencana Skema Pembayaran &amp; Kirim Pengajuan</h3></div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <label class="flex items-start gap-2.5 p-3.5 rounded-xl bg-acoustic border border-borderline hover:border-gold cursor-pointer">
+                  <input type="radio" name="payment-plan" value="DP 50%" checked onchange="recalculateLivePrice()" class="mt-0.5 accent-[#d4af37]" />
+                  <div class="text-xs"><strong class="text-ivory block">Skema DP 50% + Pelunasan 50%</strong><span class="text-ash">DP dibayar setelah Penawaran &amp; Persetujuan Administrasi.</span></div>
+                </label>
+                <label class="flex items-start gap-2.5 p-3.5 rounded-xl bg-acoustic border border-borderline hover:border-gold cursor-pointer">
+                  <input type="radio" name="payment-plan" value="Pembayaran Penuh 100%" onchange="recalculateLivePrice()" class="mt-0.5 accent-[#d4af37]" />
+                  <div class="text-xs"><strong class="text-ivory block">Skema Pembayaran Penuh 100%</strong><span class="text-ash">Dibayarkan penuh setelah Penawaran &amp; Persetujuan Administrasi.</span></div>
+                </label>
+              </div>
+              <div class="bg-obsidian border border-gold/30 rounded-xl p-3.5 text-xs text-ash leading-relaxed">
+                <strong class="text-gold block mb-1">Belum Ada Transfer Uang di Tahap Ini</strong>
+                Setelah formulir dikirim, sistem mencetak <strong>Kartu Brief Visual</strong> untuk dikirim ke WhatsApp Admin (<span class="font-mono text-ivory">08977230597</span>). PrangArt Lab akan memeriksa materi, melakukan diskusi jika perlu, lalu menerbitkan <strong>Penawaran Resmi &amp; Perjanjian Produksi Musik</strong> sebelum tahap pembayaran dibuka.
+              </div>
+              <button type="submit" class="btn-gold w-full py-4 rounded-xl text-sm font-extrabold tracking-wide shadow-lg">Kirim Pengajuan &amp; Cetak Kartu Brief →</button>
+            </div>
+          </div>
+
+          <div class="lg:col-span-4 lg:sticky lg:top-22 space-y-4">
+            <div class="bg-charcoal border border-gold/40 rounded-2xl p-5 shadow-xl space-y-4">
+              <div class="flex items-center justify-between border-b border-borderline pb-3">
+                <span class="text-xs font-mono uppercase tracking-wider text-gold font-bold">Estimasi Biaya</span>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-gold/15 text-gold font-mono">Referensi</span>
+              </div>
+              <div class="space-y-2 text-xs">
+                <div class="flex justify-between text-ash"><span>Layanan</span><span id="calc-service-name" class="font-semibold text-ivory text-right">Produksi Musik Tari</span></div>
+                <div class="flex justify-between text-ash"><span id="calc-pkg-name">Paket Standar (1,5 Juta)</span><span id="calc-pkg-price" class="font-mono text-ivory tabular-nums">Rp1.500.000</span></div>
+                <div id="calc-addon-row" class="hidden justify-between text-ash"><span id="calc-addon-label">Tambahan Vokal</span><span id="calc-addon-price" class="font-mono text-gold tabular-nums">+Rp50.000</span></div>
+              </div>
+              <div class="border-t border-borderline pt-3 space-y-1">
+                <div class="flex items-baseline justify-between"><span class="text-xs font-semibold text-ash">Estimasi Total Biaya</span><span id="calc-total-price" class="text-xl font-extrabold font-mono text-gold tabular-nums">Rp1.500.000</span></div>
+                <p id="calc-terbilang-total" class="text-[11px] italic text-ash">Terbilang: Satu Juta Lima Ratus Ribu Rupiah</p>
+              </div>
+              <div class="bg-obsidian border border-gold/30 rounded-xl p-3.5 space-y-1">
+                <div class="flex items-baseline justify-between"><span id="calc-plan-title" class="text-xs font-bold text-ivory">Opsi DP 50% (Setelah Penawaran)</span><span id="calc-dp-price" class="text-base font-extrabold font-mono text-emerald-400 tabular-nums">Rp750.000</span></div>
+                <p id="calc-terbilang-dp" class="text-[11px] italic text-emerald-300/80">Terbilang: Tujuh Ratus Lima Puluh Ribu Rupiah</p>
+              </div>
+              <p class="text-[11px] text-ash leading-relaxed">*Nominal final dan estimasi waktu pengerjaan akan dikonfirmasi resmi oleh Admin setelah pemeriksaan materi &amp; diskusi.</p>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div id="order-success-container" class="hidden max-w-4xl mx-auto space-y-6 page-dissolve">
+        <div class="bg-charcoal border border-gold/50 rounded-2xl p-6 sm:p-8 text-center space-y-3">
+          <span class="inline-block px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-400 text-xs font-mono font-bold">✓ Pengajuan Kebutuhan Tercatat</span>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-ivory">Nomor Pengajuan: <span id="success-ticket-id" class="text-gold font-mono">PAL-2026-000</span></h2>
+          <p class="text-xs sm:text-sm text-ash max-w-xl mx-auto">Gambar <strong>Kartu Brief PrangArt Lab</strong> Anda telah otomatis terunduh. Kirimkan gambar tersebut ke WhatsApp Admin (<span class="text-gold font-mono">08977230597</span>) untuk tahap <strong>Pemeriksaan Materi, Diskusi &amp; Penawaran Harga</strong>.</p>
+        </div>
+        <div class="bg-charcoal border border-borderline rounded-2xl p-4 sm:p-6 space-y-4">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono uppercase text-gold font-bold">Pratinjau Kartu Brief Resmi (16:9 PNG)</span>
+            <span class="text-[11px] text-ash">Tahap Selanjutnya: Pemeriksaan &amp; Diskusi</span>
+          </div>
+          <div class="rounded-xl overflow-hidden border border-gold/40 bg-obsidian">
+            <img id="brief-card-preview-img" src="" alt="Kartu Brief PrangArt Lab" class="w-full h-auto block" />
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+            <button type="button" onclick="downloadCurrentBriefPNG()" class="btn-ghost-gold py-3 px-4 rounded-xl text-xs font-bold">↓ Unduh Kartu Brief (PNG)</button>
+            <button type="button" onclick="sendBriefCardToProducerWA()" class="py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition">→ Kirim Kartu Brief ke WA</button>
+            <button type="button" onclick="navigateTo('client')" class="btn-gold py-3 px-4 rounded-xl text-xs font-bold">Selesai &amp; Ke Ruang Klien →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HALAMAN RUANG KLIEN -->
+  <section id="page-client" class="page-section hidden page-dissolve">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <!-- Login Wall -->
+      <div id="client-login-wall" class="max-w-md mx-auto bg-charcoal border border-borderline rounded-2xl p-6 shadow-xl space-y-4">
+        <div class="text-center">
+          <span class="text-xs font-mono uppercase text-gold font-semibold">Ruang Klien</span>
+          <h3 class="text-xl font-bold text-ivory mt-0.5">Masuk ke Akun Anda</h3>
+          <p class="text-xs text-ash mt-1">Lihat penawaran resmi, setujui perjanjian, unggah bukti pembayaran, dan unduh hasil akhir.</p>
+        </div>
+        <form onsubmit="handleClientPortalLogin(event)" class="space-y-3.5">
+          <div><label class="block text-xs font-semibold text-ivory mb-1">Email Terdaftar *</label><input type="email" id="portal-login-email" required placeholder="siti@sanggar.id" class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3.5 py-2.5 text-xs text-ivory focus:outline-none" /></div>
+          <div><label class="block text-xs font-semibold text-ivory mb-1">Kata Sandi *</label><input type="password" id="portal-login-pass" required placeholder="1234" class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3.5 py-2.5 text-xs text-ivory focus:outline-none" /></div>
+          <div class="flex items-center justify-between text-[11px] text-ash">
+            <span>Belum punya akun? <button type="button" onclick="openClientAuthModal('register')" class="text-gold font-semibold hover:underline">Daftar Cepat</button></span>
+          </div>
+          <button type="submit" class="btn-gold w-full py-3 rounded-xl text-xs font-bold">Masuk Ruang Klien →</button>
+        </form>
+      </div>
+      <div id="client-workspace-content" class="hidden space-y-6"></div>
+    </div>
+  </section>
+
+  <!-- HALAMAN ADMIN -->
+  <section id="page-admin" class="page-section hidden page-dissolve">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div id="admin-pin-gate" class="max-w-sm mx-auto bg-charcoal border border-borderline rounded-2xl p-6 shadow-xl space-y-4">
+        <div class="text-center">
+          <span class="text-xs font-mono uppercase text-gold font-semibold">Studio Command Center</span>
+          <h3 class="text-xl font-bold text-ivory mt-0.5">Akses Admin</h3>
+          <p class="text-xs text-ash mt-1">Masukkan PIN Studio untuk menerbitkan penawaran, verifikasi pembayaran, &amp; rilis master.</p>
+        </div>
+        <form onsubmit="verifyAdminPin(event)" class="space-y-3.5">
+          <input type="password" id="admin-pin-input" required placeholder="Masukkan PIN Studio" class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-4 py-3 text-center text-sm font-mono tracking-widest text-ivory focus:outline-none" />
+          <p class="text-[11px] text-ash text-center">PIN Default: <span class="font-mono text-gold">2026</span></p>
+          <button type="submit" class="btn-gold w-full py-3 rounded-xl text-xs font-bold">Buka Panel Studio →</button>
+        </form>
+      </div>
+      <div id="admin-workspace-content" class="hidden space-y-6"></div>
+    </div>
+  </section>
 
 </main>
 
+<!-- Mobile Sticky Bar (Hanya Muncul di Halaman Order) -->
 <div id="mobile-sticky-bar" class="lg:hidden fixed bottom-0 inset-x-0 z-30 hidden bg-charcoal/95 backdrop-blur-md border-t border-gold/40 px-4 py-3">
   <div class="flex items-center justify-between gap-3">
     <div>
@@ -481,11 +491,13 @@ tailwind.config = {
   </div>
 </div>
 
+<!-- Tombol WA Melayang -->
 <button type="button" onclick="openProducerWaModal()" class="fixed bottom-16 lg:bottom-6 right-5 z-30 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-3 rounded-full shadow-2xl flex items-center gap-2 text-xs font-bold transition">
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-  <span class="hidden sm:inline">Diskusi WA Produser</span>
+  <span class="hidden sm:inline">Diskusi WA</span>
 </button>
 
+<!-- Modal Welcome -->
 <div id="welcome-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[70] hidden items-center justify-center p-4">
   <div class="bg-charcoal border border-gold/50 rounded-2xl max-w-md w-full p-6 shadow-2xl text-center space-y-4">
     <div class="w-16 h-16 rounded-full bg-obsidian border border-gold/60 p-1.5 mx-auto flex items-center justify-center overflow-hidden">
@@ -494,22 +506,23 @@ tailwind.config = {
     <div class="space-y-1.5">
       <span class="text-[11px] font-mono uppercase tracking-wider text-gold font-bold">PrangArt Lab • Samarinda</span>
       <h3 class="text-xl font-extrabold text-ivory">Mulai dari Sesi Diskusi Kebutuhan</h3>
-      <p class="text-xs text-ash leading-relaxed">Untuk memastikan konsep karya, ruang lingkup pekerjaan, dan hasil akhir sesuai harapan, kami menyarankan sesi diskusi bersama Produser/Komposer sebelum pengajuan penawaran &amp; pembayaran.</p>
+      <p class="text-xs text-ash leading-relaxed">Untuk memastikan konsep karya, ruang lingkup pekerjaan, dan hasil akhir sesuai harapan, kami menyarankan sesi diskusi bersama Admin sebelum pengajuan penawaran &amp; pembayaran.</p>
     </div>
     <div class="space-y-2.5 pt-2">
-      <button type="button" onclick="closeWelcomeModal();openProducerWaModal('Halo Produser, saya ingin diskusi awal mengenai kebutuhan karya.');" class="btn-gold w-full py-3 rounded-xl text-xs font-bold">Jalur A: Diskusi via WhatsApp (08977230597)</button>
-      <button type="button" onclick="closeWelcomeModal();navigateTo('order');" class="w-full py-2.5 rounded-xl bg-acoustic border border-borderline text-xs font-semibold text-ivory hover:border-gold transition">Jalur B: Isi Formulir Kebutuhan Dulu</button>
+      <button type="button" onclick="closeWelcomeModal();openProducerWaModal('Halo Admin PrangArt Lab, saya ingin diskusi awal mengenai kebutuhan karya.');" class="btn-gold w-full py-3 rounded-xl text-xs font-bold">Jalur A: Diskusi via WhatsApp (08977230597)</button>
+      <button type="button" onclick="closeWelcomeModal();navigateTo('client');" class="w-full py-2.5 rounded-xl bg-acoustic border border-borderline text-xs font-semibold text-ivory hover:border-gold transition">Jalur B: Masuk Ruang Klien</button>
       <button type="button" onclick="closeWelcomeModal()" class="text-[11px] text-ash hover:text-ivory underline pt-1">Lihat Alur &amp; Panduan Diskusi</button>
     </div>
   </div>
 </div>
 
+<!-- Modal WA Composer -->
 <div id="wa-producer-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[75] hidden items-center justify-center p-4">
   <div class="bg-charcoal border border-gold/50 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
     <div class="flex items-center justify-between border-b border-borderline pb-3">
       <div>
         <span class="text-[10px] font-mono uppercase text-emerald-400 font-bold block">Sesi Diskusi &amp; Konsultasi • 08977230597</span>
-        <h3 class="text-base font-bold text-ivory">Kirim Pesan ke WhatsApp Produser</h3>
+        <h3 class="text-base font-bold text-ivory">Kirim Pesan ke WhatsApp Admin</h3>
       </div>
       <button type="button" onclick="closeProducerWaModal()" class="p-1.5 rounded-lg bg-acoustic text-ash hover:text-ivory text-xs">×</button>
     </div>
@@ -543,6 +556,7 @@ tailwind.config = {
   </div>
 </div>
 
+<!-- Modal Daftar Cepat (Hanya Nama, Email, WA, Pass) -->
 <div id="client-auth-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[72] hidden items-center justify-center p-4">
   <div class="bg-charcoal border border-gold/50 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
     <div class="flex items-center justify-between border-b border-borderline pb-3">
@@ -556,19 +570,19 @@ tailwind.config = {
       <button type="button" id="auth-tab-register" onclick="switchAuthModalTab('register')" class="py-2 rounded-lg text-xs font-bold bg-gold text-obsidian">Daftar Akun Baru</button>
       <button type="button" id="auth-tab-login" onclick="switchAuthModalTab('login')" class="py-2 rounded-lg text-xs font-semibold text-ash">Masuk Akun</button>
     </div>
+    
+    <!-- Form Registrasi Sederhana -->
     <form id="form-client-register" onsubmit="handleQuickClientRegister(event)" class="space-y-3">
-      <div><label class="block text-xs font-semibold text-ivory mb-1">Nama Lengkap *</label><input type="text" id="reg-name" required placeholder="Nama lengkap pemesan" class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3 py-2 text-xs text-ivory focus:outline-none" /></div>
+      <div><label class="block text-xs font-semibold text-ivory mb-1">Nama Lengkap *</label><input type="text" id="reg-name" required placeholder="Nama Anda" class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3 py-2 text-xs text-ivory focus:outline-none" /></div>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div><label class="block text-xs font-semibold text-ivory mb-1">Email *</label><input type="email" id="reg-email" required placeholder="email@contoh.com" class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3 py-2 text-xs text-ivory focus:outline-none" /></div>
         <div><label class="block text-xs font-semibold text-ivory mb-1">No. WhatsApp *</label><input type="tel" id="reg-wa" required placeholder="0812..." class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3 py-2 text-xs text-ivory focus:outline-none" /></div>
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div><label class="block text-xs font-semibold text-ivory mb-1">Sanggar / Instansi *</label><input type="text" id="reg-instansi" required placeholder="Nama sanggar/instansi" class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3 py-2 text-xs text-ivory focus:outline-none" /></div>
-        <div><label class="block text-xs font-semibold text-ivory mb-1">Kota Asal *</label><input type="text" id="reg-kota" required placeholder="Contoh: Samarinda" class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3 py-2 text-xs text-ivory focus:outline-none" /></div>
-      </div>
       <div><label class="block text-xs font-semibold text-ivory mb-1">Buat Kata Sandi *</label><input type="password" id="reg-pass" required minlength="4" placeholder="Minimal 4 karakter" class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3 py-2 text-xs text-ivory focus:outline-none" /></div>
       <button type="submit" class="btn-gold w-full py-3 rounded-xl text-xs font-bold">Buat Akun &amp; Lanjutkan →</button>
     </form>
+
+    <!-- Form Login -->
     <form id="form-client-login" onsubmit="handleQuickClientLogin(event)" class="hidden space-y-3">
       <div><label class="block text-xs font-semibold text-ivory mb-1">Email *</label><input type="email" id="login-email" required placeholder="siti@sanggar.id" class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3 py-2 text-xs text-ivory focus:outline-none" /></div>
       <div><label class="block text-xs font-semibold text-ivory mb-1">Kata Sandi *</label><input type="password" id="login-pass" required placeholder="1234" class="w-full bg-acoustic border border-borderline focus:border-gold rounded-xl px-3 py-2 text-xs text-ivory focus:outline-none" /></div>
@@ -578,6 +592,7 @@ tailwind.config = {
   </div>
 </div>
 
+<!-- Modal Kartu Brief -->
 <div id="brief-card-modal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-[68] hidden items-center justify-center p-4">
   <div class="bg-charcoal border border-gold/50 rounded-2xl max-w-4xl w-full p-5 shadow-2xl space-y-4">
     <div class="flex items-center justify-between border-b border-borderline pb-3">
@@ -594,6 +609,7 @@ tailwind.config = {
   </div>
 </div>
 
+<!-- Modal Custom (Bukti Pembayaran) -->
 <div id="custom-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[65] hidden items-center justify-center p-4">
   <div class="bg-charcoal border border-borderline rounded-2xl max-w-lg w-full p-5 shadow-2xl space-y-4">
     <div class="flex items-center justify-between border-b border-borderline pb-3">
@@ -604,6 +620,7 @@ tailwind.config = {
   </div>
 </div>
 
+<!-- Modal Invoice / Kuitansi -->
 <div id="official-doc-modal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-[66] hidden items-center justify-center p-3 sm:p-6 overflow-y-auto">
   <div class="bg-charcoal border border-gold/50 rounded-2xl max-w-3xl w-full p-4 sm:p-6 shadow-2xl space-y-4 my-auto">
     <div class="flex flex-wrap items-center justify-between gap-2 border-b border-borderline pb-3">
@@ -626,6 +643,7 @@ tailwind.config = {
   </div>
 </div>
 
+<!-- Modal Perjanjian -->
 <div id="contract-doc-modal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-[67] hidden items-center justify-center p-3 sm:p-6 overflow-y-auto">
   <div class="bg-charcoal border border-gold/50 rounded-2xl max-w-4xl w-full p-4 sm:p-6 shadow-2xl space-y-4 my-auto">
     <div class="flex flex-wrap items-center justify-between gap-2 border-b border-borderline pb-3">
