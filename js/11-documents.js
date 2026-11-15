@@ -283,6 +283,23 @@ async function downloadOfficialDocPNG() {
     ctx.fillText(appState.settings.directorName, 1010, 685);
   }
 
-  triggerPngFileDownload(c.toDataURL('image/png'), `${data.docType.toUpperCase()}-PrangArt-${data.proj.id}.png`);
-  showToast('Dokumen Diunduh', `${data.docType === 'invoice' ? 'Invoice' : 'Kuitansi'} PNG siap dikirim ke konsumen.`);
+  const dataUrl = c.toDataURL('image/png');
+  triggerPngFileDownload(dataUrl, `${data.docType.toUpperCase()}-PrangArt-${data.proj.id}.png`);
+  showToast('Dokumen Diunduh', `${data.docType === 'invoice' ? 'Invoice' : 'Kuitansi'} PNG siap dikirim.`);
+}
+
+async function sendInvoiceToWA() {
+  const data = getOfficialDocComputedData();
+  if (!data) return;
+  
+  // 1. Unduh file secara otomatis
+  await downloadOfficialDocPNG();
+  
+  // 2. Buka WA
+  const clientWa = data.proj.wa.replace(/^0/, '62');
+  const docName = data.docType === 'invoice' ? 'Invoice' : 'Kuitansi';
+  const msg = `Halo Kak *${data.proj.clientName}*,\n\nBerikut kami lampirkan *${docName}* untuk proyek *"${data.proj.judul}"* (${data.proj.id}).\n\nTotal Tagihan: *${data.amountFormatted}*\n\nMohon cek gambar/file yang saya lampirkan di chat ini ya. Terima kasih!`;
+  
+  const waUrl = `https://wa.me/${clientWa}?text=${encodeURIComponent(msg)}`;
+  window.open(waUrl, '_blank', 'noopener');
 }
