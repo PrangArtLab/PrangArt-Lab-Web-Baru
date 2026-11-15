@@ -443,4 +443,82 @@ async function handleOrderFormSubmit(e) {
   const svcObj = appState.serviceCatalog[appState.selectedServiceLine];
   const pkgObj = svcObj.packages[appState.selectedPackage];
   const addonSelected = Boolean(document.getElementById('field-addon-vocal')?.checked);
-  const addonPrice
+  const addonPrice = addonSelected ? svcObj.addonPrice : 0;
+  const totalPrice = pkgObj.price + addonPrice;
+  const dpAmount = paymentScheme === 'DP 50%' ? Math.round(totalPrice * 0.5) : totalPrice;
+
+  const seqNum = String(Math.floor(100 + Math.random() * 899));
+  const ticketId = `PAL-2026-${seqNum}`;
+  const nowDate = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+  const musicalSpec = collectOrderMusicalSpec();
+  const defaultRev = appState.selectedPackage === 'dasar' ? '3' : appState.selectedPackage === 'standar' ? '6' : 'Sesuai kesepakatan';
+
+  const newProject = {
+    id: ticketId,
+    createdTs: Date.now(),
+    createdAt: nowDate,
+    entryPath,
+    clientEmail: email,
+    clientName: nama,
+    instansi, kota, alamat, nik, wa,
+    serviceLine: appState.selectedServiceLine,
+    serviceLineLabel: svcObj.label,
+    packageKey: appState.selectedPackage,
+    packageName: pkgObj.label,
+    addonSelected,
+    addonLabel: svcObj.addonLabel,
+    addonPrice: svcObj.addonPrice,
+    basePrice: pkgObj.price,
+    totalPrice, dpAmount, paymentScheme,
+    judul, koreografer, jenisTari, budaya, durasi, referensi, sinopsis,
+    musicalSpec,
+    contractNumber: `${seqNum}/PAL-SPK/XI/2026`,
+    composerRole: 'Composer & Arranger',
+    musicFileTitle: judul.replace(/\s+/g, '_') + '_Final',
+    deliverableFormat: appState.selectedServiceLine === 'transkripsi' ? 'PDF Partitur & Audio Panduan' : 'WAV 24-bit & MP3 320kbps',
+    revisionQuota: defaultRev,
+    thirdPartyMaterial: 'Tidak ada',
+    collaboratorNotes: 'Tidak ada kontributor tambahan',
+    rawFilesIncluded: false,
+    rawFilesDetail: '',
+    extraAttachmentNotes: '-',
+    courtCity: 'Samarinda',
+    quoteStatus: 'Menunggu Pemeriksaan',
+    quoteDurationDays: '7-10 Hari Kerja',
+    quoteDeliverables: 'Sesuai Lampiran A & paket yang disepakati',
+    quoteNotes: '',
+    agreementSigned: false,
+    agreementSignedAt: '',
+    dpStatus: 'Belum Dibayar',
+    dpRejectReason: '',
+    dpProofName: '',
+    dpProofDataUrl: '',
+    pelunasanStatus: paymentScheme === 'Pembayaran Penuh 100%' ? 'Tidak Perlu (Skema Penuh)' : 'Belum Lunas',
+    pelunasanProofName: '',
+    pelunasanProofDataUrl: '',
+    productionStatus: TRACKER_MILESTONES[0],
+    previewAudioName: '',
+    previewAudioUrl: '',
+    masterFileName: '',
+    masterFileUrl: '',
+    clientAcceptedFinal: false
+  };
+
+  appState.projects.unshift(newProject);
+  appState.activeBriefProjectId = ticketId;
+  appState.selectedClientProjectId = ticketId;
+  appState.selectedAdminProjectId = ticketId;
+  await syncProjectToCloud(newProject);
+
+  const briefDataUrl = await generateBriefCardPNGDataUrl(newProject);
+  document.getElementById('success-ticket-id').textContent = ticketId;
+  document.getElementById('brief-card-preview-img').src = briefDataUrl;
+
+  document.getElementById('order-form-container').classList.add('hidden');
+  document.getElementById('mobile-sticky-bar')?.classList.add('hidden');
+  document.getElementById('order-success-container').classList.remove('hidden');
+
+  triggerPngFileDownload(briefDataUrl, `Kartu-Brief-PrangArt-${ticketId}.png`);
+  showToast('Kartu Brief Terunduh!', 'Kirim Kartu Brief PNG ke WhatsApp Admin untuk pemeriksaan & penawaran.');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
