@@ -28,8 +28,6 @@ function persistEditableSiteContent() {
   localStorage.setItem(SITE_CONTENT_KEY, JSON.stringify(editableSiteContent));
 }
 
-/* Portofolio & testimoni dirender dari data admin.
-   Bila kosong → empty state, bukan konten hardcoded. */
 function renderEditableHomeContent() {
   const portfolioGrid = document.querySelector('#page-home .portfolio-grid');
   const testimonialGrid = document.querySelector('#page-home .testimonial-grid');
@@ -117,7 +115,6 @@ function addHomeLandingSections() {
   home.appendChild(section);
 }
 
-/* Biarkan hero dari styles.css tampil utuh (label + waveform), hanya poles kartu. */
 function applyNonTraditionalCopyAndStyle() {
   const style = document.createElement('style');
   style.textContent = `
@@ -138,7 +135,13 @@ document.addEventListener('DOMContentLoaded', () => {
   addHomeLandingSections();
   renderEditableHomeContent();
   applyNonTraditionalCopyAndStyle();
+  
+  // FIX: Paksa hapus #hash di URL agar saat di-refresh selalu ke Beranda
+  if (window.location.hash) {
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+  }
   navigateTo('home');
+  
   setSynopsisMode('manual');
   initFirebaseSync();
 });
