@@ -48,15 +48,15 @@ function updateHeaderAuthBadge() {
   if (!box) return;
   if (appState.currentClientUser) {
     box.innerHTML = `
-      <div class="flex items-center gap-1.5 bg-surface border border-border rounded-xl px-2.5 py-1.5 text-[11px] transition-colors duration-300">
-        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-        <span class="font-semibold text-textMain max-w-[90px] truncate">${appState.currentClientUser.name}</span>
+      <div class="flex items-center gap-2 bg-panel border border-border rounded-xl px-3 py-2 text-xs transition-colors duration-300">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span class="font-bold text-textMain max-w-[90px] truncate">${appState.currentClientUser.name}</span>
         <button type="button" onclick="logoutClientUser()" class="text-textMuted hover:text-red-500 ml-1" title="Keluar">×</button>
       </div>
     `;
   } else {
     box.innerHTML = `
-      <button type="button" onclick="openClientAuthModal('register')" class="px-3 py-2 rounded-xl bg-surface border border-border hover:border-primary text-xs font-semibold text-textMain transition">
+      <button type="button" onclick="openClientAuthModal('register')" class="px-4 py-2.5 rounded-xl bg-panel border border-border hover:border-primary text-xs font-bold text-textMain transition">
         Masuk
       </button>
     `;
@@ -79,10 +79,10 @@ function renderSop14Grid() {
   const grid = document.getElementById('sop-14-grid');
   if (!grid) return;
   grid.innerHTML = SOP_14_STEPS.map(s => `
-    <div class="bg-surface border border-border rounded-xl p-4 space-y-1.5 transition-colors duration-300">
-      <span class="text-[11px] font-mono font-bold text-primary">Tahap ${s.no}</span>
-      <h4 class="text-sm font-bold text-textMain font-display">${s.title}</h4>
-      <p class="text-[11px] text-textMuted leading-relaxed font-light">${s.desc}</p>
+    <div class="bg-surface border border-border rounded-2xl p-5 hover:border-primary/50 transition-colors duration-300 shadow-sm group">
+      <span class="text-[11px] font-mono font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">Tahap ${s.no}</span>
+      <h4 class="text-base font-bold text-textMain font-display mt-3 group-hover:text-primary transition">${s.title}</h4>
+      <p class="text-xs text-textMuted leading-relaxed mt-2 font-light">${s.desc}</p>
     </div>
   `).join('');
 }
