@@ -52,7 +52,6 @@ tailwind.config = {
 
 <div id="toast-container" class="fixed top-4 right-4 z-[90] flex flex-col gap-2.5 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
 
-<!-- HEADER: Glassmorphism -->
 <header class="sticky top-0 z-50 glass-panel border-b border-border transition-all duration-300">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-3">
     <button type="button" onclick="navigateTo('home')" class="flex items-center gap-4 text-left group shrink-0">
@@ -75,7 +74,6 @@ tailwind.config = {
     </nav>
 
     <div class="flex items-center gap-3">
-      <!-- Theme Toggle -->
       <div class="relative">
         <button type="button" onclick="toggleThemeDropdown()" class="p-2.5 rounded-xl bg-panel border border-border hover:border-primary text-textMain transition-all shadow-sm flex items-center justify-center">
           <svg id="theme-icon-dark" class="hidden w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
@@ -97,7 +95,6 @@ tailwind.config = {
       </button>
     </div>
   </div>
-  <!-- Mobile Nav -->
   <div class="md:hidden border-t border-border bg-surface/95 backdrop-blur-md px-2 py-2 flex items-center justify-around gap-1 overflow-x-auto">
     <button type="button" id="mnav-home" onclick="navigateTo('home')" class="mnav-pill px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap">Beranda</button>
     <button type="button" id="mnav-portfolio" onclick="navigateTo('portfolio')" class="mnav-pill px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap">Portofolio</button>
@@ -107,9 +104,7 @@ tailwind.config = {
 </header>
 
 <main class="flex-1 relative">
-  <!-- HALAMAN BERANDA -->
   <section id="page-home" class="page-section page-dissolve">
-    <!-- Hero Section -->
     <div class="relative overflow-hidden border-b border-border bg-surface">
       <div class="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-primary/20 blur-[120px] rounded-full pointer-events-none"></div>
       <div class="absolute bottom-[-20%] right-[-10%] w-[40%] h-[40%] bg-accent/20 blur-[100px] rounded-full pointer-events-none"></div>
@@ -126,7 +121,7 @@ tailwind.config = {
               <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">Musik Impian Anda</span>
             </h1>
             <p class="text-base sm:text-lg text-textMuted leading-relaxed max-w-2xl font-light">
-              PrangArt Lab menempatkan sesi diskusi kebutuhan sebagai tahap awal sebelum penawaran harga dan pembayaran. Konsultasikan konsep karya Anda terlebih dahulu.
+              PrangArt Lab menempatkan sesi diskusi kebutuhan sebagai tahap awal sebelum penawaran harga dan pembayaran. Konsultasikan konsep karya Anda terlebih dahulu via WhatsApp: <strong class="text-textMain">08977250597</strong>.
             </p>
             <div class="flex flex-wrap items-center gap-4 pt-2">
               <button type="button" onclick="openProducerWaModal('Diskusi awal')" class="btn-primary px-8 py-4 rounded-2xl text-sm font-bold flex items-center gap-2 shadow-glow hover:scale-105 transition-transform">
@@ -137,7 +132,6 @@ tailwind.config = {
             </div>
           </div>
           
-          <!-- Card Kaca (Glassmorphism) -->
           <div class="lg:col-span-5 relative">
             <div class="absolute inset-0 bg-gradient-to-br from-primary/30 to-accent/30 rounded-[2.5rem] blur-xl opacity-50"></div>
             <div class="glass-panel rounded-[2rem] p-8 space-y-6 relative border border-white/10 dark:border-white/5">
@@ -158,7 +152,6 @@ tailwind.config = {
       </div>
     </div>
 
-    <!-- Layanan -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 space-y-12">
       <div class="text-center max-w-2xl mx-auto space-y-4">
         <span class="text-xs font-mono uppercase tracking-wider text-primary font-bold bg-primary/10 px-3 py-1 rounded-full">Layanan Studio</span>
@@ -167,15 +160,14 @@ tailwind.config = {
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <!-- Card 1 -->
         <div class="bg-surface border border-border rounded-3xl p-8 flex flex-col justify-between relative group hover:border-primary/50 transition-colors duration-300">
           <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-[100px] pointer-events-none"></div>
           <div class="space-y-5 relative z-10">
             <div class="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-6">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
             </div>
-            <h3 class="text-2xl font-display font-bold text-textMain">Produksi Musik Tari</h3>
-            <p class="text-sm text-textMuted leading-relaxed">Komposisi, aransemen, mixing, dan mastering musik iringan tari tradisi maupun kontemporer.</p>
+            <h3 class="text-2xl font-display font-bold text-textMain">Aransemen Musik Tari</h3>
+            <p class="text-sm text-textMuted leading-relaxed">Pembuatan musik iringan tari sesuai konsep dan alur gerak penari.</p>
             <div class="pt-4 border-t border-border">
               <span class="text-xs text-textMuted block mb-1">Mulai dari</span>
               <span class="text-xl font-mono font-bold text-primary">Rp1.000.000</span>
@@ -184,33 +176,31 @@ tailwind.config = {
           <button type="button" onclick="selectServiceAndGoOrder('tari')" class="btn-primary w-full py-3.5 rounded-xl text-sm font-bold mt-8">Ajukan Layanan →</button>
         </div>
 
-        <!-- Card 2 -->
         <div class="bg-surface border border-border rounded-3xl p-8 flex flex-col justify-between hover:border-primary/50 transition-colors duration-300">
           <div class="space-y-5">
             <div class="w-14 h-14 rounded-2xl bg-panel flex items-center justify-center text-textMain mb-6 border border-border">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/></svg>
             </div>
-            <h3 class="text-2xl font-display font-bold text-textMain">Produksi Musik Non-Tari</h3>
-            <p class="text-sm text-textMuted leading-relaxed">Aransemen lagu orisinal, ilustrasi teater, jingle instansi, dan produksi audio digital.</p>
+            <h3 class="text-2xl font-display font-bold text-textMain">Aransemen Musik Non-Tari</h3>
+            <p class="text-sm text-textMuted leading-relaxed">Pembuatan aransemen musik bebas, lagu, atau gubahan umum.</p>
             <div class="pt-4 border-t border-border">
               <span class="text-xs text-textMuted block mb-1">Mulai dari</span>
-              <span class="text-xl font-mono font-bold text-textMain">Rp100.000</span>
+              <span class="text-xl font-mono font-bold text-textMain">Rp1.000.000</span>
             </div>
           </div>
           <button type="button" onclick="selectServiceAndGoOrder('digital')" class="btn-outline w-full py-3.5 rounded-xl text-sm font-bold mt-8">Ajukan Layanan →</button>
         </div>
 
-        <!-- Card 3 -->
         <div class="bg-surface border border-border rounded-3xl p-8 flex flex-col justify-between hover:border-primary/50 transition-colors duration-300">
           <div class="space-y-5">
             <div class="w-14 h-14 rounded-2xl bg-panel flex items-center justify-center text-textMain mb-6 border border-border">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
             </div>
             <h3 class="text-2xl font-display font-bold text-textMain">Transkripsi Musik</h3>
-            <p class="text-sm text-textMuted leading-relaxed">Penulisan ulang audio/video menjadi partitur Not Angka, Not Balok, atau keduanya.</p>
+            <p class="text-sm text-textMuted leading-relaxed">Pengubahan audio/video menjadi partitur (Not Angka / Balok) dan file MIDI.</p>
             <div class="pt-4 border-t border-border">
               <span class="text-xs text-textMuted block mb-1">Mulai dari</span>
-              <span class="text-xl font-mono font-bold text-textMain">Rp300.000</span>
+              <span class="text-xl font-mono font-bold text-textMain">Rp50.000</span>
             </div>
           </div>
           <button type="button" onclick="selectServiceAndGoOrder('transkripsi')" class="btn-outline w-full py-3.5 rounded-xl text-sm font-bold mt-8">Ajukan Layanan →</button>
@@ -218,7 +208,6 @@ tailwind.config = {
       </div>
     </div>
 
-    <!-- SOP -->
     <div class="bg-panel/30 border-y border-border">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 space-y-12">
         <div class="text-center space-y-2">
@@ -229,16 +218,14 @@ tailwind.config = {
       </div>
     </div>
 
-    <!-- FAQ -->
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 space-y-8">
       <div class="text-center">
-        <h2 class="text-3xl font-display font-bold text-textMain">FAQ</h2>
+        <h2 class="text-3xl font-display font-bold text-textMain">FAQ & Ketentuan</h2>
       </div>
       <div id="faq-accordion-list" class="space-y-4"></div>
     </div>
   </section>
 
-  <!-- PORTOFOLIO -->
   <section id="page-portfolio" class="page-section hidden page-dissolve">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-10">
       <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-6 border-b border-border pb-8">
@@ -248,8 +235,8 @@ tailwind.config = {
         </div>
         <div class="flex flex-wrap gap-2">
           <button type="button" onclick="filterPortfolio('Semua')" class="pf-filter-btn px-5 py-2.5 rounded-xl text-xs font-bold bg-primary text-white shadow-glow">Semua</button>
-          <button type="button" onclick="filterPortfolio('Produksi Musik Tari')" class="pf-filter-btn px-5 py-2.5 rounded-xl text-xs font-semibold bg-surface text-textMain border border-border hover:border-primary">Musik Tari</button>
-          <button type="button" onclick="filterPortfolio('Produksi Musik Non-Tari')" class="pf-filter-btn px-5 py-2.5 rounded-xl text-xs font-semibold bg-surface text-textMain border border-border hover:border-primary">Musik Non-Tari</button>
+          <button type="button" onclick="filterPortfolio('Aransemen Musik Tari')" class="pf-filter-btn px-5 py-2.5 rounded-xl text-xs font-semibold bg-surface text-textMain border border-border hover:border-primary">Musik Tari</button>
+          <button type="button" onclick="filterPortfolio('Aransemen Musik Non-Tari')" class="pf-filter-btn px-5 py-2.5 rounded-xl text-xs font-semibold bg-surface text-textMain border border-border hover:border-primary">Musik Non-Tari</button>
           <button type="button" onclick="filterPortfolio('Transkripsi Musik')" class="pf-filter-btn px-5 py-2.5 rounded-xl text-xs font-semibold bg-surface text-textMain border border-border hover:border-primary">Transkripsi</button>
         </div>
       </div>
@@ -257,7 +244,6 @@ tailwind.config = {
     </div>
   </section>
 
-  <!-- RUANG KLIEN & ADMIN -->
   <section id="page-client" class="page-section hidden page-dissolve bg-base">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
       <div id="client-login-wall" class="max-w-md mx-auto bg-surface border border-border rounded-[2rem] p-8 shadow-2xl relative overflow-hidden">
@@ -279,7 +265,6 @@ tailwind.config = {
     </div>
   </section>
 
-  <!-- ORDER FORM -->
   <section id="page-order" class="page-section hidden page-dissolve bg-base">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pb-32">
       <div id="order-form-container">
@@ -290,9 +275,8 @@ tailwind.config = {
 
         <form id="prangart-order-form" onsubmit="handleOrderFormSubmit(event)" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           <div class="lg:col-span-8 space-y-8">
-            <!-- Bagian 1 -->
             <div class="bg-surface border border-border rounded-3xl p-6 sm:p-8 space-y-6">
-              <div><span class="text-[11px] font-mono text-primary font-bold uppercase tracking-wider">Langkah 01</span><h3 class="text-2xl font-display font-bold text-textMain mt-1">Pilih Layanan</h3></div>
+              <div><span class="text-[11px] font-mono text-primary font-bold uppercase tracking-wider">Langkah 01</span><h3 class="text-2xl font-display font-bold text-textMain mt-1">Pilih Layanan & Harga</h3></div>
               <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <button type="button" id="svc-tab-tari" onclick="selectServiceLine('tari')" class="svc-tab-btn p-4 rounded-2xl border text-left transition-all">
                   <span class="text-sm font-bold block">Musik Tari</span>
@@ -306,7 +290,6 @@ tailwind.config = {
               </div>
               <div id="package-cards-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2"></div>
               
-              <!-- TAMBAHAN: HARGA KESEPAKATAN -->
               <div class="mt-4 pt-4 border-t border-border">
                 <label class="block text-xs font-bold text-textMain mb-2">Atau masukkan Harga Kesepakatan (Rp)</label>
                 <input type="number" id="custom-price-input" oninput="handleCustomPrice(this.value)" placeholder="Contoh: 1500000" class="w-full bg-panel border border-border focus:border-primary rounded-xl px-4 py-3 text-sm font-mono text-textMain focus:outline-none" />
@@ -314,7 +297,6 @@ tailwind.config = {
               </div>
             </div>
 
-            <!-- Bagian 2 -->
             <div class="bg-surface border border-border rounded-3xl p-6 sm:p-8 space-y-6">
               <div><span class="text-[11px] font-mono text-primary font-bold uppercase tracking-wider">Langkah 02</span><h3 class="text-2xl font-display font-bold text-textMain mt-1">Informasi Karya</h3></div>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -344,15 +326,14 @@ tailwind.config = {
               </div>
             </div>
 
-            <!-- Bagian 3 -->
             <div class="bg-surface border border-border rounded-3xl p-6 sm:p-8 space-y-6">
               <div><span class="text-[11px] font-mono text-primary font-bold uppercase tracking-wider">Langkah 03</span><h3 class="text-2xl font-display font-bold text-textMain mt-1">Spesifikasi Teknis</h3></div>
               <div id="dynamic-spec-fields" class="space-y-4"></div>
               <div id="addon-vocal-wrapper" class="pt-4 border-t border-border">
                 <label class="flex items-center justify-between gap-3 p-5 rounded-2xl bg-panel border border-border hover:border-primary cursor-pointer transition">
                   <div>
-                    <span class="text-sm font-bold text-textMain block">Tambahan Vokal</span>
-                    <span class="text-xs text-textMuted">Rekaman live studio.</span>
+                    <span class="text-sm font-bold text-textMain block">Tambahan Vokal / Session Player</span>
+                    <span class="text-xs text-textMuted">Dikoordinasikan secara fleksibel (+ Rp50.000).</span>
                   </div>
                   <div class="flex items-center gap-3 shrink-0">
                     <span id="addon-vocal-price-label" class="text-sm font-mono font-bold text-primary">+Rp50.000</span>
@@ -362,7 +343,6 @@ tailwind.config = {
               </div>
             </div>
 
-            <!-- Bagian 4 -->
             <div class="bg-surface border border-border rounded-3xl p-6 sm:p-8 space-y-6">
               <div><span class="text-[11px] font-mono text-primary font-bold uppercase tracking-wider">Langkah 04</span><h3 class="text-2xl font-display font-bold text-textMain mt-1">Pembayaran</h3></div>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -396,7 +376,6 @@ tailwind.config = {
     </div>
   </section>
 
-  <!-- ADMIN -->
   <section id="page-admin" class="page-section hidden page-dissolve bg-base">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
       <div id="admin-pin-gate" class="max-w-md mx-auto bg-surface border border-border rounded-[2rem] p-8 shadow-2xl relative overflow-hidden">
@@ -414,12 +393,10 @@ tailwind.config = {
   </section>
 </main>
 
-<!-- FLOATING WA BUTTON -->
 <button type="button" onclick="openProducerWaModal()" class="fixed bottom-6 right-6 z-40 bg-[#25D366] hover:bg-[#1EBE57] text-white p-4 rounded-full shadow-[0_8px_30px_rgb(37,211,102,0.4)] flex items-center justify-center transition-transform hover:scale-110">
   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
 </button>
 
-<!-- MODALS -->
 <div id="client-auth-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[72] hidden items-center justify-center p-4">
   <div class="bg-surface border border-border rounded-3xl max-w-md w-full p-8 shadow-2xl space-y-6">
     <div class="flex items-center justify-between border-b border-border pb-4">
@@ -467,12 +444,11 @@ tailwind.config = {
 <div id="contract-doc-modal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-[67] hidden items-center justify-center p-3 sm:p-6 overflow-y-auto"><div class="bg-surface border border-border rounded-2xl max-w-4xl w-full p-4 sm:p-6 shadow-2xl space-y-4 my-auto"><div class="flex flex-wrap items-center justify-between gap-2 border-b border-border pb-3"><h3 class="text-base font-bold text-textMain">Perjanjian</h3><button type="button" onclick="closeContractDocModal()" class="text-xl text-textMuted">×</button></div><div id="contract-doc-canvas" class="bg-white text-neutral-900 rounded-xl p-6 shadow-xl max-h-[65vh] overflow-y-auto font-serif text-xs sm:text-sm"></div></div></div>
 <div id="custom-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[65] hidden items-center justify-center p-4"><div class="bg-surface border border-border rounded-2xl max-w-lg w-full p-5 shadow-2xl space-y-4"><div class="flex items-center justify-between border-b border-border pb-3"><h3 id="custom-modal-title" class="text-base font-bold text-textMain"></h3><button type="button" onclick="closeCustomModal()" class="text-xl text-textMuted">×</button></div><div id="custom-modal-body" class="text-sm text-textMain"></div></div></div>
 
-<!-- FOOTER -->
 <footer class="border-t border-border bg-surface mt-auto py-8">
   <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-textMuted">
     <strong class="text-textMain font-display font-bold text-sm">PrangArt Lab</strong>
     <div class="flex gap-4 font-mono text-[11px]">
-      <span>WA: 08977230597</span>
+      <span>WA: 08977250597</span>
       <span>prangart.studios@gmail.com</span>
     </div>
   </div>
