@@ -18,9 +18,8 @@ document.addEventListener('DOMContentLoaded', () => {
   renderFaqAccordion(); 
   renderPortfolioGrid();
   
-  // LOGIKA REFRESH: Tetap di halaman yang sama
-  const page = window.location.hash.replace('#', '') || 'home';
-  navigateTo(page);
+  // Saat aplikasi dibuka atau dimuat ulang, selalu tampilkan beranda.
+  navigateTo('home');
   
   // Set mode AI default ke manual
   setSynopsisMode('manual');
