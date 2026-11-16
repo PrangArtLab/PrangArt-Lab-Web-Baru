@@ -1,4 +1,6 @@
-/* === FITUR LIHAT PASSWORD (MATA) === */
+/* =========================================
+   FITUR LIHAT PASSWORD (IKON MATA)
+   ========================================= */
 window.togglePasswordVisibility = function(inputId, iconId) {
   const input = document.getElementById(inputId);
   const icon = document.getElementById(iconId);
@@ -6,17 +8,33 @@ window.togglePasswordVisibility = function(inputId, iconId) {
   
   if (input.type === 'password') {
     input.type = 'text';
-    // Ganti ikon jadi mata dicoret (hide)
+    // Ikon mata dicoret (Sembunyikan)
     icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>';
   } else {
     input.type = 'password';
-    // Ganti ikon kembali ke mata terbuka
+    // Ikon mata terbuka (Lihat)
     icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>';
   }
 };
 
-function openClientAuthModal() { document.getElementById('client-auth-modal')?.classList.remove('hidden'); document.getElementById('client-auth-modal')?.classList.add('flex'); }
-function closeClientAuthModal() { document.getElementById('client-auth-modal')?.classList.add('hidden'); document.getElementById('client-auth-modal')?.classList.remove('flex'); }
+/* =========================================
+   MODAL & REGISTRASI
+   ========================================= */
+function openClientAuthModal() { 
+  const modal = document.getElementById('client-auth-modal'); 
+  if (modal) {
+    modal.classList.remove('hidden'); 
+    modal.classList.add('flex'); 
+  }
+}
+
+function closeClientAuthModal() { 
+  const modal = document.getElementById('client-auth-modal'); 
+  if (modal) {
+    modal.classList.add('hidden'); 
+    modal.classList.remove('flex'); 
+  }
+}
 
 function handleQuickClientRegister(e) {
   e.preventDefault();
@@ -26,17 +44,19 @@ function handleQuickClientRegister(e) {
   const pass = document.getElementById('reg-pass').value;
   
   if (!name || !email || !wa || !pass) {
-    return showToast('Gagal', 'Semua field wajib diisi.', 'error');
+    return showToast('Gagal', 'Semua kolom wajib diisi.', 'error');
   }
 
-  // VALIDASI PASSWORD KOMBINASI (Min 8 karakter, ada huruf dan angka)
+  // VALIDASI PASSWORD KOMBINASI (Min 8 karakter, kombinasi huruf & angka)
   const hasLetter = /[a-zA-Z]/.test(pass);
-  const hasNumber = /\d/.test(pass);
+  const hasNumber = /[0-9]/.test(pass);
   if (pass.length < 8 || !hasLetter || !hasNumber) {
     return showToast('Sandi Lemah', 'Kata sandi minimal 8 karakter, serta harus mengandung kombinasi huruf dan angka.', 'warning');
   }
 
-  if (appState.users.find(u => u.email.toLowerCase() === email)) return showToast('Gagal', 'Email terdaftar. Silakan masuk.', 'error');
+  if (appState.users.find(u => u.email.toLowerCase() === email)) {
+    return showToast('Gagal', 'Email sudah terdaftar. Silakan masuk.', 'error');
+  }
 
   const newUser = { name, email, wa, pass };
   appState.users.push(newUser);
@@ -45,10 +65,13 @@ function handleQuickClientRegister(e) {
   persistLocalState();
   updateHeaderAuthBadge();
   closeClientAuthModal();
-  showToast('Sukses', 'Akun dibuat. Selamat datang!');
+  showToast('Sukses', 'Akun berhasil dibuat. Selamat datang!');
   refreshClientPageUI();
 }
 
+/* =========================================
+   LOGIN MANUAL
+   ========================================= */
 function handleClientPortalLogin(e) {
   e.preventDefault();
   const email = document.getElementById('portal-login-email').value.trim().toLowerCase();
@@ -75,6 +98,9 @@ function handleClientPortalLogin(e) {
   showToast('Sukses', `Halo, ${registeredUser.name}`);
 }
 
+/* =========================================
+   LOGIN GOOGLE (FIREBASE)
+   ========================================= */
 async function handleGoogleLogin() {
   if (!window.firebaseAuth) return showToast('Info', 'Firebase belum siap.', 'warning');
   try {
@@ -105,17 +131,25 @@ async function handleGoogleLogin() {
   }
 }
 
+/* =========================================
+   LUPA SANDI & LOGOUT
+   ========================================= */
 async function handleForgotPassword(email) {
-  if (!email) return showToast('Info', 'Isi email dulu.', 'warning');
-  if (!window.firebaseAuth) return showToast('Info', 'Firebase tidak siap.', 'warning');
+  if (!email) return showToast('Info', 'Isi email Anda terlebih dahulu.', 'warning');
+  if (!window.firebaseAuth) return showToast('Info', 'Sistem Firebase tidak siap.', 'warning');
   try {
     const { sendPasswordResetEmail } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js');
     await sendPasswordResetEmail(window.firebaseAuth, email);
-    showToast('Email Terkirim', 'Cek kotak masuk.', 'success');
-  } catch (error) { showToast('Gagal', 'Email tidak ditemukan.', 'error'); }
+    showToast('Email Terkirim', 'Silakan cek kotak masuk email Anda.', 'success');
+  } catch (error) { 
+    showToast('Gagal', 'Email tidak ditemukan atau terjadi kesalahan.', 'error'); 
+  }
 }
 
 function logoutClientUser() {
-  appState.currentClientUser = null; localStorage.removeItem('prangart_current_user');
-  updateHeaderAuthBadge(); navigateTo('client'); showToast('Logout', 'Berhasil keluar.');
+  appState.currentClientUser = null; 
+  localStorage.removeItem('prangart_current_user');
+  updateHeaderAuthBadge(); 
+  navigateTo('client'); 
+  showToast('Logout', 'Anda berhasil keluar.');
 }
