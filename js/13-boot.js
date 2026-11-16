@@ -8,7 +8,8 @@ Object.assign(window, {
   handleCustomPrice, recalculateLivePrice, generateAISynopsis, handleOrderFormSubmit,
   renderPortfolioGrid, filterPortfolio, renderFaqAccordion, refreshClientPageUI, renderClientWorkspace,
   updateProfile, updatePass, verifyAdminPin, refreshAdminPageUI, renderAdminDashboard, syncProjectToCloud,
-  closeCustomModal, openContractDocModal, closeContractDocModal, openOfficialDocModal, closeOfficialDocModal
+  closeCustomModal, openContractDocModal, closeContractDocModal, openOfficialDocModal, closeOfficialDocModal,
+  saveAdminPayment, deleteAdminPayment, saveAdminSettings, openPaymentModal
 });
 
 const SITE_CONTENT_KEY = 'prangart_public_site_content_v1';
@@ -45,60 +46,63 @@ function renderEditableHomeContent() {
   }
 }
 
+// Render form untuk Tab Konten di Admin
 function renderSiteContentAdmin() {
-  const workspace = document.getElementById('admin-workspace-content');
-  if (!workspace || document.getElementById('site-content-admin')) return;
-  const editor = document.createElement('section');
-  editor.id = 'site-content-admin';
-  editor.className = 'mt-8 space-y-6';
-  editor.innerHTML = `<div class="bg-surface border border-border rounded-3xl p-6 sm:p-8">
-    <span class="home-kicker">Konten beranda</span><h2 class="text-2xl font-display font-bold mb-6">Kelola portofolio &amp; testimoni</h2>
+  const container = document.getElementById('site-content-admin-inner');
+  if (!container) return;
+  
+  container.innerHTML = `
     <div class="grid lg:grid-cols-2 gap-8">
       <form id="site-portfolio-form" class="space-y-3"><h3 class="font-bold text-lg">Tambah portofolio</h3>
         <input name="title" required maxlength="100" placeholder="Judul karya" class="w-full bg-panel border border-border rounded-xl p-3" />
         <input name="category" required maxlength="60" placeholder="Kategori, mis. Musik Tari" class="w-full bg-panel border border-border rounded-xl p-3" />
         <input name="image" type="url" placeholder="URL gambar (opsional)" class="w-full bg-panel border border-border rounded-xl p-3" />
         <textarea name="description" required maxlength="300" placeholder="Deskripsi singkat" class="w-full bg-panel border border-border rounded-xl p-3"></textarea>
-        <button class="btn-primary rounded-xl font-bold">Simpan portofolio</button><div class="site-admin-list" id="site-portfolio-list"></div>
+        <button class="btn-primary rounded-xl font-bold py-3 px-4">Simpan portofolio</button><div class="site-admin-list mt-4" id="site-portfolio-list"></div>
       </form>
       <form id="site-testimonial-form" class="space-y-3"><h3 class="font-bold text-lg">Tambah testimoni</h3>
         <input name="name" required maxlength="80" placeholder="Nama klien" class="w-full bg-panel border border-border rounded-xl p-3" />
         <input name="role" required maxlength="80" placeholder="Peran / organisasi" class="w-full bg-panel border border-border rounded-xl p-3" />
         <textarea name="quote" required maxlength="400" placeholder="Isi testimoni" class="w-full bg-panel border border-border rounded-xl p-3"></textarea>
-        <button class="btn-primary rounded-xl font-bold">Simpan testimoni</button><div class="site-admin-list" id="site-testimonial-list"></div>
+        <button class="btn-primary rounded-xl font-bold py-3 px-4">Simpan testimoni</button><div class="site-admin-list mt-4" id="site-testimonial-list"></div>
       </form>
-    </div><p class="text-xs text-textMuted mt-6">Konten tersimpan di browser ini saja, belum tersinkron ke perangkat pengunjung lain.</p>
-  </div>`;
-  workspace.appendChild(editor);
-  editor.querySelector('#site-portfolio-form').addEventListener('submit', event => {
+    </div>
+  `;
+
+  container.querySelector('#site-portfolio-form').addEventListener('submit', event => {
     event.preventDefault();
     const form = event.currentTarget;
     editableSiteContent.portfolio.push({ title: form.elements.title.value.trim(), category: form.elements.category.value.trim(), image: form.elements.image.value.trim(), description: form.elements.description.value.trim() });
-    persistEditableSiteContent(); form.reset(); renderEditableHomeContent(); editor.remove(); renderSiteContentAdmin();
+    persistEditableSiteContent(); form.reset(); renderEditableHomeContent(); 
+    adminActiveTab = 'content'; renderAdminDashboard();
   });
-  editor.querySelector('#site-testimonial-form').addEventListener('submit', event => {
+  
+  container.querySelector('#site-testimonial-form').addEventListener('submit', event => {
     event.preventDefault();
     const form = event.currentTarget;
     editableSiteContent.testimonials.push({ name: form.elements.name.value.trim(), role: form.elements.role.value.trim(), quote: form.elements.quote.value.trim() });
-    persistEditableSiteContent(); form.reset(); renderEditableHomeContent(); editor.remove(); renderSiteContentAdmin();
+    persistEditableSiteContent(); form.reset(); renderEditableHomeContent();
+    adminActiveTab = 'content'; renderAdminDashboard();
   });
+  
   renderSiteContentLists();
 }
+
 function renderSiteContentLists() {
   const portfolioList = document.getElementById('site-portfolio-list');
   const testimonialList = document.getElementById('site-testimonial-list');
-  if (portfolioList) portfolioList.innerHTML = editableSiteContent.portfolio.map((item, index) => `<div class="site-admin-row"><span>${escapeSiteText(item.title)}</span><button type="button" onclick="removeSiteContent('portfolio',${index})">Hapus</button></div>`).join('') || '<p class="text-sm text-textMuted">Belum ada portofolio.</p>';
-  if (testimonialList) testimonialList.innerHTML = editableSiteContent.testimonials.map((item, index) => `<div class="site-admin-row"><span>${escapeSiteText(item.name)} — ${escapeSiteText(item.role)}</span><button type="button" onclick="removeSiteContent('testimonials',${index})">Hapus</button></div>`).join('') || '<p class="text-sm text-textMuted">Belum ada testimoni.</p>';
+  if (portfolioList) portfolioList.innerHTML = editableSiteContent.portfolio.map((item, index) => `<div class="site-admin-row"><span>${escapeSiteText(item.title)}</span><button type="button" onclick="removeSiteContent('portfolio',${index})" class="text-red-500 font-bold ml-2">Hapus</button></div>`).join('') || '<p class="text-sm text-textMuted">Belum ada portofolio.</p>';
+  if (testimonialList) testimonialList.innerHTML = editableSiteContent.testimonials.map((item, index) => `<div class="site-admin-row"><span>${escapeSiteText(item.name)} — ${escapeSiteText(item.role)}</span><button type="button" onclick="removeSiteContent('testimonials',${index})" class="text-red-500 font-bold ml-2">Hapus</button></div>`).join('') || '<p class="text-sm text-textMuted">Belum ada testimoni.</p>';
 }
+
 function removeSiteContent(type, index) {
   if (!['portfolio', 'testimonials'].includes(type)) return;
   editableSiteContent[type].splice(index, 1);
   persistEditableSiteContent(); renderEditableHomeContent();
-  document.getElementById('site-content-admin')?.remove(); renderSiteContentAdmin();
+  adminActiveTab = 'content'; renderAdminDashboard();
 }
-const originalRenderAdminDashboard = renderAdminDashboard;
-renderAdminDashboard = function() { originalRenderAdminDashboard(); renderSiteContentAdmin(); };
-Object.assign(window, { renderAdminDashboard, removeSiteContent });
+
+Object.assign(window, { renderSiteContentAdmin, removeSiteContent });
 
 function addHomeLandingSections() {
   const home = document.getElementById('page-home');
@@ -136,7 +140,6 @@ document.addEventListener('DOMContentLoaded', () => {
   renderEditableHomeContent();
   applyNonTraditionalCopyAndStyle();
   
-  // FIX: Paksa hapus #hash di URL agar saat di-refresh selalu ke Beranda
   if (window.location.hash) {
     history.replaceState(null, '', window.location.pathname + window.location.search);
   }
