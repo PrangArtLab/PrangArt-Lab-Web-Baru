@@ -1,4 +1,4 @@
-function openClientAuthModal(tab = 'register') {
+function openClientAuthModal() {
   document.getElementById('client-auth-modal')?.classList.remove('hidden');
   document.getElementById('client-auth-modal')?.classList.add('flex');
 }
@@ -19,7 +19,11 @@ function handleQuickClientRegister(e) {
   const newUser = { name, email, wa, pass };
   appState.users.push(newUser);
   appState.currentClientUser = newUser;
+  
+  // Simpan sesi
+  localStorage.setItem('prangart_current_user', JSON.stringify(newUser));
   syncUserToCloud(newUser);
+  
   updateHeaderAuthBadge();
   closeClientAuthModal();
   showToast('Berhasil', 'Akun berhasil dibuat.');
@@ -35,6 +39,9 @@ function handleClientPortalLogin(e) {
   if (!found) return showToast('Gagal', 'Email atau sandi salah.', 'error');
   
   appState.currentClientUser = found;
+  // Simpan sesi
+  localStorage.setItem('prangart_current_user', JSON.stringify(found));
+  
   updateHeaderAuthBadge();
   refreshClientPageUI();
   showToast('Sukses', `Selamat datang, ${found.name}`);
@@ -48,7 +55,6 @@ async function handleGoogleLogin() {
     const result = await signInWithPopup(window.firebaseAuth, provider);
     const user = result.user;
     
-    // Cek apakah user sudah ada di data lokal
     let existing = appState.users.find(u => u.email === user.email);
     if (!existing) {
       existing = { name: user.displayName, email: user.email, wa: '', pass: 'google-auth' };
@@ -56,6 +62,8 @@ async function handleGoogleLogin() {
       syncUserToCloud(existing);
     }
     appState.currentClientUser = existing;
+    localStorage.setItem('prangart_current_user', JSON.stringify(existing));
+    
     updateHeaderAuthBadge();
     refreshClientPageUI();
     showToast('Sukses', `Halo, ${user.displayName}`);
@@ -76,31 +84,9 @@ async function handleForgotPassword(email) {
   }
 }
 
-function openChangePasswordModal() {
-  document.getElementById('custom-modal-title').textContent = 'Ganti Kata Sandi';
-  document.getElementById('custom-modal-body').innerHTML = `
-    <div class="space-y-3">
-      <input type="password" id="new-pass-input" placeholder="Sandi Baru" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
-      <button onclick="submitChangePassword()" class="btn-primary w-full py-3 rounded-xl text-sm font-bold">Simpan Sandi</button>
-    </div>
-  `;
-  document.getElementById('custom-modal')?.classList.remove('hidden');
-  document.getElementById('custom-modal')?.classList.add('flex');
-}
-
-function submitChangePassword() {
-  const newPass = document.getElementById('new-pass-input').value;
-  if (!newPass || newPass.length < 4) return showToast('Gagal', 'Sandi minimal 4 karakter.', 'warning');
-  if (appState.currentClientUser) {
-    appState.currentClientUser.pass = newPass;
-    syncUserToCloud(appState.currentClientUser);
-    showToast('Sukses', 'Sandi berhasil diubah.');
-    closeCustomModal();
-  }
-}
-
 function logoutClientUser() {
   appState.currentClientUser = null;
+  localStorage.removeItem('prangart_current_user'); // Hapus sesi
   updateHeaderAuthBadge();
   navigateTo('client');
   showToast('Logout', 'Anda telah keluar.');
