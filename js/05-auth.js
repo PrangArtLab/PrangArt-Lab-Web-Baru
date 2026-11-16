@@ -7,6 +7,10 @@ function handleQuickClientRegister(e) {
   const email = document.getElementById('reg-email').value.trim().toLowerCase();
   const wa = document.getElementById('reg-wa').value.trim();
   const pass = document.getElementById('reg-pass').value;
+  if (!name || !email || !wa || !pass) {
+    showToast('Gagal', 'Semua field wajib diisi.', 'error');
+    return;
+  }
   if (appState.users.find(u => u.email.toLowerCase() === email)) return showToast('Gagal', 'Email terdaftar. Silakan masuk.', 'error');
 
   const newUser = { name, email, wa, pass };
@@ -26,12 +30,11 @@ function handleClientPortalLogin(e) {
   const pass = document.getElementById('portal-login-pass').value;
   const registeredUser = appState.users.find(u => (u.email || '').toLowerCase() === email);
 
-  // Jika email belum terdaftar, buka formulir pendaftaran dan isi email secara otomatis.
   if (!registeredUser) {
     const registrationEmail = document.getElementById('reg-email');
     if (registrationEmail) registrationEmail.value = email;
     openClientAuthModal();
-    showToast('Belum terdaftar', 'Silakan lengkapi formulir untuk membuat akun.', 'warning');
+    showToast('Belum terdaftar', 'Silakan buat akun baru terlebih dahulu.', 'warning');
     return;
   }
 
