@@ -28,22 +28,35 @@
 <body class="min-h-screen flex flex-col bg-base text-textMain selection:bg-primary selection:text-white transition-colors duration-300 antialiased">
   <div id="toast-container" class="fixed top-4 right-4 z-[90] flex flex-col gap-2.5 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
   
-  <!-- HEADER -->
+  <!-- HEADER (DIPERBARUI) -->
   <header class="sticky top-0 z-50 glass-panel border-b border-border/50 transition-all duration-300">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-3">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+      
+      <!-- Logo Kiri -->
       <button type="button" onclick="navigateTo('home')" class="flex items-center gap-4 text-left group shrink-0">
-        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-accent p-[2px] shadow-glow group-hover:scale-105 transition-all duration-300"><div class="w-full h-full rounded-xl bg-white flex items-center justify-center overflow-hidden p-1"><img src="https://iili.io/o9B6HXa.md.png" alt="PrangArt Lab" class="w-full h-full object-contain" /></div></div>
-        <div><span class="font-display font-bold text-xl tracking-tight text-textMain block leading-none">PrangArt <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">Lab</span></span><span class="text-[10px] font-mono uppercase tracking-widest text-textMuted block mt-1">Production Studio</span></div>
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-primary to-accent p-[2px] shadow-glow group-hover:scale-105 transition-all duration-300">
+          <div class="w-full h-full rounded-xl bg-white flex items-center justify-center overflow-hidden p-1">
+            <img src="https://iili.io/o9B6HXa.md.png" alt="PrangArt Lab" class="w-full h-full object-contain" />
+          </div>
+        </div>
+        <div class="hidden sm:block">
+          <span class="font-display font-bold text-xl tracking-tight text-textMain block leading-none">PrangArt <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">Lab</span></span>
+          <span class="text-[10px] font-mono uppercase tracking-widest text-textMuted block mt-1">Production Studio</span>
+        </div>
       </button>
-      <nav class="hidden md:flex items-center gap-1 bg-surface/80 backdrop-blur-md border border-border/60 rounded-2xl p-1.5 shadow-sm">
-        <button type="button" id="nav-home" onclick="navigateTo('home')" class="nav-pill px-4 py-2 rounded-xl text-sm font-semibold transition-all">Beranda</button>
-        <button type="button" id="nav-portfolio" onclick="navigateTo('portfolio')" class="nav-pill px-4 py-2 rounded-xl text-sm font-semibold transition-all">Portofolio</button>
-        <button type="button" id="nav-client" onclick="navigateTo('client')" class="nav-pill px-4 py-2 rounded-xl text-sm font-semibold transition-all">Ruang Klien</button>
-        <button type="button" id="nav-admin" onclick="navigateTo('admin')" class="nav-pill px-4 py-2 rounded-xl text-sm font-semibold transition-all">Admin</button>
+
+      <!-- Navigasi Tengah -->
+      <nav class="hidden md:flex items-center gap-1 bg-panel border border-border/80 rounded-2xl p-1.5 shadow-sm">
+        <button type="button" id="nav-home" onclick="navigateTo('home')" class="nav-pill px-5 py-2 rounded-xl text-sm font-semibold transition-all">Beranda</button>
+        <button type="button" id="nav-portfolio" onclick="navigateTo('portfolio')" class="nav-pill px-5 py-2 rounded-xl text-sm font-semibold transition-all">Portofolio</button>
+        <button type="button" id="nav-client" onclick="navigateTo('client')" class="nav-pill px-5 py-2 rounded-xl text-sm font-semibold transition-all">Ruang Klien</button>
+        <button type="button" id="nav-admin" onclick="navigateTo('admin')" class="nav-pill px-5 py-2 rounded-xl text-sm font-semibold transition-all">Admin</button>
       </nav>
-      <div class="flex items-center gap-3">
+
+      <!-- Kanan: Tema & Akun -->
+      <div class="flex items-center gap-3 shrink-0">
         <div class="relative">
-          <button type="button" onclick="toggleThemeDropdown()" aria-label="Pilih tema" class="p-2.5 rounded-xl bg-surface/80 border border-border/60 hover:border-primary text-textMain transition-all shadow-sm flex items-center justify-center">
+          <button type="button" onclick="toggleThemeDropdown()" aria-label="Pilih tema" class="p-2.5 rounded-xl bg-panel border border-border/80 hover:border-primary/50 text-textMain transition-all shadow-sm flex items-center justify-center">
             <svg id="theme-icon-dark" class="hidden w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
             <svg id="theme-icon-light" class="hidden w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path stroke-linecap="round" stroke-width="2" d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg>
             <svg id="theme-icon-auto" class="hidden w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="14" rx="2"/><path stroke-linecap="round" stroke-width="2" d="M8 22h8m-4-4v4"/></svg>
@@ -61,7 +74,6 @@
 
   <!-- MAIN CONTENT -->
   <main class="flex-1 relative">
-    
     <!-- PAGE: HOME -->
     <section id="page-home" class="page-section page-dissolve">
       <div class="home-hero relative overflow-hidden bg-surface text-center">
@@ -93,39 +105,41 @@
     <section id="page-portfolio" class="page-section hidden bg-base"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16"><span class="home-kicker">Portofolio</span><h1 class="text-4xl font-display font-bold mt-3">Karya pilihan</h1><div id="portfolio-grid" class="grid md:grid-cols-3 gap-5 mt-8"></div></div></section>
 
     <!-- PAGE: CLIENT -->
-    <section id="page-client" class="page-section hidden page-dissolve bg-base"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-      <div id="client-login-wall" class="max-w-md mx-auto bg-surface border border-border/80 rounded-[2rem] p-8 md:p-10 shadow-premium">
-        <div class="text-center mb-8"><h2 class="text-3xl font-display font-bold">Ruang Klien</h2><p class="text-textMuted text-sm mt-2">Masuk untuk melihat proyek Anda.</p></div>
-        <form onsubmit="handleClientPortalLogin(event)" class="space-y-4">
-          <div><label class="block text-xs font-bold mb-2">Email</label><input type="email" id="portal-login-email" required class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3.5 text-sm" /></div>
-          <div>
-            <label class="block text-xs font-bold mb-2">Kata Sandi</label>
-            <div class="relative">
-              <input type="password" id="portal-login-pass" required class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3.5 text-sm pr-12" />
-              <button type="button" onclick="togglePasswordVisibility('portal-login-pass', 'eye-icon-login')" class="absolute inset-y-0 right-0 pr-4 flex items-center text-textMuted hover:text-primary transition">
-                <svg id="eye-icon-login" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-              </button>
+    <section id="page-client" class="page-section hidden page-dissolve bg-base">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+        <!-- Login Wall -->
+        <div id="client-login-wall" class="max-w-md mx-auto bg-surface border border-border/80 rounded-[2rem] p-8 md:p-10 shadow-premium">
+          <div class="text-center mb-8"><h2 class="text-3xl font-display font-bold">Ruang Klien</h2><p class="text-textMuted text-sm mt-2">Masuk untuk melihat proyek Anda.</p></div>
+          <form onsubmit="handleClientPortalLogin(event)" class="space-y-4">
+            <div><label class="block text-xs font-bold mb-2">Email</label><input type="email" id="portal-login-email" required class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3.5 text-sm" /></div>
+            <div>
+              <label class="block text-xs font-bold mb-2">Kata Sandi</label>
+              <div class="relative">
+                <input type="password" id="portal-login-pass" required class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3.5 text-sm pr-12" />
+                <button type="button" onclick="togglePasswordVisibility('portal-login-pass', 'eye-icon-login')" class="absolute inset-y-0 right-0 pr-4 flex items-center text-textMuted hover:text-primary transition">
+                  <svg id="eye-icon-login" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                </button>
+              </div>
             </div>
-          </div>
-          <div class="flex justify-between items-center text-xs"><button type="button" onclick="openClientAuthModal('register')" class="text-primary font-bold hover:underline">Daftar Akun</button><button type="button" onclick="handleForgotPassword(document.getElementById('portal-login-email').value)" class="text-textMuted hover:text-primary">Lupa Sandi?</button></div>
-          <button type="submit" class="btn-primary w-full py-4 rounded-xl text-sm font-bold">Masuk →</button>
-          <div class="relative flex py-2 items-center"><div class="flex-grow border-t border-border/60"></div><span class="mx-4 text-textMuted text-xs">atau</span><div class="flex-grow border-t border-border/60"></div></div>
-          <button type="button" onclick="handleGoogleLogin()" class="w-full py-3.5 rounded-xl bg-white text-gray-800 border border-gray-300 font-bold text-sm hover:bg-gray-50 transition flex items-center justify-center gap-2">
-            <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-            Masuk dengan Google
-          </button>
-        </form>
+            <div class="flex justify-between items-center text-xs"><button type="button" onclick="openClientAuthModal('register')" class="text-primary font-bold hover:underline">Daftar Akun</button><button type="button" onclick="handleForgotPassword(document.getElementById('portal-login-email').value)" class="text-textMuted hover:text-primary">Lupa Sandi?</button></div>
+            <button type="submit" class="btn-primary w-full py-4 rounded-xl text-sm font-bold">Masuk →</button>
+            <div class="relative flex py-2 items-center"><div class="flex-grow border-t border-border/60"></div><span class="mx-4 text-textMuted text-xs">atau</span><div class="flex-grow border-t border-border/60"></div></div>
+            <button type="button" onclick="handleGoogleLogin()" class="w-full py-3.5 rounded-xl bg-white text-gray-800 border border-gray-300 font-bold text-sm hover:bg-gray-50 transition flex items-center justify-center gap-2">
+              <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+              Masuk dengan Google
+            </button>
+          </form>
+        </div>
+        <!-- Dashboard Workspace -->
+        <div id="client-workspace-content" class="hidden space-y-6"></div>
       </div>
-      <div id="client-workspace-content" class="hidden space-y-6"></div>
-    </div></section>
+    </section>
 
     <!-- PAGE: ORDER -->
     <section id="page-order" class="page-section hidden page-dissolve bg-base">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pb-32">
         <div id="order-form-container">
           <form id="prangart-order-form" onsubmit="handleOrderFormSubmit(event)" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            
-            <!-- KIRI: FORM -->
             <div class="lg:col-span-8 space-y-8">
               <!-- Langkah 01 -->
               <div class="bg-surface border border-border/80 rounded-3xl p-6 sm:p-10 space-y-6 shadow-premium">
@@ -168,17 +182,12 @@
                   <h2 class="text-2xl font-display font-bold mt-1">Spesifikasi & Referensi</h2>
                 </div>
                 
-                <!-- Form Spesifikasi Dinamis -->
                 <div id="dynamic-spec-fields" class="space-y-4"></div>
 
-                <!-- Upload Video Garapan -->
                 <div class="pt-6 border-t border-border/60">
                   <label class="block text-xs font-bold mb-3">Referensi Video Garapan (Opsional)</label>
                   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <!-- Input Link -->
                     <input type="url" id="field-video-link" placeholder="Link Video (YouTube / GDrive)" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
-                    
-                    <!-- Input File -->
                     <div class="relative group">
                       <input type="file" id="field-video-file" accept="video/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onchange="document.getElementById('video-file-name').textContent = this.files[0] ? this.files[0].name : 'Pilih File Video...'" />
                       <div class="w-full bg-panel border border-border border-dashed rounded-xl px-4 py-3 text-sm flex justify-between items-center group-hover:border-primary transition">
@@ -189,13 +198,11 @@
                   </div>
                 </div>
 
-                <!-- Tambahan Vokal -->
                 <label class="flex items-center justify-between p-5 rounded-2xl bg-panel border cursor-pointer mt-4">
                   <span class="text-sm font-bold">Tambahan Vokal / Player <small class="block text-textMuted">+ Rp250.000</small></span>
                   <input type="checkbox" id="field-addon-vocal" onchange="recalculateLivePrice()" class="w-5 h-5" />
                 </label>
 
-                <!-- KETENTUAN LENGKAP -->
                 <div class="mt-8 pt-6 border-t border-border/60">
                   <h3 class="text-lg font-bold text-textMain mb-4">Ketentuan & Aturan Layanan</h3>
                   <div class="text-[13px] text-textMuted space-y-3 leading-relaxed bg-panel p-5 rounded-2xl border border-border/50">
@@ -209,13 +216,11 @@
                 </div>
               </div>
 
-              <!-- Tombol Submit -->
               <div class="bg-surface border border-border/80 rounded-3xl p-6">
                 <button type="submit" class="btn-primary w-full py-4 rounded-xl font-bold">Kirim Pengajuan →</button>
               </div>
             </div>
 
-            <!-- KANAN: RINGKASAN BIAYA -->
             <aside class="lg:col-span-4 lg:sticky lg:top-28">
               <div class="bg-surface border border-border/80 rounded-3xl p-8 shadow-premium space-y-5">
                 <span class="text-xs font-mono uppercase text-primary font-bold block border-b pb-3">Ringkasan Biaya</span>
@@ -299,8 +304,13 @@
     </div>
   </div>
 
-  <!-- MODAL: CUSTOM & HIDDEN -->
-  <div id="custom-modal" class="fixed inset-0 bg-black/85 z-[65] hidden items-center justify-center p-4"><div class="bg-surface border border-border rounded-2xl max-w-lg w-full p-6"><div class="flex justify-between mb-4"><h2 id="custom-modal-title" class="font-bold"></h2><button type="button" onclick="closeCustomModal()" aria-label="Tutup">×</button></div><div id="custom-modal-body"></div></div></div>
+  <!-- MODAL: CUSTOM -->
+  <div id="custom-modal" class="fixed inset-0 bg-black/85 z-[65] hidden items-center justify-center p-4">
+    <div class="bg-surface border border-border rounded-2xl max-w-lg w-full p-6">
+      <div class="flex justify-between mb-4"><h2 id="custom-modal-title" class="font-bold"></h2><button type="button" onclick="closeCustomModal()" aria-label="Tutup">×</button></div>
+      <div id="custom-modal-body"></div>
+    </div>
+  </div>
   <div id="sop-14-grid" class="hidden"></div><div id="faq-accordion-list" class="hidden"></div>
 
   <!-- SCRIPTS -->
