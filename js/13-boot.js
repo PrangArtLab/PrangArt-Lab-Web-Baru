@@ -28,13 +28,18 @@ function persistEditableSiteContent() {
   localStorage.setItem(SITE_CONTENT_KEY, JSON.stringify(editableSiteContent));
 }
 
-/* FIX: jangan timpa konten hardcoded saat daftar kosong. */
+/* Portofolio & testimoni dirender dari data admin.
+   Bila kosong → empty state, bukan konten hardcoded. */
 function renderEditableHomeContent() {
   const portfolioGrid = document.querySelector('#page-home .portfolio-grid');
   const testimonialGrid = document.querySelector('#page-home .testimonial-grid');
-  if (portfolioGrid && editableSiteContent.portfolio.length) {
-    portfolioGrid.innerHTML = editableSiteContent.portfolio.map(item => `<article class="portfolio-card">${item.image ? `<div class="portfolio-thumb" style="background-image:linear-gradient(135deg,rgba(17,24,39,.12),rgba(17,24,39,.18)),url('${escapeSiteText(item.image)}')"></div>` : ''}<div class="portfolio-body"><span class="mini-label">${escapeSiteText(item.category)}</span><h3>${escapeSiteText(item.title)}</h3><p>${escapeSiteText(item.description)}</p></div></article>`).join('');
+
+  if (portfolioGrid) {
+    portfolioGrid.innerHTML = editableSiteContent.portfolio.length
+      ? editableSiteContent.portfolio.map(item => `<article class="portfolio-card">${item.image ? `<div class="portfolio-thumb" style="background-image:linear-gradient(135deg,rgba(17,24,39,.12),rgba(17,24,39,.18)),url('${escapeSiteText(item.image)}')"></div>` : '<div class="portfolio-thumb thumb-one"></div>'}<div class="portfolio-body"><span class="mini-label">${escapeSiteText(item.category)}</span><h3>${escapeSiteText(item.title)}</h3><p>${escapeSiteText(item.description)}</p></div></article>`).join('')
+      : '<p class="site-content-empty">Portofolio akan tampil di sini setelah ditambahkan melalui panel admin.</p>';
   }
+
   if (testimonialGrid && editableSiteContent.testimonials.length) {
     testimonialGrid.innerHTML = editableSiteContent.testimonials.map(item => `<article class="testimonial-card"><p>“${escapeSiteText(item.quote)}”</p><div class="testimonial-meta"><strong>${escapeSiteText(item.name)}</strong><span>${escapeSiteText(item.role)}</span></div></article>`).join('');
   }
@@ -111,7 +116,7 @@ function addHomeLandingSections() {
   home.appendChild(section);
 }
 
-/* FIX: biarkan hero dari styles.css tampil utuh (label + waveform), hanya poles kartu. */
+/* Biarkan hero dari styles.css tampil utuh (label + waveform), hanya poles kartu. */
 function applyNonTraditionalCopyAndStyle() {
   const style = document.createElement('style');
   style.textContent = `
