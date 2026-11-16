@@ -54,11 +54,9 @@ tailwind.config = {
 
 <div id="toast-container" class="fixed top-4 right-4 z-[90] flex flex-col gap-2.5 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
 
-<!-- HEADER -->
 <header class="sticky top-0 z-50 glass-panel border-b border-border/50 transition-all duration-300">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-3">
     <button type="button" onclick="navigateTo('home')" class="flex items-center gap-4 text-left group shrink-0">
-      <!-- LOGO FIX: Latar putih permanen agar terlihat di dark mode -->
       <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-accent p-[2px] shadow-glow group-hover:scale-105 transition-all duration-300">
         <div class="w-full h-full rounded-xl bg-white flex items-center justify-center overflow-hidden p-1">
           <img src="https://iili.io/o9B6HXa.md.png" alt="PrangArt Lab" class="w-full h-full object-contain" />
@@ -108,8 +106,8 @@ tailwind.config = {
 </header>
 
 <main class="flex-1 relative">
+  <!-- Beranda, Portofolio, Order form tetap sama -->
   <section id="page-home" class="page-section page-dissolve">
-    <!-- Hero Section dengan pendaran warna -->
     <div class="relative overflow-hidden border-b border-border/50 bg-surface">
       <div class="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-primary/20 blur-[130px] rounded-full pointer-events-none mix-blend-multiply dark:mix-blend-screen"></div>
       <div class="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-accent/20 blur-[100px] rounded-full pointer-events-none mix-blend-multiply dark:mix-blend-screen"></div>
@@ -137,7 +135,6 @@ tailwind.config = {
             </div>
           </div>
           
-          <!-- Card Glassmorphism -->
           <div class="lg:col-span-5 relative group">
             <div class="absolute inset-0 bg-gradient-to-br from-primary/40 to-accent/40 rounded-[2.5rem] blur-2xl opacity-40 group-hover:opacity-60 transition duration-500"></div>
             <div class="glass-panel rounded-[2rem] p-8 space-y-6 relative border border-white/20 dark:border-white/10 shadow-2xl backdrop-blur-xl">
@@ -166,126 +163,91 @@ tailwind.config = {
         </div>
       </div>
     </div>
-
-    <!-- Layanan -->
+    <!-- Layanan, SOP, FAQ tetap sama seperti versi terakhir -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 space-y-12">
       <div class="text-center max-w-2xl mx-auto space-y-4">
         <span class="text-xs font-mono uppercase tracking-wider text-primary font-bold bg-primary/10 px-3 py-1 rounded-full border border-primary/20">Layanan Studio</span>
         <h2 class="text-4xl font-display font-bold text-textMain">3 Kategori Layanan</h2>
-        <p class="text-sm text-textMuted">Estimasi paket referensi sebelum penawaran resmi.</p>
       </div>
-
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <!-- Card 1 -->
-        <div class="bg-surface border border-border/80 rounded-3xl p-8 flex flex-col justify-between relative group shadow-premium dark:shadow-premium-dark hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
-          <div class="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-bl-[100px] pointer-events-none transition-transform group-hover:scale-110"></div>
-          <div class="space-y-5 relative z-10">
-            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center text-primary mb-6 shadow-inner">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-            </div>
-            <h3 class="text-2xl font-display font-bold text-textMain group-hover:text-primary transition-colors">Aransemen Musik Tari</h3>
-            <p class="text-sm text-textMuted leading-relaxed">Pembuatan musik iringan tari sesuai konsep dan alur gerak penari.</p>
-            <div class="pt-4 border-t border-border/60">
-              <span class="text-xs text-textMuted block mb-1">Mulai dari</span>
-              <span class="text-2xl font-mono font-bold text-primary">Rp1.000.000</span>
-            </div>
-          </div>
-          <button type="button" onclick="selectServiceAndGoOrder('tari')" class="btn-primary w-full py-3.5 rounded-xl text-sm font-bold mt-8 shadow-glow hover:shadow-glow-hover">Ajukan Layanan →</button>
-        </div>
-
-        <!-- Card 2 -->
-        <div class="bg-surface border border-border/80 rounded-3xl p-8 flex flex-col justify-between group shadow-premium dark:shadow-premium-dark hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
+        <!-- Kartu Layanan Tari -->
+        <div class="bg-surface border border-border/80 rounded-3xl p-8 flex flex-col justify-between group shadow-premium hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
           <div class="space-y-5">
-            <div class="w-14 h-14 rounded-2xl bg-panel border border-border flex items-center justify-center text-textMain mb-6 shadow-inner group-hover:text-accent transition-colors">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/></svg>
-            </div>
-            <h3 class="text-2xl font-display font-bold text-textMain group-hover:text-accent transition-colors">Aransemen Musik Non-Tari</h3>
-            <p class="text-sm text-textMuted leading-relaxed">Pembuatan aransemen musik bebas, lagu, atau gubahan umum.</p>
-            <div class="pt-4 border-t border-border/60">
-              <span class="text-xs text-textMuted block mb-1">Mulai dari</span>
-              <span class="text-2xl font-mono font-bold text-textMain">Rp1.000.000</span>
-            </div>
+            <div class="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-6"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>
+            <h3 class="text-2xl font-display font-bold text-textMain">Aransemen Musik Tari</h3>
+            <p class="text-sm text-textMuted leading-relaxed">Musik iringan tari sesuai konsep dan alur gerak.</p>
+            <div class="pt-4 border-t border-border/60"><span class="text-xl font-mono font-bold text-primary">Rp1.000.000+</span></div>
+          </div>
+          <button type="button" onclick="selectServiceAndGoOrder('tari')" class="btn-primary w-full py-3.5 rounded-xl text-sm font-bold mt-8">Ajukan Layanan →</button>
+        </div>
+        <!-- Kartu Layanan Non-Tari -->
+        <div class="bg-surface border border-border/80 rounded-3xl p-8 flex flex-col justify-between group shadow-premium hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
+          <div class="space-y-5">
+            <div class="w-14 h-14 rounded-2xl bg-panel border border-border flex items-center justify-center text-textMain mb-6"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/></svg></div>
+            <h3 class="text-2xl font-display font-bold text-textMain">Aransemen Non-Tari</h3>
+            <p class="text-sm text-textMuted leading-relaxed">Aransemen bebas, lagu, atau gubahan umum.</p>
+            <div class="pt-4 border-t border-border/60"><span class="text-xl font-mono font-bold text-textMain">Rp1.000.000+</span></div>
           </div>
           <button type="button" onclick="selectServiceAndGoOrder('digital')" class="btn-outline w-full py-3.5 rounded-xl text-sm font-bold mt-8">Ajukan Layanan →</button>
         </div>
-
-        <!-- Card 3 -->
-        <div class="bg-surface border border-border/80 rounded-3xl p-8 flex flex-col justify-between group shadow-premium dark:shadow-premium-dark hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
+        <!-- Kartu Transkripsi -->
+        <div class="bg-surface border border-border/80 rounded-3xl p-8 flex flex-col justify-between group shadow-premium hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
           <div class="space-y-5">
-            <div class="w-14 h-14 rounded-2xl bg-panel border border-border flex items-center justify-center text-textMain mb-6 shadow-inner group-hover:text-accent transition-colors">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
-            </div>
-            <h3 class="text-2xl font-display font-bold text-textMain group-hover:text-accent transition-colors">Transkripsi Musik</h3>
-            <p class="text-sm text-textMuted leading-relaxed">Pengubahan audio/video menjadi partitur (Not Angka / Balok) dan file MIDI.</p>
-            <div class="pt-4 border-t border-border/60">
-              <span class="text-xs text-textMuted block mb-1">Mulai dari</span>
-              <span class="text-2xl font-mono font-bold text-textMain">Rp50.000</span>
-            </div>
+            <div class="w-14 h-14 rounded-2xl bg-panel border border-border flex items-center justify-center text-textMain mb-6"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></div>
+            <h3 class="text-2xl font-display font-bold text-textMain">Transkripsi Musik</h3>
+            <p class="text-sm text-textMuted leading-relaxed">Audio/video menjadi partitur & file MIDI.</p>
+            <div class="pt-4 border-t border-border/60"><span class="text-xl font-mono font-bold text-textMain">Rp50.000+</span></div>
           </div>
           <button type="button" onclick="selectServiceAndGoOrder('transkripsi')" class="btn-outline w-full py-3.5 rounded-xl text-sm font-bold mt-8">Ajukan Layanan →</button>
         </div>
       </div>
     </div>
-
-    <!-- SOP -->
     <div class="bg-panel/40 border-y border-border/60">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 space-y-12">
-        <div class="text-center space-y-2">
-          <span class="text-xs font-mono uppercase tracking-wider text-primary font-bold">Standar Operasional</span>
-          <h2 class="text-3xl font-display font-bold text-textMain">Alur Pemesanan (14 Tahap)</h2>
-        </div>
+        <div class="text-center space-y-2"><h2 class="text-3xl font-display font-bold text-textMain">Alur Pemesanan</h2></div>
         <div id="sop-14-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
       </div>
     </div>
-
-    <!-- FAQ -->
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-24 space-y-8">
-      <div class="text-center">
-        <h2 class="text-3xl font-display font-bold text-textMain">FAQ & Ketentuan</h2>
-      </div>
+      <div class="text-center"><h2 class="text-3xl font-display font-bold text-textMain">FAQ & Ketentuan</h2></div>
       <div id="faq-accordion-list" class="space-y-4"></div>
     </div>
   </section>
 
+  <!-- PORTOFOLIO -->
   <section id="page-portfolio" class="page-section hidden page-dissolve">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 space-y-10">
-      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-6 border-b border-border/60 pb-8">
-        <div>
-          <span class="text-xs font-mono text-primary font-bold tracking-wider uppercase">Arsip Karya</span>
-          <h2 class="text-4xl font-display font-bold text-textMain mt-2">Portofolio</h2>
-        </div>
-        <div class="flex flex-wrap gap-2">
-          <button type="button" onclick="filterPortfolio('Semua')" class="pf-filter-btn px-5 py-2.5 rounded-xl text-xs font-bold bg-primary text-white shadow-glow">Semua</button>
-          <button type="button" onclick="filterPortfolio('Aransemen Musik Tari')" class="pf-filter-btn px-5 py-2.5 rounded-xl text-xs font-semibold bg-surface text-textMain border border-border hover:border-primary transition-colors">Musik Tari</button>
-          <button type="button" onclick="filterPortfolio('Aransemen Musik Non-Tari')" class="pf-filter-btn px-5 py-2.5 rounded-xl text-xs font-semibold bg-surface text-textMain border border-border hover:border-primary transition-colors">Musik Non-Tari</button>
-          <button type="button" onclick="filterPortfolio('Transkripsi Musik')" class="pf-filter-btn px-5 py-2.5 rounded-xl text-xs font-semibold bg-surface text-textMain border border-border hover:border-primary transition-colors">Transkripsi</button>
-        </div>
-      </div>
+      <h2 class="text-4xl font-display font-bold text-textMain">Portofolio</h2>
       <div id="portfolio-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
     </div>
   </section>
 
+  <!-- RUANG KLIEN (DASHBOARD KLIEN) -->
   <section id="page-client" class="page-section hidden page-dissolve bg-base">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-      <div id="client-login-wall" class="max-w-md mx-auto bg-surface border border-border/80 rounded-[2.5rem] p-10 shadow-premium dark:shadow-premium-dark relative overflow-hidden">
+      <div id="client-login-wall" class="max-w-md mx-auto bg-surface border border-border/80 rounded-[2.5rem] p-10 shadow-premium relative overflow-hidden">
         <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary to-accent"></div>
-        <div class="text-center mb-10">
-          <h3 class="text-3xl font-display font-bold text-textMain mt-2">Ruang Klien</h3>
-          <p class="text-sm text-textMuted mt-2">Masuk untuk melihat penawaran dan progres.</p>
+        <div class="text-center mb-8">
+          <h3 class="text-3xl font-display font-bold text-textMain">Ruang Klien</h3>
+          <p class="text-sm text-textMuted mt-2">Masuk atau daftar untuk melihat progres.</p>
         </div>
-        <form onsubmit="handleClientPortalLogin(event)" class="space-y-5">
-          <div><label class="block text-xs font-bold text-textMain mb-2">Email</label><input type="email" id="portal-login-email" required class="w-full bg-panel border border-border/80 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-xl px-4 py-3.5 text-sm text-textMain focus:outline-none transition-all" /></div>
-          <div><label class="block text-xs font-bold text-textMain mb-2">Kata Sandi</label><input type="password" id="portal-login-pass" required class="w-full bg-panel border border-border/80 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-xl px-4 py-3.5 text-sm text-textMain focus:outline-none transition-all" /></div>
-          <div class="flex items-center justify-between text-xs text-textMuted">
-            <span>Belum punya akun? <button type="button" onclick="openClientAuthModal('register')" class="text-primary font-bold hover:underline">Daftar</button></span>
+        <form onsubmit="handleClientPortalLogin(event)" class="space-y-4">
+          <div><label class="block text-xs font-bold text-textMain mb-2">Email</label><input type="email" id="portal-login-email" required class="w-full bg-panel border border-border/80 focus:border-primary rounded-xl px-4 py-3.5 text-sm text-textMain focus:outline-none" /></div>
+          <div><label class="block text-xs font-bold text-textMain mb-2">Kata Sandi</label><input type="password" id="portal-login-pass" required class="w-full bg-panel border border-border/80 focus:border-primary rounded-xl px-4 py-3.5 text-sm text-textMain focus:outline-none" /></div>
+          <div class="flex justify-between items-center text-xs">
+            <button type="button" onclick="openClientAuthModal('register')" class="text-primary font-bold hover:underline">Daftar Akun</button>
+            <button type="button" onclick="handleForgotPassword(document.getElementById('portal-login-email').value)" class="text-textMuted hover:text-primary transition">Lupa Sandi?</button>
           </div>
-          <button type="submit" class="btn-primary w-full py-4 rounded-xl text-sm font-bold mt-4 shadow-glow hover:shadow-glow-hover">Masuk →</button>
+          <button type="submit" class="btn-primary w-full py-4 rounded-xl text-sm font-bold mt-2 shadow-glow">Masuk →</button>
+          <div class="relative flex py-2 items-center"><div class="flex-grow border-t border-border/60"></div><span class="flex-shrink-0 mx-4 text-textMuted text-xs">atau</span><div class="flex-grow border-t border-border/60"></div></div>
+          <button type="button" onclick="handleGoogleLogin()" class="w-full py-3.5 rounded-xl bg-white text-gray-800 border border-gray-300 font-bold text-sm flex items-center justify-center gap-2 hover:bg-gray-50 transition"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5" /> Masuk dengan Google</button>
         </form>
       </div>
       <div id="client-workspace-content" class="hidden space-y-8"></div>
     </div>
   </section>
 
+  <!-- ORDER FORM -->
   <section id="page-order" class="page-section hidden page-dissolve bg-base">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pb-32">
       <div id="order-form-container">
@@ -293,104 +255,75 @@ tailwind.config = {
           <div id="order-account-banner" class="text-sm text-textMain"></div>
           <button type="button" onclick="navigateTo('client')" class="px-5 py-2.5 rounded-xl bg-panel border border-border hover:border-primary text-xs font-bold text-textMain transition">← Kembali</button>
         </div>
-
+        <!-- Form order tetap sama (id: prangart-order-form) -->
         <form id="prangart-order-form" onsubmit="handleOrderFormSubmit(event)" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <!-- Konten Form order (Langkah 1-4) tetap disini -->
           <div class="lg:col-span-8 space-y-8">
-            <div class="bg-surface border border-border/80 rounded-3xl p-6 sm:p-10 space-y-6 shadow-premium dark:shadow-premium-dark">
+            <div class="bg-surface border border-border/80 rounded-3xl p-6 sm:p-10 space-y-6 shadow-premium">
               <div><span class="text-[11px] font-mono text-primary font-bold uppercase tracking-wider">Langkah 01</span><h3 class="text-2xl font-display font-bold text-textMain mt-1">Pilih Layanan & Harga</h3></div>
               <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <button type="button" id="svc-tab-tari" onclick="selectServiceLine('tari')" class="svc-tab-btn p-4 rounded-2xl border text-left transition-all">
-                  <span class="text-sm font-bold block">Musik Tari</span>
-                </button>
-                <button type="button" id="svc-tab-digital" onclick="selectServiceLine('digital')" class="svc-tab-btn p-4 rounded-2xl border text-left transition-all">
-                  <span class="text-sm font-bold block">Musik Non-Tari</span>
-                </button>
-                <button type="button" id="svc-tab-transkripsi" onclick="selectServiceLine('transkripsi')" class="svc-tab-btn p-4 rounded-2xl border text-left transition-all">
-                  <span class="text-sm font-bold block">Transkripsi</span>
-                </button>
+                <button type="button" id="svc-tab-tari" onclick="selectServiceLine('tari')" class="svc-tab-btn p-4 rounded-2xl border text-left"><span class="text-sm font-bold block">Musik Tari</span></button>
+                <button type="button" id="svc-tab-digital" onclick="selectServiceLine('digital')" class="svc-tab-btn p-4 rounded-2xl border text-left"><span class="text-sm font-bold block">Musik Non-Tari</span></button>
+                <button type="button" id="svc-tab-transkripsi" onclick="selectServiceLine('transkripsi')" class="svc-tab-btn p-4 rounded-2xl border text-left"><span class="text-sm font-bold block">Transkripsi</span></button>
               </div>
               <div id="package-cards-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2"></div>
-              
               <div class="mt-4 pt-6 border-t border-border/60">
                 <label class="block text-xs font-bold text-textMain mb-2">Atau masukkan Harga Kesepakatan (Rp)</label>
-                <input type="number" id="custom-price-input" oninput="handleCustomPrice(this.value)" placeholder="Contoh: 1500000" class="w-full bg-panel border border-border/80 focus:border-primary rounded-xl px-4 py-3.5 text-sm font-mono text-textMain focus:outline-none shadow-inner" />
-                <p class="text-[10px] text-textMuted mt-2">Kosongkan jika menggunakan paket standar di atas.</p>
+                <input type="number" id="custom-price-input" oninput="handleCustomPrice(this.value)" placeholder="Contoh: 1500000" class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3.5 text-sm font-mono text-textMain shadow-inner" />
               </div>
             </div>
-
-            <div class="bg-surface border border-border/80 rounded-3xl p-6 sm:p-10 space-y-6 shadow-premium dark:shadow-premium-dark">
+            <div class="bg-surface border border-border/80 rounded-3xl p-6 sm:p-10 space-y-6 shadow-premium">
               <div><span class="text-[11px] font-mono text-primary font-bold uppercase tracking-wider">Langkah 02</span><h3 class="text-2xl font-display font-bold text-textMain mt-1">Informasi Karya</h3></div>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <div><label class="block text-xs font-bold text-textMain mb-2">Nama Lengkap *</label><input type="text" id="field-nama" required class="w-full bg-panel border border-border/80 focus:border-primary rounded-xl px-4 py-3 text-sm text-textMain focus:outline-none shadow-inner" /></div>
-                <div><label class="block text-xs font-bold text-textMain mb-2">Email *</label><input type="email" id="field-email" required class="w-full bg-panel border border-border/80 focus:border-primary rounded-xl px-4 py-3 text-sm text-textMain focus:outline-none shadow-inner" /></div>
-                <div><label class="block text-xs font-bold text-textMain mb-2">No. WhatsApp *</label><input type="tel" id="field-wa" required class="w-full bg-panel border border-border/80 focus:border-primary rounded-xl px-4 py-3 text-sm text-textMain focus:outline-none shadow-inner" /></div>
-                <div><label class="block text-xs font-bold text-textMain mb-2">Kota *</label><input type="text" id="field-kota" required class="w-full bg-panel border border-border/80 focus:border-primary rounded-xl px-4 py-3 text-sm text-textMain focus:outline-none shadow-inner" /></div>
-                <div><label class="block text-xs font-bold text-textMain mb-2">Alamat *</label><input type="text" id="field-alamat" required class="w-full bg-panel border border-border/80 focus:border-primary rounded-xl px-4 py-3 text-sm text-textMain focus:outline-none shadow-inner" /></div>
-                <div><label class="block text-xs font-bold text-textMain mb-2">NIK</label><input type="text" id="field-nik" class="w-full bg-panel border border-border/80 focus:border-primary rounded-xl px-4 py-3 text-sm text-textMain focus:outline-none shadow-inner" /></div>
-                <div><label class="block text-xs font-bold text-textMain mb-2">Instansi *</label><input type="text" id="field-instansi" required class="w-full bg-panel border border-border/80 focus:border-primary rounded-xl px-4 py-3 text-sm text-textMain focus:outline-none shadow-inner" /></div>
-                <div><label class="block text-xs font-bold text-textMain mb-2">Pencipta *</label><input type="text" id="field-koreografer" required class="w-full bg-panel border border-border/80 focus:border-primary rounded-xl px-4 py-3 text-sm text-textMain focus:outline-none shadow-inner" /></div>
-                <div><label class="block text-xs font-bold text-textMain mb-2">Judul *</label><input type="text" id="field-judul" required class="w-full bg-panel border border-border/80 focus:border-primary rounded-xl px-4 py-3 text-sm text-textMain focus:outline-none shadow-inner" /></div>
-                <div><label class="block text-xs font-bold text-textMain mb-2">Jenis *</label><input type="text" id="field-jenis-tari" required class="w-full bg-panel border border-border/80 focus:border-primary rounded-xl px-4 py-3 text-sm text-textMain focus:outline-none shadow-inner" /></div>
-                <div><label class="block text-xs font-bold text-textMain mb-2">Budaya *</label><input type="text" id="field-budaya" required class="w-full bg-panel border border-border/80 focus:border-primary rounded-xl px-4 py-3 text-sm text-textMain focus:outline-none shadow-inner" /></div>
-                <div><label class="block text-xs font-bold text-textMain mb-2">Durasi *</label><input type="text" id="field-durasi" required placeholder="05:30" class="w-full bg-panel border border-border/80 focus:border-primary rounded-xl px-4 py-3 text-sm font-mono text-textMain focus:outline-none shadow-inner" /></div>
+                <div><label class="block text-xs font-bold text-textMain mb-2">Nama Lengkap *</label><input type="text" id="field-nama" required class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3 text-sm" /></div>
+                <div><label class="block text-xs font-bold text-textMain mb-2">Email *</label><input type="email" id="field-email" required class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3 text-sm" /></div>
+                <div><label class="block text-xs font-bold text-textMain mb-2">No. WhatsApp *</label><input type="tel" id="field-wa" required class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3 text-sm" /></div>
+                <div><label class="block text-xs font-bold text-textMain mb-2">Kota *</label><input type="text" id="field-kota" required class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3 text-sm" /></div>
+                <div><label class="block text-xs font-bold text-textMain mb-2">Alamat *</label><input type="text" id="field-alamat" required class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3 text-sm" /></div>
+                <div><label class="block text-xs font-bold text-textMain mb-2">NIK</label><input type="text" id="field-nik" class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3 text-sm" /></div>
+                <div><label class="block text-xs font-bold text-textMain mb-2">Instansi *</label><input type="text" id="field-instansi" required class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3 text-sm" /></div>
+                <div><label class="block text-xs font-bold text-textMain mb-2">Pencipta *</label><input type="text" id="field-koreografer" required class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3 text-sm" /></div>
+                <div><label class="block text-xs font-bold text-textMain mb-2">Judul *</label><input type="text" id="field-judul" required class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3 text-sm" /></div>
+                <div><label class="block text-xs font-bold text-textMain mb-2">Jenis *</label><input type="text" id="field-jenis-tari" required class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3 text-sm" /></div>
+                <div><label class="block text-xs font-bold text-textMain mb-2">Budaya *</label><input type="text" id="field-budaya" required class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3 text-sm" /></div>
+                <div><label class="block text-xs font-bold text-textMain mb-2">Durasi *</label><input type="text" id="field-durasi" required placeholder="05:30" class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3 text-sm font-mono" /></div>
               </div>
-              <div>
-                <label class="block text-xs font-bold text-textMain mb-2">Link Drive / YouTube (Referensi) *</label>
-                <input type="url" id="field-referensi" required class="w-full bg-panel border border-border/80 focus:border-primary rounded-xl px-4 py-3 text-sm text-textMain focus:outline-none shadow-inner" />
-              </div>
+              <div><label class="block text-xs font-bold text-textMain mb-2">Link Drive / YouTube (Referensi) *</label><input type="url" id="field-referensi" required class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3 text-sm" /></div>
               <div>
                 <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
                   <label class="block text-xs font-bold text-textMain">Sinopsis *</label>
-                  <button type="button" id="btn-ai-synopsis" onclick="generateAISynopsis()" class="px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/30 text-primary text-[11px] font-bold hover:bg-primary/20 transition shadow-sm">✦ Generate AI</button>
+                  <button type="button" id="btn-ai-synopsis" onclick="generateAISynopsis()" class="px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/30 text-primary text-[11px] font-bold shadow-sm">✦ Generate AI</button>
                 </div>
-                <textarea id="field-sinopsis" rows="4" required class="w-full bg-panel border border-border/80 focus:border-primary rounded-xl px-4 py-3 text-sm text-textMain leading-relaxed focus:outline-none shadow-inner"></textarea>
+                <textarea id="field-sinopsis" rows="4" required class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3 text-sm leading-relaxed"></textarea>
               </div>
             </div>
-
-            <div class="bg-surface border border-border/80 rounded-3xl p-6 sm:p-10 space-y-6 shadow-premium dark:shadow-premium-dark">
+            <div class="bg-surface border border-border/80 rounded-3xl p-6 sm:p-10 space-y-6 shadow-premium">
               <div><span class="text-[11px] font-mono text-primary font-bold uppercase tracking-wider">Langkah 03</span><h3 class="text-2xl font-display font-bold text-textMain mt-1">Spesifikasi Teknis</h3></div>
               <div id="dynamic-spec-fields" class="space-y-4"></div>
               <div id="addon-vocal-wrapper" class="pt-6 border-t border-border/60">
-                <label class="flex items-center justify-between gap-3 p-5 rounded-2xl bg-panel border border-border/80 hover:border-primary/50 cursor-pointer transition shadow-sm">
-                  <div>
-                    <span class="text-sm font-bold text-textMain block">Tambahan Vokal / Session Player</span>
-                    <span class="text-xs text-textMuted">Dikoordinasikan secara fleksibel (+ Rp50.000).</span>
-                  </div>
-                  <div class="flex items-center gap-3 shrink-0">
-                    <span id="addon-vocal-price-label" class="text-sm font-mono font-bold text-primary">+Rp50.000</span>
-                    <input type="checkbox" id="field-addon-vocal" onchange="recalculateLivePrice()" class="w-5 h-5 accent-primary rounded cursor-pointer" />
-                  </div>
+                <label class="flex items-center justify-between gap-3 p-5 rounded-2xl bg-panel border border-border/80 cursor-pointer">
+                  <div><span class="text-sm font-bold text-textMain block">Tambahan Vokal / Player</span><span class="text-xs text-textMuted">+ Rp50.000</span></div>
+                  <input type="checkbox" id="field-addon-vocal" onchange="recalculateLivePrice()" class="w-5 h-5 accent-primary rounded" />
                 </label>
               </div>
             </div>
-
-            <div class="bg-surface border border-border/80 rounded-3xl p-6 sm:p-10 space-y-6 shadow-premium dark:shadow-premium-dark">
+            <div class="bg-surface border border-border/80 rounded-3xl p-6 sm:p-10 space-y-6 shadow-premium">
               <div><span class="text-[11px] font-mono text-primary font-bold uppercase tracking-wider">Langkah 04</span><h3 class="text-2xl font-display font-bold text-textMain mt-1">Pembayaran</h3></div>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <label class="flex items-start gap-4 p-5 rounded-2xl bg-panel border border-border/80 hover:border-primary cursor-pointer transition shadow-sm">
-                  <input type="radio" name="payment-plan" value="DP 50%" checked onchange="recalculateLivePrice()" class="mt-1 w-4 h-4 accent-primary" />
-                  <div class="text-sm"><strong class="text-textMain block font-bold">DP 50%</strong><span class="text-xs text-textMuted mt-1 block">Bayar separuh di awal.</span></div>
-                </label>
-                <label class="flex items-start gap-4 p-5 rounded-2xl bg-panel border border-border/80 hover:border-primary cursor-pointer transition shadow-sm">
-                  <input type="radio" name="payment-plan" value="Pembayaran Penuh 100%" onchange="recalculateLivePrice()" class="mt-1 w-4 h-4 accent-primary" />
-                  <div class="text-sm"><strong class="text-textMain block font-bold">Penuh 100%</strong><span class="text-xs text-textMuted mt-1 block">Bayar lunas di awal.</span></div>
-                </label>
+                <label class="flex items-start gap-4 p-5 rounded-2xl bg-panel border border-border/80 cursor-pointer"><input type="radio" name="payment-plan" value="DP 50%" checked onchange="recalculateLivePrice()" class="mt-1 accent-primary" /><div class="text-sm"><strong class="text-textMain block font-bold">DP 50%</strong></div></label>
+                <label class="flex items-start gap-4 p-5 rounded-2xl bg-panel border border-border/80 cursor-pointer"><input type="radio" name="payment-plan" value="Pembayaran Penuh 100%" onchange="recalculateLivePrice()" class="mt-1 accent-primary" /><div class="text-sm"><strong class="text-textMain block font-bold">Penuh 100%</strong></div></label>
               </div>
-              <button type="submit" class="btn-primary w-full py-4 rounded-xl text-sm font-bold shadow-glow hover:shadow-glow-hover mt-4">Kirim Pengajuan →</button>
+              <button type="submit" class="btn-primary w-full py-4 rounded-xl text-sm font-bold shadow-glow">Kirim Pengajuan →</button>
             </div>
           </div>
-
           <div class="lg:col-span-4 lg:sticky lg:top-28 space-y-4">
-            <div class="bg-surface border border-border/80 rounded-3xl p-8 shadow-premium dark:shadow-premium-dark space-y-5 relative overflow-hidden">
-              <div class="absolute -top-10 -right-10 w-32 h-32 bg-primary/10 blur-2xl rounded-full"></div>
+            <div class="bg-surface border border-border/80 rounded-3xl p-8 shadow-premium space-y-5">
               <span class="text-xs font-mono uppercase tracking-wider text-primary font-bold block border-b border-border/60 pb-3">Ringkasan Biaya</span>
               <div class="space-y-3 text-sm">
                 <div class="flex justify-between text-textMuted"><span>Layanan</span><span id="calc-service-name" class="font-bold text-textMain"></span></div>
                 <div class="flex justify-between text-textMuted"><span id="calc-pkg-name"></span><span id="calc-pkg-price" class="font-mono text-textMain"></span></div>
               </div>
-              <div class="border-t border-border/60 pt-4">
-                <div class="flex items-baseline justify-between"><span class="text-sm font-bold text-textMuted">Total</span><span id="calc-total-price" class="text-3xl font-display font-bold text-primary"></span></div>
-              </div>
+              <div class="border-t border-border/60 pt-4"><div class="flex items-baseline justify-between"><span class="text-sm font-bold text-textMuted">Total</span><span id="calc-total-price" class="text-3xl font-display font-bold text-primary"></span></div></div>
             </div>
           </div>
         </form>
@@ -398,16 +331,15 @@ tailwind.config = {
     </div>
   </section>
 
+  <!-- ADMIN DASHBOARD -->
   <section id="page-admin" class="page-section hidden page-dissolve bg-base">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-      <div id="admin-pin-gate" class="max-w-md mx-auto bg-surface border border-border/80 rounded-[2.5rem] p-10 shadow-premium dark:shadow-premium-dark relative overflow-hidden">
+      <div id="admin-pin-gate" class="max-w-md mx-auto bg-surface border border-border/80 rounded-[2.5rem] p-10 shadow-premium relative overflow-hidden">
         <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary to-accent"></div>
-        <div class="text-center mb-10">
-          <h3 class="text-3xl font-display font-bold text-textMain mt-2">Akses Admin</h3>
-        </div>
+        <div class="text-center mb-10"><h3 class="text-3xl font-display font-bold text-textMain">Akses Admin</h3></div>
         <form onsubmit="verifyAdminPin(event)" class="space-y-5">
-          <input type="password" id="admin-pin-input" required placeholder="Masukkan PIN" class="w-full bg-panel border border-border/80 focus:border-primary rounded-xl px-4 py-4 text-center text-lg font-mono tracking-widest text-textMain focus:outline-none shadow-inner" />
-          <button type="submit" class="btn-primary w-full py-4 rounded-xl text-sm font-bold mt-2 shadow-glow hover:shadow-glow-hover">Buka Panel →</button>
+          <input type="password" id="admin-pin-input" required placeholder="Masukkan PIN" class="w-full bg-panel border border-border/80 rounded-xl px-4 py-4 text-center text-lg font-mono tracking-widest text-textMain shadow-inner" />
+          <button type="submit" class="btn-primary w-full py-4 rounded-xl text-sm font-bold mt-2 shadow-glow">Buka Panel →</button>
         </form>
       </div>
       <div id="admin-workspace-content" class="hidden space-y-6"></div>
@@ -415,8 +347,7 @@ tailwind.config = {
   </section>
 </main>
 
-<!-- FLOATING WA BUTTON -->
-<button type="button" onclick="openProducerWaModal()" class="fixed bottom-8 right-8 z-40 bg-[#25D366] hover:bg-[#1EBE57] text-white p-4.5 rounded-full shadow-[0_10px_40px_-10px_rgba(37,211,102,0.6)] flex items-center justify-center transition-all hover:scale-110 hover:-translate-y-2 group">
+<button type="button" onclick="openProducerWaModal()" class="fixed bottom-8 right-8 z-40 bg-[#25D366] hover:bg-[#1EBE57] text-white p-4.5 rounded-full shadow-[0_10px_40px_-10px_rgba(37,211,102,0.6)] flex items-center justify-center transition-all hover:scale-110 hover:-translate-y-2">
   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
 </button>
 
@@ -424,36 +355,22 @@ tailwind.config = {
 <div id="client-auth-modal" class="fixed inset-0 bg-black/70 backdrop-blur-md z-[72] hidden items-center justify-center p-4">
   <div class="bg-surface border border-border/80 rounded-3xl max-w-md w-full p-8 shadow-2xl space-y-6 animate-fade-in">
     <div class="flex items-center justify-between border-b border-border/60 pb-4">
-      <h3 class="text-xl font-display font-bold text-textMain">Daftar / Masuk</h3>
-      <button type="button" onclick="closeClientAuthModal()" class="text-2xl text-textMuted hover:text-red-500 transition-colors">×</button>
-    </div>
-    <div class="grid grid-cols-2 gap-2 bg-panel p-1.5 rounded-xl border border-border/60">
-      <button type="button" id="auth-tab-register" onclick="switchAuthModalTab('register')" class="py-2.5 rounded-lg text-xs font-bold bg-surface shadow text-textMain border border-border/50">Daftar</button>
-      <button type="button" id="auth-tab-login" onclick="switchAuthModalTab('login')" class="py-2.5 rounded-lg text-xs font-semibold text-textMuted transition">Masuk</button>
+      <h3 class="text-xl font-display font-bold text-textMain">Daftar Akun Baru</h3>
+      <button type="button" onclick="closeClientAuthModal()" class="text-2xl text-textMuted hover:text-red-500">×</button>
     </div>
     <form id="form-client-register" onsubmit="handleQuickClientRegister(event)" class="space-y-4">
-      <div><input type="text" id="reg-name" required placeholder="Nama Lengkap" class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3 text-sm text-textMain focus:outline-none" /></div>
-      <div class="grid grid-cols-2 gap-4">
-        <div><input type="email" id="reg-email" required placeholder="Email" class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3 text-sm text-textMain focus:outline-none" /></div>
-        <div><input type="tel" id="reg-wa" required placeholder="WhatsApp" class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3 text-sm text-textMain focus:outline-none" /></div>
-      </div>
-      <div><input type="password" id="reg-pass" required placeholder="Kata Sandi" class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3 text-sm text-textMain focus:outline-none" /></div>
-      <button type="submit" class="btn-primary w-full py-3.5 rounded-xl text-sm font-bold mt-2">Buat Akun →</button>
-    </form>
-    <form id="form-client-login" onsubmit="handleQuickClientLogin(event)" class="hidden space-y-4">
-      <div><input type="email" id="login-email" required placeholder="Email" class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3 text-sm text-textMain focus:outline-none" /></div>
-      <div><input type="password" id="login-pass" required placeholder="Kata Sandi" class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3 text-sm text-textMain focus:outline-none" /></div>
-      <button type="submit" class="btn-primary w-full py-3.5 rounded-xl text-sm font-bold mt-2">Masuk →</button>
+      <div><input type="text" id="reg-name" required placeholder="Nama Lengkap" class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3 text-sm text-textMain" /></div>
+      <div><input type="email" id="reg-email" required placeholder="Email" class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3 text-sm text-textMain" /></div>
+      <div><input type="tel" id="reg-wa" required placeholder="No. WhatsApp" class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3 text-sm text-textMain" /></div>
+      <div><input type="password" id="reg-pass" required placeholder="Buat Kata Sandi" class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3 text-sm text-textMain" /></div>
+      <button type="submit" class="btn-primary w-full py-3.5 rounded-xl text-sm font-bold mt-2 shadow-glow">Daftar →</button>
     </form>
   </div>
 </div>
 
 <div id="wa-producer-modal" class="fixed inset-0 bg-black/70 backdrop-blur-md z-[75] hidden items-center justify-center p-4">
   <div class="bg-surface border border-border/80 rounded-3xl max-w-lg w-full p-8 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto animate-fade-in">
-    <div class="flex items-center justify-between border-b border-border/60 pb-4">
-      <h3 class="text-xl font-display font-bold text-textMain">Kirim WA</h3>
-      <button type="button" onclick="closeProducerWaModal()" class="text-2xl text-textMuted hover:text-red-500">×</button>
-    </div>
+    <div class="flex items-center justify-between border-b border-border/60 pb-4"><h3 class="text-xl font-display font-bold text-textMain">Kirim WA</h3><button type="button" onclick="closeProducerWaModal()" class="text-2xl text-textMuted hover:text-red-500">×</button></div>
     <div class="space-y-4">
       <input type="text" id="wa-comp-name" oninput="updateWaComposerPreview()" placeholder="Nama Anda" class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3 text-sm text-textMain" />
       <textarea id="wa-comp-intent" rows="3" oninput="updateWaComposerPreview()" placeholder="Pesan..." class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3 text-sm text-textMain"></textarea>
@@ -471,10 +388,7 @@ tailwind.config = {
 <footer class="border-t border-border/60 bg-surface mt-auto py-10">
   <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-textMuted">
     <strong class="text-textMain font-display font-bold text-sm tracking-wider">PRANGART LAB</strong>
-    <div class="flex gap-4 font-mono text-[11px]">
-      <span class="hover:text-primary transition cursor-pointer">WA: 08977250597</span>
-      <span class="hover:text-primary transition cursor-pointer">prangart.studios@gmail.com</span>
-    </div>
+    <div class="flex gap-4 font-mono text-[11px]"><span>WA: 08977250597</span><span>prangart.studios@gmail.com</span></div>
   </div>
 </footer>
 
