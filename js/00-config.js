@@ -1,5 +1,5 @@
 const LOGO_URL = 'https://iili.io/o9B6HXa.md.png';
-const STORAGE_KEY = 'prangart_lab_v11';
+const STORAGE_KEY = 'prangart_lab_v12'; // Naikkan versi untuk hapus cache lama
 
 const STUDIO_FIREBASE_CONFIG = {
   apiKey: "AIzaSyDJX7Y95gJ8j3A3te5pvTONrAJBxZ5yS2s",
@@ -21,7 +21,7 @@ const TRACKER_MILESTONES = [
 
 const DEFAULT_STATE = {
   settings: {
-    studioWhatsApp: '628977250597',
+    studioWhatsApp: '628977250597', // NOMOR WA DIUPDATE
     recaptchaSiteKey: '6LeDaSEuAAAAAIDdp1Ir_V-wkmOXE-e8imq9Alzj',
     adminPin: '2026',
     paymentMethods: [
@@ -30,7 +30,7 @@ const DEFAULT_STATE = {
   },
   serviceCatalog: {
     tari: {
-      label:'Aransemen Musik Tari', addonLabel:'Tambahan Vokal', addonPrice:250000, // HARGA 250RB
+      label:'Aransemen Musik Tari', addonLabel:'Tambahan Vokal', addonPrice:250000,
       packages: {
         dasar: { label:'Paket Dasar (1 Juta)', price:1000000, desc:'Maks 5 menit.' },
         standar: { label:'Paket Standar (1,5 Juta)', price:1500000, desc:'Maks 7 menit.' },
@@ -38,7 +38,7 @@ const DEFAULT_STATE = {
       }
     },
     digital: {
-      label:'Aransemen Musik Non-Tari', addonLabel:'Tambahan Vokal', addonPrice:250000, // HARGA 250RB
+      label:'Aransemen Musik Non-Tari', addonLabel:'Tambahan Vokal', addonPrice:250000,
       packages: {
         dasar: { label:'Paket Dasar (1 Juta)', price:1000000, desc:'Maks 4-5 menit.' },
         standar: { label:'Paket Standar (1,5 Juta)', price:1500000, desc:'Maks 7 menit.' },
@@ -46,7 +46,7 @@ const DEFAULT_STATE = {
       }
     },
     transkripsi: {
-      label:'Transkripsi Musik', addonLabel:'Tambahan Vokal', addonPrice:250000, // HARGA 250RB
+      label:'Transkripsi Musik', addonLabel:'Tambahan Vokal', addonPrice:250000,
       packages: {
         dasar: { label:'Tarif Minimum (50rb)', price:50000, desc:'Durasi ≤ 1 Menit.' },
         standar: { label:'Bundling Dasar (300rb)', price:300000, desc:'± 3 Menit.' },
@@ -71,7 +71,6 @@ let appState = {
   customPrice: null, synopsisMode: 'manual'
 };
 
-// PERSISTENSI: Menjaga sesi login & data saat di-refresh
 try {
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved) {
