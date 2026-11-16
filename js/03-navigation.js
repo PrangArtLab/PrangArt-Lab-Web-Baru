@@ -1,5 +1,4 @@
 function navigateTo(page) {
-  // JIKA HARUS LOGIN UNTUK ORDER
   if (page === 'order' && !appState.currentClientUser) {
     showToast('Perhatian', 'Silakan masuk atau daftar akun terlebih dahulu untuk mengajukan layanan.', 'warning');
     page = 'client';
@@ -41,7 +40,8 @@ function updateHeaderAuthBadge() {
   const box = document.getElementById('header-auth-status');
   if (!box) return;
   if (appState.currentClientUser) {
-    box.innerHTML = `<div class="flex items-center gap-1.5 bg-surface border border-border rounded-xl px-3 py-1.5 text-xs"><span class="w-2 h-2 rounded-full bg-emerald-500"></span><span class="font-bold text-textMain">${appState.currentClientUser.name}</span><button onclick="logoutClientUser()" class="text-textMuted hover:text-red-500 ml-1">×</button></div>`;
+    // Tanda silang (x) dihilangkan dari sini
+    box.innerHTML = `<div class="flex items-center gap-1.5 bg-surface border border-border rounded-xl px-3 py-1.5 text-xs"><span class="w-2 h-2 rounded-full bg-emerald-500"></span><span class="font-bold text-textMain">${appState.currentClientUser.name}</span></div>`;
   } else {
     box.innerHTML = `<button onclick="navigateTo('client')" class="px-4 py-2 rounded-xl bg-surface border border-border text-xs font-bold text-textMain">Masuk</button>`;
   }
@@ -50,6 +50,6 @@ function updateHeaderAuthBadge() {
 function selectServiceAndGoOrder(svcKey) {
   appState.selectedServiceLine = svcKey;
   appState.selectedPackage = 'standar';
-  navigateTo('order'); // Navigasi sudah dilindungi oleh fungsi di atas
+  navigateTo('order'); 
 }
 function renderSop14Grid() { const el = document.getElementById('sop-14-grid'); if(el) el.innerHTML = `<div class="p-4 bg-surface border rounded-xl">SOP 14 Tahap</div>`; }
