@@ -1,20 +1,22 @@
-/* Light Mode */
 :root {
-  --base: 248 250 252;       /* Slate 50 (Background) */
-  --surface: 255 255 255;    /* White (Cards) */
-  --panel: 241 245 249;      /* Slate 100 (Inner Cards) */
-  --primary: 79 70 229;      /* Indigo 600 (Primary) */
+  /* Light Mode */
+  --base: 248 250 252;       /* Slate 50 */
+  --surface: 255 255 255;    /* White */
+  --panel: 241 245 249;      /* Slate 100 */
+  --primary: 79 70 229;      /* Indigo 600 */
+  --accent: 16 185 129;      /* Emerald 500 */
   --text-main: 15 23 42;     /* Slate 900 */
   --text-muted: 100 116 139; /* Slate 500 */
   --border: 226 232 240;     /* Slate 200 */
 }
 
-/* Dark Mode */
 .dark {
-  --base: 2 6 23;            /* Slate 950 (Background) */
-  --surface: 15 23 42;       /* Slate 900 (Cards) */
-  --panel: 30 41 59;         /* Slate 800 (Inner Cards) */
-  --primary: 139 92 246;     /* Violet 500 (Primary) */
+  /* Dark Mode */
+  --base: 2 6 23;            /* Slate 950 */
+  --surface: 15 23 42;       /* Slate 900 */
+  --panel: 30 41 59;         /* Slate 800 */
+  --primary: 129 140 248;    /* Indigo 400 (Lebih terang agar kontras) */
+  --accent: 52 211 153;      /* Emerald 400 */
   --text-main: 248 250 252;  /* Slate 50 */
   --text-muted: 148 163 184; /* Slate 400 */
   --border: 51 65 85;        /* Slate 700 */
@@ -24,13 +26,48 @@
 html, body {
   background-color: rgb(var(--base));
   color: rgb(var(--text-main));
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Plus Jakarta Sans', sans-serif;
   scroll-behavior: smooth;
   transition: background-color 0.3s ease, color 0.3s ease;
+  min-height: 100vh;
 }
 
-/* Typography */
 h1, h2, h3, h4, .font-display { font-family: 'Space Grotesk', sans-serif; }
+
+/* Glassmorphism */
+.glass-panel {
+  background: rgba(var(--surface), 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+}
+
+/* Tombol Primary (Gradient) */
+.btn-primary {
+  background: linear-gradient(135deg, rgb(var(--primary)) 0%, rgb(var(--accent)) 100%);
+  color: #ffffff;
+  transition: all 0.3s ease;
+  border: none;
+}
+.btn-primary:hover:not(:disabled) {
+  filter: brightness(1.1);
+  box-shadow: 0 8px 20px -6px rgba(var(--primary), 0.5);
+  transform: translateY(-2px);
+}
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Tombol Outline */
+.btn-outline {
+  border: 1px solid rgb(var(--border));
+  color: rgb(var(--text-main));
+  background: transparent;
+  transition: all 0.3s ease;
+}
+.btn-outline:hover {
+  border-color: rgb(var(--primary));
+  color: rgb(var(--primary));
+  background: rgba(var(--primary), 0.05);
+}
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
@@ -38,43 +75,14 @@ h1, h2, h3, h4, .font-display { font-family: 'Space Grotesk', sans-serif; }
 ::-webkit-scrollbar-thumb { background: rgb(var(--border)); border-radius: 9999px; }
 ::-webkit-scrollbar-thumb:hover { background: rgb(var(--primary)); }
 
-/* Buttons */
-.btn-primary {
-  background: rgb(var(--primary));
-  color: #ffffff;
-  transition: all 0.2s ease;
-}
-.btn-primary:hover:not(:disabled) {
-  background: rgba(var(--primary), 0.85);
-  box-shadow: 0 4px 15px rgba(var(--primary), 0.3);
-  transform: translateY(-1px);
-}
-.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-
-.btn-outline {
-  border: 1px solid rgb(var(--border));
-  color: rgb(var(--text-main));
-  background: rgb(var(--surface));
-  transition: all 0.2s ease;
-}
-.btn-outline:hover {
-  border-color: rgb(var(--primary));
-  color: rgb(var(--primary));
-}
-
 /* Animations */
-.page-dissolve { animation: pageDissolve 0.3s ease-out forwards; }
+.page-dissolve { animation: pageDissolve 0.4s ease-out forwards; }
 @keyframes pageDissolve {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
-
-.shake-error { animation: shakeX 0.32s ease-in-out; }
-@keyframes shakeX {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  75% { transform: translateX(5px); }
-}
+.animate-fade-in { animation: fadeIn 0.2s ease-out; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
 /* Print */
 @media print {
