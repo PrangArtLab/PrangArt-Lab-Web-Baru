@@ -1,125 +1,56 @@
 function refreshClientPageUI() {
-  const wall = document.getElementById('client-login-wall');
-  const ws = document.getElementById('client-workspace-content');
+  const wall = document.getElementById('client-login-wall'), ws = document.getElementById('client-workspace-content');
   if (!appState.currentClientUser) { wall?.classList.remove('hidden'); ws?.classList.add('hidden'); return; }
   wall?.classList.add('hidden'); ws?.classList.remove('hidden'); renderClientWorkspace();
 }
 
 function renderClientWorkspace() {
-  const ws = document.getElementById('client-workspace-content');
-  if (!ws || !appState.currentClientUser) return;
+  const ws = document.getElementById('client-workspace-content'); if (!ws) return;
   
-  // UI TABS
-  const tabsHtml = `
+  const tabs = `
     <div class="flex gap-2 border-b border-border/60 pb-4 mb-6">
-      <button type="button" onclick="appState.clientTab = 'projects'; renderClientWorkspace();" class="px-4 py-2 rounded-xl text-sm font-bold ${appState.clientTab === 'projects' ? 'bg-primary text-white shadow-glow' : 'bg-panel text-textMuted hover:text-textMain'}">Proyek Saya</button>
-      <button type="button" onclick="appState.clientTab = 'settings'; renderClientWorkspace();" class="px-4 py-2 rounded-xl text-sm font-bold ${appState.clientTab === 'settings' ? 'bg-primary text-white shadow-glow' : 'bg-panel text-textMuted hover:text-textMain'}">Pengaturan Akun</button>
-    </div>
-  `;
+      <button onclick="appState.clientTab='projects'; renderClientWorkspace();" class="px-4 py-2 rounded-xl text-sm font-bold ${appState.clientTab==='projects'?'bg-primary text-white':'bg-panel text-textMuted'}">Proyek Saya</button>
+      <button onclick="appState.clientTab='settings'; renderClientWorkspace();" class="px-4 py-2 rounded-xl text-sm font-bold ${appState.clientTab==='settings'?'bg-primary text-white':'bg-panel text-textMuted'}">Pengaturan Akun</button>
+    </div>`;
 
-  // JIKA TAB SETTINGS
+  // RENDER TAB SETTING
   if (appState.clientTab === 'settings') {
-    ws.innerHTML = `
-      <div class="bg-surface border border-border/80 rounded-[2rem] p-8 shadow-premium space-y-6">
-        ${tabsHtml}
-        <div class="space-y-5 max-w-lg">
-          <div>
-            <h3 class="text-xl font-display font-bold text-textMain mb-4">Edit Profil</h3>
-            <label class="block text-xs font-bold text-textMain mb-2">Nama Lengkap</label>
-            <input type="text" id="set-name" value="${appState.currentClientUser.name}" class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3 text-sm mb-3" />
-            <label class="block text-xs font-bold text-textMain mb-2">No. WhatsApp</label>
-            <input type="tel" id="set-wa" value="${appState.currentClientUser.wa || ''}" class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3 text-sm mb-4" />
-            <button type="button" onclick="updateClientProfile()" class="btn-primary px-6 py-2.5 rounded-xl text-xs font-bold">Simpan Profil</button>
-          </div>
-          
-          <hr class="border-border/60 my-6" />
-          
-          <div>
-            <h3 class="text-xl font-display font-bold text-textMain mb-4">Ganti Kata Sandi</h3>
-            <label class="block text-xs font-bold text-textMain mb-2">Kata Sandi Baru</label>
-            <input type="password" id="set-pass" placeholder="Minimal 4 karakter" class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3 text-sm mb-4" />
-            <button type="button" onclick="updateClientPassword()" class="btn-outline px-6 py-2.5 rounded-xl text-xs font-bold">Ganti Sandi</button>
-          </div>
-          
-          <hr class="border-border/60 my-6" />
-          <button type="button" onclick="logoutClientUser()" class="w-full py-3 rounded-xl bg-red-500/10 text-red-500 font-bold text-sm hover:bg-red-500 hover:text-white transition">Logout Akun</button>
-        </div>
+    ws.innerHTML = `<div class="bg-surface border border-border/80 p-8 rounded-3xl shadow-premium">${tabs}
+      <div class="max-w-md space-y-4">
+        <div><label class="block text-xs font-bold mb-2">Nama Lengkap</label><input type="text" id="set-name" value="${appState.currentClientUser.name}" class="w-full bg-panel border p-3 rounded-xl text-sm" /></div>
+        <div><label class="block text-xs font-bold mb-2">No. WhatsApp</label><input type="tel" id="set-wa" value="${appState.currentClientUser.wa || ''}" class="w-full bg-panel border p-3 rounded-xl text-sm" /></div>
+        <button onclick="updateProfile()" class="btn-primary w-full py-3 rounded-xl text-sm font-bold">Simpan Profil</button>
+        <hr class="my-6 border-border/60"/>
+        <div><label class="block text-xs font-bold mb-2">Sandi Baru</label><input type="password" id="set-pass" placeholder="Minimal 4 karakter" class="w-full bg-panel border p-3 rounded-xl text-sm" /></div>
+        <button onclick="updatePass()" class="btn-outline w-full py-3 rounded-xl text-sm font-bold">Ganti Sandi</button>
+        <button onclick="logoutClientUser()" class="w-full py-3 rounded-xl bg-red-500/10 text-red-500 font-bold text-sm mt-4 hover:bg-red-500 hover:text-white transition">Logout</button>
       </div>
-    `;
-    return;
+    </div>`; return;
   }
 
-  // JIKA TAB PROJECTS
-  const myProjects = appState.projects.filter(p => p.clientEmail === appState.currentClientUser.email);
-  if (!myProjects.length) {
-    ws.innerHTML = `
-      <div class="bg-surface border border-border/80 rounded-[2rem] p-12 text-center shadow-premium">
-        ${tabsHtml}
-        <h3 class="text-2xl font-display font-bold text-textMain mb-4">Belum Ada Pengajuan</h3>
-        <button type="button" onclick="navigateTo('order')" class="btn-primary px-8 py-3.5 rounded-xl text-sm font-bold mt-4">+ Buat Pengajuan Baru</button>
-      </div>`;
-    return;
-  }
-
-  if (!myProjects.some(p => p.id === appState.selectedClientProjectId)) appState.selectedClientProjectId = myProjects[0].id;
-  const proj = myProjects.find(p => p.id === appState.selectedClientProjectId);
-
-  ws.innerHTML = `
-    <div class="bg-surface border border-border/80 rounded-[2rem] p-8 shadow-premium space-y-6">
-      ${tabsHtml}
-      <div class="flex flex-wrap justify-between items-center border-b border-border/60 pb-6 gap-4">
-        <div>
-          <span class="text-xs font-mono text-primary font-bold uppercase block mb-1">Proyek: ${proj.id}</span>
-          <h2 class="text-3xl font-display font-bold text-textMain">${proj.judul}</h2>
-        </div>
-        <div class="flex gap-3">
-          <button type="button" onclick="navigateTo('order')" class="btn-primary px-4 py-2 rounded-xl text-xs font-bold">+ Baru</button>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="bg-panel border border-border/80 rounded-2xl p-6">
-          <span class="text-xs text-primary font-bold uppercase">Status Proyek</span>
-          <p class="text-lg text-textMain font-bold mt-2">${proj.productionStatus || 'Menunggu Pengerjaan'}</p>
-        </div>
-        <div class="bg-panel border border-border/80 rounded-2xl p-6">
-          <span class="text-xs text-primary font-bold uppercase">Total Biaya</span>
-          <p class="text-2xl text-textMain font-mono font-bold mt-2">${formatRupiah(proj.totalPrice)}</p>
-          <p class="text-xs text-textMuted mt-1">Status: ${proj.dpStatus}</p>
-        </div>
-      </div>
-    </div>
-  `;
+  // RENDER TAB PROYEK
+  const myP = appState.projects.filter(p => p.clientEmail === appState.currentClientUser.email);
+  if (!myP.length) return ws.innerHTML = `<div class="text-center p-10 bg-surface rounded-3xl border border-border/80">${tabs}<h3 class="text-xl font-bold mb-4">Belum ada proyek</h3><button onclick="navigateTo('order')" class="btn-primary px-6 py-2.5 rounded-xl font-bold">+ Buat Pengajuan</button></div>`;
+  
+  ws.innerHTML = `<div class="bg-surface border border-border/80 p-8 rounded-3xl shadow-premium">${tabs}
+    ${myP.map(p => `<div class="border border-border/80 p-5 rounded-2xl mb-4 flex justify-between items-center bg-panel">
+      <div><strong class="block text-lg text-textMain">${p.judul}</strong><span class="text-xs text-textMuted">${p.id}</span></div>
+      <div class="text-right"><span class="text-primary font-bold block">${formatRupiah(p.totalPrice)}</span><span class="text-xs bg-surface px-2 py-1 rounded border border-border">${p.dpStatus}</span></div>
+    </div>`).join('')}
+  </div>`;
 }
 
-function updateClientProfile() {
-  const newName = document.getElementById('set-name').value;
-  const newWa = document.getElementById('set-wa').value;
-  if(!newName) return showToast('Gagal', 'Nama tidak boleh kosong.', 'warning');
-  
-  appState.currentClientUser.name = newName;
-  appState.currentClientUser.wa = newWa;
-  
-  // Update di array users
-  const idx = appState.users.findIndex(u => u.email === appState.currentClientUser.email);
-  if(idx > -1) appState.users[idx] = appState.currentClientUser;
-  
+function updateProfile() {
+  appState.currentClientUser.name = document.getElementById('set-name').value;
+  appState.currentClientUser.wa = document.getElementById('set-wa').value;
   localStorage.setItem('prangart_current_user', JSON.stringify(appState.currentClientUser));
-  syncUserToCloud(appState.currentClientUser);
-  updateHeaderAuthBadge();
-  showToast('Sukses', 'Profil berhasil diperbarui.');
+  updateHeaderAuthBadge(); showToast('Sukses', 'Profil diperbarui.');
 }
 
-function updateClientPassword() {
-  const newPass = document.getElementById('set-pass').value;
-  if (!newPass || newPass.length < 4) return showToast('Gagal', 'Sandi minimal 4 karakter.', 'warning');
-  
-  appState.currentClientUser.pass = newPass;
-  const idx = appState.users.findIndex(u => u.email === appState.currentClientUser.email);
-  if(idx > -1) appState.users[idx] = appState.currentClientUser;
-  
+function updatePass() {
+  const p = document.getElementById('set-pass').value;
+  if(p.length < 4) return showToast('Gagal', 'Sandi minimal 4 karakter.', 'warning');
+  appState.currentClientUser.pass = p;
   localStorage.setItem('prangart_current_user', JSON.stringify(appState.currentClientUser));
-  syncUserToCloud(appState.currentClientUser);
-  document.getElementById('set-pass').value = '';
-  showToast('Sukses', 'Sandi berhasil diubah.');
+  persistLocalState(); showToast('Sukses', 'Sandi diubah.');
 }
