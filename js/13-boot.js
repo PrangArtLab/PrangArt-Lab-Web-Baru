@@ -9,7 +9,8 @@ Object.assign(window, {
   refreshClientPageUI, renderClientWorkspace, changeClientPaymentScheme, uploadClientStagePayment, changePaymentMethodDisplay,
   openOfficialDocModal, closeOfficialDocModal, downloadOfficialDocPNG, sendInvoiceToWA,
   verifyAdminPin, refreshAdminPageUI, renderAdminDashboard, addPaymentMethod, removePaymentMethod,
-  syncProjectToCloud, syncUserToCloud, syncStudioConfigToCloud
+  syncProjectToCloud, syncUserToCloud, syncStudioConfigToCloud,
+  handleCustomPrice // <-- Tambahan fungsi baru di sini
 });
 
 document.addEventListener('DOMContentLoaded', () => {
