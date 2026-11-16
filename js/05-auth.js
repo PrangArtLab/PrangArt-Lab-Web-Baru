@@ -3,29 +3,48 @@ function closeClientAuthModal() { document.getElementById('client-auth-modal')?.
 
 function handleQuickClientRegister(e) {
   e.preventDefault();
-  const name = document.getElementById('reg-name').value;
-  const email = document.getElementById('reg-email').value.toLowerCase();
-  const wa = document.getElementById('reg-wa').value;
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim().toLowerCase();
+  const wa = document.getElementById('reg-wa').value.trim();
   const pass = document.getElementById('reg-pass').value;
-  if (appState.users.find(u => u.email === email)) return showToast('Gagal', 'Email terdaftar.', 'error');
+  if (appState.users.find(u => u.email.toLowerCase() === email)) return showToast('Gagal', 'Email terdaftar. Silakan masuk.', 'error');
 
   const newUser = { name, email, wa, pass };
-  appState.users.push(newUser); appState.currentClientUser = newUser;
+  appState.users.push(newUser);
+  appState.currentClientUser = newUser;
   localStorage.setItem('prangart_current_user', JSON.stringify(newUser));
-  persistLocalState(); updateHeaderAuthBadge(); closeClientAuthModal();
-  showToast('Sukses', 'Akun dibuat.'); refreshClientPageUI();
+  persistLocalState();
+  updateHeaderAuthBadge();
+  closeClientAuthModal();
+  showToast('Sukses', 'Akun dibuat. Selamat datang!');
+  refreshClientPageUI();
 }
 
 function handleClientPortalLogin(e) {
   e.preventDefault();
-  const email = document.getElementById('portal-login-email').value.toLowerCase();
+  const email = document.getElementById('portal-login-email').value.trim().toLowerCase();
   const pass = document.getElementById('portal-login-pass').value;
-  const found = appState.users.find(u => u.email === email && u.pass === pass);
-  if (!found) return showToast('Gagal', 'Email / sandi salah.', 'error');
-  
-  appState.currentClientUser = found;
-  localStorage.setItem('prangart_current_user', JSON.stringify(found));
-  updateHeaderAuthBadge(); refreshClientPageUI(); showToast('Sukses', `Halo, ${found.name}`);
+  const registeredUser = appState.users.find(u => (u.email || '').toLowerCase() === email);
+
+  // Jika email belum terdaftar, buka formulir pendaftaran dan isi email secara otomatis.
+  if (!registeredUser) {
+    const registrationEmail = document.getElementById('reg-email');
+    if (registrationEmail) registrationEmail.value = email;
+    openClientAuthModal();
+    showToast('Belum terdaftar', 'Silakan lengkapi formulir untuk membuat akun.', 'warning');
+    return;
+  }
+
+  if (registeredUser.pass !== pass) {
+    showToast('Gagal', 'Kata sandi salah. Silakan coba lagi.', 'error');
+    return;
+  }
+
+  appState.currentClientUser = registeredUser;
+  localStorage.setItem('prangart_current_user', JSON.stringify(registeredUser));
+  updateHeaderAuthBadge();
+  refreshClientPageUI();
+  showToast('Sukses', `Halo, ${registeredUser.name}`);
 }
 
 async function handleGoogleLogin() {
