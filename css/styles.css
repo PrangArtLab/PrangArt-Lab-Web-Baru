@@ -1,5 +1,3 @@
-
-
 /* Homepage visual refresh: bring back the studio's blue-green identity and add a subtle audio motif. */
 :root {
   --base: 248 250 252;
@@ -126,47 +124,78 @@
   transition: background-color 0.2s ease, border-color 0.2s ease,
               box-shadow 0.2s ease, transform 0.2s ease;
 }
-
 #page-home > .home-hero .btn-primary {
   color: #fff;
   background: linear-gradient(120deg, rgb(var(--primary)), rgb(var(--accent)));
   border: 1px solid transparent;
   box-shadow: 0 10px 24px -14px rgba(var(--primary), 0.75);
 }
-
-#page-home > .home-hero .btn-primary::after {
-  content: none;
-}
-
+#page-home > .home-hero .btn-primary::after { content: none; }
 #page-home > .home-hero .btn-primary:hover:not(:disabled) {
   transform: translateY(-2px);
   filter: brightness(1.05);
   box-shadow: 0 14px 28px -14px rgba(var(--primary), 0.65);
 }
-
 #page-home > .home-hero .btn-outline {
   color: rgb(var(--text-main));
   background: rgba(var(--surface), 0.82);
   border: 1px solid rgba(var(--border), 0.95);
   box-shadow: none;
 }
-
 #page-home > .home-hero .btn-outline:hover {
   color: rgb(var(--primary));
   background: rgb(var(--surface));
   border-color: rgba(var(--primary), 0.35);
   transform: translateY(-2px);
 }
-
 #page-home > .home-hero .btn-primary:focus-visible,
 #page-home > .home-hero .btn-outline:focus-visible {
   outline: 3px solid rgba(var(--primary), 0.35);
   outline-offset: 3px;
 }
 
+/* Smooth, restrained hover motion */
+#page-home > .home-hero .btn-primary,
+#page-home > .home-hero .btn-outline {
+  transition: transform 280ms cubic-bezier(.2,.7,.2,1),
+              box-shadow 280ms ease, background-color 280ms ease,
+              border-color 280ms ease, color 280ms ease, filter 280ms ease;
+  will-change: transform;
+}
+#page-home > .home-hero .btn-primary:hover:not(:disabled),
+#page-home > .home-hero .btn-outline:hover {
+  transform: translateY(-2px);
+}
+#page-home > .home-hero .btn-primary:active:not(:disabled),
+#page-home > .home-hero .btn-outline:active {
+  transform: translateY(0);
+  transition-duration: 120ms;
+}
+.home-service-card,
+.portfolio-card,
+.testimonial-card {
+  transition: transform 280ms cubic-bezier(.2,.7,.2,1),
+              box-shadow 280ms ease, border-color 280ms ease;
+}
+.home-service-card:hover,
+.portfolio-card:hover,
+.testimonial-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(var(--primary), .32);
+  box-shadow: 0 18px 34px -26px rgba(15, 23, 42, .28);
+}
+.nav-pill { transition: color 220ms ease, background-color 220ms ease, border-color 220ms ease; }
+
 @media (prefers-reduced-motion: reduce) {
   #page-home > .home-hero .btn-primary,
-  #page-home > .home-hero .btn-outline {
-    transition: none;
-  }
+  #page-home > .home-hero .btn-outline,
+  .home-service-card,
+  .portfolio-card,
+  .testimonial-card,
+  .nav-pill { transition: none; }
+  #page-home > .home-hero .btn-primary:hover:not(:disabled),
+  #page-home > .home-hero .btn-outline:hover,
+  .home-service-card:hover,
+  .portfolio-card:hover,
+  .testimonial-card:hover { transform: none; }
 }
