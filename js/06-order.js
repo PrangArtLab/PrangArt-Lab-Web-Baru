@@ -1,5 +1,5 @@
 function refreshOrderPageUI() {
-  if (!appState.currentClientUser) return; // Akan dicegat oleh tombol navigasi
+  if (!appState.currentClientUser) return; 
   const setIf = (id, val) => { const el = document.getElementById(id); if (el && !el.value && val) el.value = val; };
   setIf('field-nama', appState.currentClientUser.name);
   selectServiceLine(appState.selectedServiceLine);
@@ -51,13 +51,11 @@ function handleCustomPrice(v) { appState.customPrice = (v && Number(v) > 0) ? Nu
 function renderDynamicSpecFields() {
   const c = document.getElementById('dynamic-spec-fields'); if(!c) return;
   
-  // Tampilan jika menggunakan Custom Price
   if (appState.customPrice) {
     c.innerHTML = `<div class="p-4 bg-surface border border-primary/30 rounded-xl"><label class="text-xs font-bold text-primary mb-2 block">Spesifikasi Custom (Harga Kesepakatan)</label><textarea id="spec-custom-detail" rows="3" placeholder="Jelaskan detail kebutuhan custom Anda..." class="w-full bg-panel border border-border rounded-lg p-3 text-sm"></textarea></div>`;
     return;
   }
   
-  // Tampilan standar
   c.innerHTML = appState.selectedPackage === 'dasar' 
     ? `<div class="grid grid-cols-2 gap-4"><input type="number" placeholder="BPM" class="bg-panel border p-3 rounded-xl text-sm"/><input type="text" placeholder="Nuansa" class="bg-panel border p-3 rounded-xl text-sm"/></div>` 
     : `<div class="space-y-3"><label class="text-xs text-textMuted">Rincian Waktu & Link Drive</label><input type="text" placeholder="00:00 - 01:30 (Opening)" class="w-full bg-panel border p-3 rounded-xl text-sm"/><input type="url" placeholder="Link GDrive (opsional)" class="w-full bg-panel border p-3 rounded-xl text-sm"/></div>`;
