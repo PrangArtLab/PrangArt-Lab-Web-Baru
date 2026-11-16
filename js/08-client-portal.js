@@ -82,4 +82,4 @@ function uploadClientStagePayment(projId, kind, file) {
   reader.readAsDataURL(file);
 }
 function changeClientPaymentScheme() {}
-function downloadMasterAsset() { showToast('Unduh', 'File master berhasil diunduh.'); }
+function downloadMasterAsset() { showToast('Unduh', 'File master berhasil diunduh.'); } 
