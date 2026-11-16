@@ -1,88 +1,5 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>PrangArt Lab — Music Production Studio</title>
-<script>
-  (function() {
-    const savedTheme = localStorage.getItem('prangart_theme') || 'auto';
-    const isDark = savedTheme === 'dark' || (savedTheme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    if (isDark) document.documentElement.classList.add('dark');
-    else document.documentElement.classList.remove('dark');
-  })();
-</script>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
-<script src="https://www.google.com/recaptcha/api.js?render=6LeDaSEuAAAAAIDdp1Ir_V-wkmOXE-e8imq9Alzj"></script>
-<script>
-  window.__recaptchaSiteKey = '6LeDaSEuAAAAAIDdp1Ir_V-wkmOXE-e8imq9Alzj';
-</script>
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-tailwind.config = {
-  darkMode: 'class',
-  theme: { extend: {
-    colors: { 
-      base: 'rgb(var(--base) / <alpha-value>)', surface: 'rgb(var(--surface) / <alpha-value>)', 
-      panel: 'rgb(var(--panel) / <alpha-value>)', primary: 'rgb(var(--primary) / <alpha-value>)', 
-      accent: 'rgb(var(--accent) / <alpha-value>)', textMain: 'rgb(var(--text-main) / <alpha-value>)', 
-      textMuted: 'rgb(var(--text-muted) / <alpha-value>)', border: 'rgb(var(--border) / <alpha-value>)'
-    },
-    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'], display: ['"Space Grotesk"', 'sans-serif'], mono: ['"JetBrains Mono"', 'monospace'] },
-    boxShadow: { 'glow': '0 0 25px -5px rgba(var(--primary), 0.5)', 'glow-hover': '0 0 35px -2px rgba(var(--primary), 0.6)', 'premium': '0 10px 40px -10px rgba(0,0,0,0.1)' }
-  }}
-};
-</script>
-<link rel="stylesheet" href="css/styles.css" />
-</head>
-<body class="min-h-screen flex flex-col bg-base text-textMain selection:bg-primary selection:text-white transition-colors duration-300 antialiased">
-
-<div id="toast-container" class="fixed top-4 right-4 z-[90] flex flex-col gap-2.5 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
-
-<header class="sticky top-0 z-50 glass-panel border-b border-border/50 transition-all duration-300">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-3">
-    <button type="button" onclick="navigateTo('home')" class="flex items-center gap-4 text-left group shrink-0">
-      <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-accent p-[2px] shadow-glow group-hover:scale-105 transition-all duration-300">
-        <div class="w-full h-full rounded-xl bg-white flex items-center justify-center overflow-hidden p-1">
-          <img src="https://iili.io/o9B6HXa.md.png" alt="PrangArt Lab" class="w-full h-full object-contain" />
-        </div>
-      </div>
-      <div>
-        <span class="font-display font-bold text-xl tracking-tight text-textMain block leading-none">PrangArt <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">Lab</span></span>
-        <span class="text-[10px] font-mono uppercase tracking-widest text-textMuted block mt-1">Production Studio</span>
-      </div>
-    </button>
-    
-    <nav class="hidden md:flex items-center gap-1 bg-surface/80 backdrop-blur-md border border-border/60 rounded-2xl p-1.5 shadow-sm">
-      <button type="button" id="nav-home" onclick="navigateTo('home')" class="nav-pill px-4 py-2 rounded-xl text-sm font-semibold transition-all">Beranda</button>
-      <button type="button" id="nav-portfolio" onclick="navigateTo('portfolio')" class="nav-pill px-4 py-2 rounded-xl text-sm font-semibold transition-all">Portofolio</button>
-      <button type="button" id="nav-client" onclick="navigateTo('client')" class="nav-pill px-4 py-2 rounded-xl text-sm font-semibold transition-all">Ruang Klien</button>
-      <button type="button" id="nav-admin" onclick="navigateTo('admin')" class="nav-pill px-4 py-2 rounded-xl text-sm font-semibold transition-all">Admin</button>
-    </nav>
-
-    <div class="flex items-center gap-3">
-      <div class="relative">
-        <button type="button" onclick="toggleThemeDropdown()" class="p-2.5 rounded-xl bg-surface/80 border border-border/60 hover:border-primary text-textMain transition-all shadow-sm flex items-center justify-center hover:bg-panel">
-          <svg id="theme-icon-dark" class="hidden w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-          <svg id="theme-icon-light" class="hidden w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-          <svg id="theme-icon-auto" class="hidden w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-        </button>
-        <div id="theme-dropdown" class="hidden absolute right-0 mt-3 w-40 bg-surface border border-border rounded-2xl shadow-premium overflow-hidden z-50 animate-fade-in">
-          <button type="button" onclick="setTheme('light')" class="w-full text-left px-4 py-3 text-xs font-semibold text-textMain hover:bg-panel hover:text-primary transition">Mode Terang</button>
-          <button type="button" onclick="setTheme('dark')" class="w-full text-left px-4 py-3 text-xs font-semibold text-textMain hover:bg-panel hover:text-primary transition">Mode Gelap</button>
-          <button type="button" onclick="setTheme('auto')" class="w-full text-left px-4 py-3 text-xs font-semibold text-textMain hover:bg-panel hover:text-primary transition">Ikuti Perangkat</button>
-        </div>
-      </div>
-      <div id="header-auth-status"></div>
-    </div>
-  </div>
-</header>
-
 <main class="flex-1 relative">
   <section id="page-home" class="page-section page-dissolve">
-    <!-- Hero Section disederhanakan untuk ruang -->
     <div class="relative overflow-hidden border-b border-border/50 bg-surface py-24 text-center">
       <h1 class="text-5xl font-display font-bold text-textMain">Wujudkan <span class="text-primary">Musik Impian</span></h1>
       <p class="text-textMuted mt-4 max-w-lg mx-auto">Konsultasikan konsep karya Anda terlebih dahulu.</p>
@@ -93,141 +10,34 @@ tailwind.config = {
     </div>
   </section>
 
+  <section class="home-services">
+    <div class="home-services-inner">
+      <div class="home-services-header">
+        <span class="home-kicker">Layanan utama</span>
+        <h2>Musik yang siap menyatu dengan cerita Anda.</h2>
+      </div>
+
+      <div class="home-service-grid">
+        <article class="home-service-card card-tari">
+          <span class="service-tag">Musik Tari</span>
+          <h3>Komposisi untuk pertunjukan & ritual</h3>
+          <p>Skor atau aransemen yang disesuaikan dengan tempo, karakter, dan momen penampilan.</p>
+        </article>
+
+        <article class="home-service-card card-digital">
+          <span class="service-tag">Aransemen</span>
+          <h3>Audio untuk video, brand, dan konten digital</h3>
+          <p>Musik yang lebih tajam, fleksibel, dan siap mendukung presentasi maupun promosi digital.</p>
+        </article>
+
+        <article class="home-service-card card-transkripsi">
+          <span class="service-tag">Transkripsi</span>
+          <h3>Ubah karya audio menjadi struktur musik yang jelas</h3>
+          <p>Format tertulis dan rinci untuk keperluan dokumentasi, analisis, atau kebutuhan produksi.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
   <!-- RUANG KLIEN -->
   <section id="page-client" class="page-section hidden page-dissolve bg-base">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-      <!-- LOGIN WALL -->
-      <div id="client-login-wall" class="max-w-md mx-auto bg-surface border border-border/80 rounded-[2.5rem] p-10 shadow-premium relative overflow-hidden">
-        <div class="text-center mb-8"><h3 class="text-3xl font-display font-bold text-textMain">Ruang Klien</h3></div>
-        <form onsubmit="handleClientPortalLogin(event)" class="space-y-4">
-          <div><label class="block text-xs font-bold text-textMain mb-2">Email</label><input type="email" id="portal-login-email" required class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3.5 text-sm" /></div>
-          <div><label class="block text-xs font-bold text-textMain mb-2">Kata Sandi</label><input type="password" id="portal-login-pass" required class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3.5 text-sm" /></div>
-          <div class="flex justify-between items-center text-xs">
-            <button type="button" onclick="openClientAuthModal('register')" class="text-primary font-bold hover:underline">Daftar Akun</button>
-            <button type="button" onclick="handleForgotPassword(document.getElementById('portal-login-email').value)" class="text-textMuted hover:text-primary transition">Lupa Sandi?</button>
-          </div>
-          <button type="submit" class="btn-primary w-full py-4 rounded-xl text-sm font-bold mt-2 shadow-glow">Masuk →</button>
-          <div class="relative flex py-2 items-center"><div class="flex-grow border-t border-border/60"></div><span class="flex-shrink-0 mx-4 text-textMuted text-xs">atau</span><div class="flex-grow border-t border-border/60"></div></div>
-          <button type="button" onclick="handleGoogleLogin()" class="w-full py-3.5 rounded-xl bg-white text-gray-800 border border-gray-300 font-bold text-sm flex items-center justify-center gap-2 hover:bg-gray-50 transition"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5" /> Masuk dengan Google</button>
-        </form>
-      </div>
-
-      <!-- DASHBOARD KLIEN -->
-      <div id="client-workspace-content" class="hidden space-y-6"></div>
-    </div>
-  </section>
-
-  <!-- FORM ORDER -->
-  <section id="page-order" class="page-section hidden page-dissolve bg-base">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pb-32">
-      <div id="order-form-container">
-        <form id="prangart-order-form" onsubmit="handleOrderFormSubmit(event)" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          <div class="lg:col-span-8 space-y-8">
-            <!-- Paket (Langkah 1) -->
-            <div class="bg-surface border border-border/80 rounded-3xl p-6 sm:p-10 space-y-6 shadow-premium">
-              <div><span class="text-[11px] font-mono text-primary font-bold uppercase tracking-wider">Langkah 01</span><h3 class="text-2xl font-display font-bold text-textMain mt-1">Pilih Layanan & Harga</h3></div>
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <button type="button" id="svc-tab-tari" onclick="selectServiceLine('tari')" class="svc-tab-btn p-4 rounded-2xl border text-left"><span class="text-sm font-bold block">Musik Tari</span></button>
-                <button type="button" id="svc-tab-digital" onclick="selectServiceLine('digital')" class="svc-tab-btn p-4 rounded-2xl border text-left"><span class="text-sm font-bold block">Musik Non-Tari</span></button>
-                <button type="button" id="svc-tab-transkripsi" onclick="selectServiceLine('transkripsi')" class="svc-tab-btn p-4 rounded-2xl border text-left"><span class="text-sm font-bold block">Transkripsi</span></button>
-              </div>
-              <div id="package-cards-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2"></div>
-              <div class="mt-4 pt-6 border-t border-border/60">
-                <label class="block text-xs font-bold text-textMain mb-2">Atau masukkan Harga Kesepakatan (Rp)</label>
-                <input type="number" id="custom-price-input" oninput="handleCustomPrice(this.value)" placeholder="Contoh: 1500000" class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3.5 text-sm font-mono shadow-inner" />
-              </div>
-            </div>
-
-            <!-- Info Karya & AI Mode (Langkah 2) -->
-            <div class="bg-surface border border-border/80 rounded-3xl p-6 sm:p-10 space-y-6 shadow-premium">
-              <div><span class="text-[11px] font-mono text-primary font-bold uppercase tracking-wider">Langkah 02</span><h3 class="text-2xl font-display font-bold text-textMain mt-1">Informasi Karya</h3></div>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <div><label class="block text-xs font-bold mb-2">Nama Lengkap *</label><input type="text" id="field-nama" required class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3 text-sm" /></div>
-                <div><label class="block text-xs font-bold mb-2">Judul Karya *</label><input type="text" id="field-judul" required class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3 text-sm" /></div>
-                <div><label class="block text-xs font-bold mb-2">Jenis Karya *</label><input type="text" id="field-jenis-tari" required class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3 text-sm" /></div>
-                <div><label class="block text-xs font-bold mb-2">Durasi (MM:SS) *</label><input type="text" id="field-durasi" required placeholder="05:30" class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3 text-sm" /></div>
-              </div>
-              <div>
-                <div class="flex justify-between items-center mb-2">
-                   <label class="block text-xs font-bold text-textMain">Sinopsis *</label>
-                   <!-- TOGGLE AI / MANUAL -->
-                   <div class="flex bg-panel p-1 rounded-lg border border-border/60">
-                     <button type="button" id="btn-mode-manual" onclick="setSynopsisMode('manual')" class="px-3 py-1 rounded-md text-[10px] font-bold bg-surface text-textMain shadow-sm">Ketik Manual</button>
-                     <button type="button" id="btn-mode-ai" onclick="setSynopsisMode('ai')" class="px-3 py-1 rounded-md text-[10px] font-bold text-textMuted">Gunakan AI</button>
-                   </div>
-                </div>
-                <textarea id="field-sinopsis" rows="4" required class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3 text-sm leading-relaxed"></textarea>
-                <div id="ai-action-wrapper" class="hidden mt-2">
-                   <button type="button" id="btn-ai-synopsis" onclick="generateAISynopsis()" class="w-full py-2 bg-primary/10 border border-primary/30 text-primary text-xs font-bold rounded-lg hover:bg-primary/20 transition">✦ Generate Sinopsis AI</button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Spesifikasi (Langkah 3) -->
-            <div class="bg-surface border border-border/80 rounded-3xl p-6 sm:p-10 space-y-6 shadow-premium">
-              <div><span class="text-[11px] font-mono text-primary font-bold uppercase tracking-wider">Langkah 03</span><h3 class="text-2xl font-display font-bold text-textMain mt-1">Spesifikasi Teknis</h3></div>
-              <div id="dynamic-spec-fields" class="space-y-4"></div>
-              <div class="pt-6 border-t border-border/60">
-                <label class="flex items-center justify-between p-5 rounded-2xl bg-panel border border-border/80 cursor-pointer">
-                  <div><span class="text-sm font-bold block">Tambahan Vokal / Player</span><span class="text-xs text-textMuted">+ Rp250.000</span></div>
-                  <input type="checkbox" id="field-addon-vocal" onchange="recalculateLivePrice()" class="w-5 h-5 accent-primary" />
-                </label>
-              </div>
-            </div>
-            
-            <!-- Pembayaran -->
-            <div class="bg-surface border border-border/80 rounded-3xl p-6 sm:p-10 shadow-premium">
-               <button type="submit" class="btn-primary w-full py-4 rounded-xl text-sm font-bold shadow-glow">Kirim Pengajuan →</button>
-            </div>
-          </div>
-          
-          <div class="lg:col-span-4 lg:sticky lg:top-28">
-            <div class="bg-surface border border-border/80 rounded-3xl p-8 shadow-premium space-y-5">
-              <span class="text-xs font-mono uppercase tracking-wider text-primary font-bold block border-b border-border/60 pb-3">Ringkasan Biaya</span>
-              <div class="space-y-3 text-sm">
-                <div class="flex justify-between text-textMuted"><span>Layanan</span><span id="calc-service-name" class="font-bold text-textMain"></span></div>
-                <div class="flex justify-between text-textMuted"><span id="calc-pkg-name"></span><span id="calc-pkg-price" class="font-mono text-textMain"></span></div>
-                <div class="flex justify-between text-textMuted"><span id="calc-addon-label"></span><span id="calc-addon-price" class="font-mono text-primary"></span></div>
-              </div>
-              <div class="border-t border-border/60 pt-4"><div class="flex items-baseline justify-between"><span class="text-sm font-bold text-textMuted">Total</span><span id="calc-total-price" class="text-3xl font-display font-bold text-primary"></span></div></div>
-            </div>
-          </div>
-        </form>
-      </div>
-    </div>
-  </section>
-</main>
-
-<!-- MODALS -->
-<div id="client-auth-modal" class="fixed inset-0 bg-black/70 backdrop-blur-md z-[72] hidden items-center justify-center p-4">
-  <div class="bg-surface border border-border/80 rounded-3xl max-w-md w-full p-8 shadow-2xl space-y-6">
-    <div class="flex items-center justify-between border-b border-border/60 pb-4"><h3 class="text-xl font-display font-bold text-textMain">Daftar Akun</h3><button type="button" onclick="closeClientAuthModal()" class="text-2xl text-textMuted">×</button></div>
-    <form id="form-client-register" onsubmit="handleQuickClientRegister(event)" class="space-y-4">
-      <div><input type="text" id="reg-name" required placeholder="Nama Lengkap" class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3 text-sm" /></div>
-      <div><input type="email" id="reg-email" required placeholder="Email" class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3 text-sm" /></div>
-      <div><input type="tel" id="reg-wa" required placeholder="No. WhatsApp" class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3 text-sm" /></div>
-      <div><input type="password" id="reg-pass" required placeholder="Kata Sandi" class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3 text-sm" /></div>
-      <button type="submit" class="btn-primary w-full py-3.5 rounded-xl text-sm font-bold mt-2 shadow-glow">Daftar →</button>
-    </form>
-  </div>
-</div>
-
-<div id="custom-modal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-[65] hidden items-center justify-center p-4"><div class="bg-surface border border-border/80 rounded-2xl max-w-lg w-full p-5 shadow-2xl space-y-4"><div class="flex items-center justify-between border-b border-border/60 pb-3"><h3 id="custom-modal-title" class="text-base font-bold text-textMain"></h3><button type="button" onclick="closeCustomModal()" class="text-xl text-textMuted">×</button></div><div id="custom-modal-body" class="text-sm text-textMain"></div></div></div>
-
-<!-- Scripts -->
-<script src="js/00-config.js"></script>
-<script src="js/01-utils.js"></script>
-<script src="js/02-firebase.js"></script>
-<script src="js/03-navigation.js"></script>
-<script src="js/04-wa-composer.js"></script>
-<script src="js/05-auth.js"></script>
-<script src="js/06-order.js"></script>
-<script src="js/07-portfolio.js"></script>
-<script src="js/08-client-portal.js"></script>
-<script src="js/09-brief-card.js"></script>
-<script src="js/10-contract.js"></script>
-<script src="js/11-documents.js"></script>
-<script src="js/12-admin.js"></script>
-<script src="js/13-boot.js"></script>
-</body>
-</html>
