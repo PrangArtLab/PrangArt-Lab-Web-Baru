@@ -13,7 +13,6 @@ function renderClientWorkspace() {
       <button onclick="appState.clientTab='settings'; renderClientWorkspace();" class="px-4 py-2 rounded-xl text-sm font-bold ${appState.clientTab==='settings'?'bg-primary text-white':'bg-panel text-textMuted'}">Pengaturan Akun</button>
     </div>`;
 
-  // RENDER TAB SETTING
   if (appState.clientTab === 'settings') {
     ws.innerHTML = `<div class="bg-surface border border-border/80 p-8 rounded-3xl shadow-premium">${tabs}
       <div class="max-w-md space-y-4">
@@ -28,7 +27,6 @@ function renderClientWorkspace() {
     </div>`; return;
   }
 
-  // RENDER TAB PROYEK
   const myP = appState.projects.filter(p => p.clientEmail === appState.currentClientUser.email);
   if (!myP.length) return ws.innerHTML = `<div class="text-center p-10 bg-surface rounded-3xl border border-border/80">${tabs}<h3 class="text-xl font-bold mb-4">Belum ada proyek</h3><button onclick="navigateTo('order')" class="btn-primary px-6 py-2.5 rounded-xl font-bold">+ Buat Pengajuan</button></div>`;
   
