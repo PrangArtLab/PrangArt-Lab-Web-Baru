@@ -1,5 +1,5 @@
 const LOGO_URL = 'https://iili.io/o9B6HXa.md.png';
-const STORAGE_KEY = 'prangart_lab_state_v7';
+const STORAGE_KEY = 'prangart_lab_state_v8'; // Versi dinaikkan agar cache lama ter-reset
 
 const STUDIO_FIREBASE_CONFIG = {
   apiKey: "AIzaSyDJX7Y95gJ8j3A3te5pvTONrAJBxZ5yS2s",
@@ -49,7 +49,7 @@ const DEFAULT_STATE = {
     directorIdNumber: '6472050000000001',
     studioAddress: 'Jl. Wiraguna Gang 4, Kel. Sidodadi, Samarinda',
     studioEmail: 'prangart.studios@gmail.com',
-    studioWhatsApp: '628977230597',
+    studioWhatsApp: '628977250597', // NOMOR WA DIPERBARUI
     recaptchaSiteKey: '6LeDaSEuAAAAAIDdp1Ir_V-wkmOXE-e8imq9Alzj',
     adminPin: '2026',
     paymentMethods: [
@@ -59,34 +59,36 @@ const DEFAULT_STATE = {
   },
   serviceCatalog: {
     tari: {
-      label:'Produksi Musik Tari', addonLabel:'Rekaman Vokal', addonPrice:50000,
+      label:'Aransemen Musik Tari', addonLabel:'Rekaman Vokal', addonPrice:50000,
       packages: {
-        dasar: { label:'Paket Dasar (1 Juta)', price:1000000, desc:'1 tempo utama, maks. 5 instrumen.' },
-        standar: { label:'Paket Standar (1,5 Juta)', price:1500000, desc:'Rincian per struktur tari + timestamp.' },
-        pro: { label:'Paket Pro (2 Juta)', price:2000000, desc:'Alur dramatik kompleks, perubahan bebas.' }
+        dasar: { label:'Paket Dasar (1 Juta)', price:1000000, desc:'Maks 5 menit. Musik dasar, maks 5 instrumen, 3x revisi, MP3. Pengerjaan 7 hari.' },
+        standar: { label:'Paket Standar (1,5 Juta)', price:1500000, desc:'Maks 7 menit. Sesuai alur gerak, 5-8 instrumen, MP3 & WAV. Pengerjaan 14 hari.' },
+        pro: { label:'Paket Pro (2 Juta)', price:2000000, desc:'Maks 7 menit. Garapan detail, revisi UNLIMITED (1 bln), MP3 & WAV Master. 14 hari.' }
       }
     },
     digital: {
-      label:'Produksi Musik Non-Tari', addonLabel:'Rekaman Vokal', addonPrice:50000,
+      label:'Aransemen Musik Non-Tari', addonLabel:'Rekaman Vokal', addonPrice:50000,
       packages: {
-        dasar: { label:'Paket Dasar (750rb)', price:750000, desc:'Aransemen digital standar.' },
-        standar: { label:'Paket Standar (1,2 Juta)', price:1200000, desc:'Aransemen penuh + mixing.' },
-        pro: { label:'Paket Pro (1,8 Juta)', price:1800000, desc:'Produksi multi-layer + stem.' }
+        dasar: { label:'Paket Dasar (1 Juta)', price:1000000, desc:'Maks 4-5 menit. Aransemen akustik, maks 5 instrumen, 3x revisi, MP3/WAV. 14 hari.' },
+        standar: { label:'Paket Standar (1,5 Juta)', price:1500000, desc:'Maks 7 menit. Struktur lengkap (Intro, Verse, Chorus, dll), MP3/WAV. 14 hari.' },
+        pro: { label:'Paket Pro (2 Juta)', price:2000000, desc:'Maks 7 menit. Kompleks & mendetail, revisi UNLIMITED (1 bln), MP3/WAV Master. 14 hari.' }
       }
     },
     transkripsi: {
-      label:'Transkripsi Musik', addonLabel:'Partitur Lengkap', addonPrice:50000,
+      label:'Layanan Transkripsi Musik', addonLabel:'Partitur Lengkap', addonPrice:50000,
       packages: {
-        dasar: { label:'Paket Dasar (350rb)', price:350000, desc:'Melodi utama, 1 notasi.' },
-        standar: { label:'Paket Standar (600rb)', price:600000, desc:'Not Angka & Balok lengkap.' },
-        pro: { label:'Paket Pro (1 Juta)', price:1000000, desc:'Full skor ansambel + MIDI.' }
+        dasar: { label:'Tarif Minimum (50rb)', price:50000, desc:'Durasi ≤ 1 Menit / pola berulang. Tarif per instrumen.' },
+        standar: { label:'Paket Bundling Dasar (300rb)', price:300000, desc:'± 3 Menit. Melodi utama, 1 jenis notasi.' },
+        pro: { label:'Paket Bundling Standar (600rb)', price:600000, desc:'± 3 Menit. Not Angka & Not Balok lengkap.' }
       }
     }
   },
   portfolioItems: [],
   faqs: [
-    { q:'Mengapa diskusi sebelum pembayaran?', a:'Memastikan kebutuhan artistik dan anggaran dipahami sebelum penawaran resmi.' },
-    { q:'Bagaimana perbedaan persetujuan?', a:'Tari/Non-Tari menggunakan Perjanjian Produksi. Transkripsi menggunakan Persetujuan Layanan.' }
+    { q:'Bagaimana ketentuan revisi?', a:'Paket Dasar mencakup 3x revisi. Paket Pro mencakup revisi UNLIMITED (maksimal 1 bulan setelah selesai). Revisi di luar kuota dikenakan biaya Rp250.000 per sesi.' },
+    { q:'Apa yang terjadi jika klien tidak merespon >14 hari?', a:'Proyek akan dicatat sebagai selesai sementara/diarsipkan. Pembatalan sepihak menyebabkan DP hangus (non-refundable).' },
+    { q:'Bagaimana jika PrangArt Lab terlambat?', a:'Klien berhak atas potongan harga 1% - 2% per hari dari sisa pelunasan, dengan maksimal potongan 10%.' },
+    { q:'Bagaimana prosedur pemesanan?', a:'Seluruh proyek diawali dengan konsultasi via WhatsApp (08977250597) sebelum kesepakatan harga dan pengerjaan.' }
   ],
   users: [
     { email:'siti@sanggar.id', pass:'1234', name:'Siti Rahmawati', wa:'081254889900', instansi:'Sanggar Pesona Mahakam', kota:'Samarinda', alamat:'Jl. AW Syahranie No. 45', nik:'6472015504950002' }
@@ -97,7 +99,7 @@ const DEFAULT_STATE = {
 let appState = {
   ...structuredClone(DEFAULT_STATE),
   currentPage:'home', currentClientUser:null, isAdminAuthenticated:false,
-  selectedServiceLine:'tari', selectedPackage:'standar',
+  selectedServiceLine:'tari', selectedPackage:'standar', customPrice: null,
   basicInstruments:['Sampe','Kendang','Gong'],
   proScenes:[{ title:'Babak 1', detail:'Tempo lambat.', link:'' }],
   previousSynopsisBackup:'',
