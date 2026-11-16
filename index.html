@@ -28,11 +28,10 @@
 <body class="min-h-screen flex flex-col bg-base text-textMain selection:bg-primary selection:text-white transition-colors duration-300 antialiased">
   <div id="toast-container" class="fixed top-4 right-4 z-[90] flex flex-col gap-2.5 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
   
-  <!-- HEADER (DIPERBARUI) -->
+  <!-- HEADER -->
   <header class="sticky top-0 z-50 glass-panel border-b border-border/50 transition-all duration-300">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
       
-      <!-- Logo Kiri -->
       <button type="button" onclick="navigateTo('home')" class="flex items-center gap-4 text-left group shrink-0">
         <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-primary to-accent p-[2px] shadow-glow group-hover:scale-105 transition-all duration-300">
           <div class="w-full h-full rounded-xl bg-white flex items-center justify-center overflow-hidden p-1">
@@ -45,7 +44,6 @@
         </div>
       </button>
 
-      <!-- Navigasi Tengah -->
       <nav class="hidden md:flex items-center gap-1 bg-panel border border-border/80 rounded-2xl p-1.5 shadow-sm">
         <button type="button" id="nav-home" onclick="navigateTo('home')" class="nav-pill px-5 py-2 rounded-xl text-sm font-semibold transition-all">Beranda</button>
         <button type="button" id="nav-portfolio" onclick="navigateTo('portfolio')" class="nav-pill px-5 py-2 rounded-xl text-sm font-semibold transition-all">Portofolio</button>
@@ -53,7 +51,6 @@
         <button type="button" id="nav-admin" onclick="navigateTo('admin')" class="nav-pill px-5 py-2 rounded-xl text-sm font-semibold transition-all">Admin</button>
       </nav>
 
-      <!-- Kanan: Tema & Akun -->
       <div class="flex items-center gap-3 shrink-0">
         <div class="relative">
           <button type="button" onclick="toggleThemeDropdown()" aria-label="Pilih tema" class="p-2.5 rounded-xl bg-panel border border-border/80 hover:border-primary/50 text-textMain transition-all shadow-sm flex items-center justify-center">
@@ -116,8 +113,9 @@
               <label class="block text-xs font-bold mb-2">Kata Sandi</label>
               <div class="relative">
                 <input type="password" id="portal-login-pass" required class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3.5 text-sm pr-12" />
-                <button type="button" onclick="togglePasswordVisibility('portal-login-pass', 'eye-icon-login')" class="absolute inset-y-0 right-0 pr-4 flex items-center text-textMuted hover:text-primary transition">
-                  <svg id="eye-icon-login" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                <button type="button" onclick="togglePasswordVisibility('portal-login-pass', 'login-eye-show', 'login-eye-hide')" class="absolute inset-y-0 right-0 pr-4 flex items-center text-textMuted hover:text-primary transition">
+                  <svg id="login-eye-show" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                  <svg id="login-eye-hide" class="hidden w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
                 </button>
               </div>
             </div>
@@ -241,11 +239,14 @@
     <section id="page-admin" class="page-section hidden page-dissolve bg-base">
       <div class="max-w-7xl mx-auto px-4 py-16">
         <div id="admin-pin-gate" class="max-w-md mx-auto bg-surface border border-border rounded-3xl p-8">
-          <h2 class="text-2xl font-bold mb-5">Panel Admin</h2>
+          <h2 class="text-2xl font-bold mb-5 text-center">Panel Admin</h2>
           <form onsubmit="verifyAdminPin(event)" class="space-y-4">
-            <input id="admin-pin-input" type="password" required placeholder="PIN Admin" class="w-full bg-panel border rounded-xl p-3"/>
+            <input id="admin-pin-input" type="password" required placeholder="PIN Admin" class="w-full bg-panel border rounded-xl p-3 text-center text-lg tracking-widest"/>
             <button class="btn-primary w-full py-3 rounded-xl font-bold">Masuk</button>
           </form>
+          <div class="mt-4 text-center">
+            <button type="button" onclick="resetAdminPin()" class="text-xs text-textMuted hover:text-red-500 transition">Lupa PIN Admin?</button>
+          </div>
         </div>
         <div id="admin-workspace-content" class="hidden"></div>
       </div>
@@ -266,8 +267,9 @@
         <div>
           <div class="relative">
             <input type="password" id="reg-pass" required placeholder="Kata Sandi (Min. 8 huruf & angka)" class="w-full bg-panel border rounded-xl px-4 py-3 pr-12"/>
-            <button type="button" onclick="togglePasswordVisibility('reg-pass', 'eye-icon-reg')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-textMuted hover:text-primary">
-              <svg id="eye-icon-reg" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+            <button type="button" onclick="togglePasswordVisibility('reg-pass', 'reg-eye-show', 'reg-eye-hide')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-textMuted hover:text-primary">
+              <svg id="reg-eye-show" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+              <svg id="reg-eye-hide" class="hidden w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
             </button>
           </div>
         </div>
