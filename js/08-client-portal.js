@@ -11,7 +11,7 @@ function renderClientWorkspace() {
   const myProjects = appState.projects.filter(p => p.clientEmail === appState.currentClientUser.email);
 
   if (!myProjects.length) {
-    ws.innerHTML = `<div class="bg-surface border border-border rounded-[2rem] p-12 text-center max-w-lg mx-auto"><h3 class="text-2xl font-display font-bold text-textMain mb-4">Belum Ada Pengajuan</h3><p class="text-textMuted text-sm mb-8">Silakan buat pengajuan pertama Anda untuk melihat progres.</p><button type="button" onclick="navigateTo('order')" class="btn-primary px-8 py-3.5 rounded-xl text-sm font-bold">+ Buat Pengajuan</button></div>`;
+    ws.innerHTML = `<div class="bg-surface border border-border/80 rounded-[2rem] p-12 text-center max-w-lg mx-auto shadow-premium"><h3 class="text-2xl font-display font-bold text-textMain mb-4">Belum Ada Pengajuan</h3><p class="text-textMuted text-sm mb-8">Silakan buat pengajuan pertama Anda untuk melihat progres.</p><button type="button" onclick="navigateTo('order')" class="btn-primary px-8 py-3.5 rounded-xl text-sm font-bold">+ Buat Pengajuan</button></div>`;
     return;
   }
 
@@ -20,13 +20,15 @@ function renderClientWorkspace() {
   const isQuoteIssued = proj.quoteStatus === 'Diterbitkan';
   const isAgreementSigned = Boolean(proj.agreementSigned);
   const isFirstPaymentVerified = proj.dpStatus === 'Terverifikasi';
+  const isFullyPaid = proj.paymentScheme === 'Pembayaran Penuh 100%' ? isFirstPaymentVerified : (proj.pelunasanStatus === 'Lunas');
 
   ws.innerHTML = `
-    <div class="bg-surface border border-border rounded-[2rem] p-8 space-y-8 shadow-sm">
-      <div class="flex flex-wrap justify-between items-center border-b border-border pb-6 gap-4">
+    <div class="bg-surface border border-border/80 rounded-[2rem] p-8 space-y-8 shadow-premium dark:shadow-premium-dark">
+      <div class="flex flex-wrap justify-between items-center border-b border-border/60 pb-6 gap-4">
         <div>
           <span class="text-xs font-mono text-primary font-bold uppercase tracking-wider block mb-1">Ruang Klien</span>
           <h2 class="text-3xl font-display font-bold text-textMain">${proj.judul}</h2>
+          <p class="text-sm text-textMuted mt-1">Kode: ${proj.id}</p>
         </div>
         <div class="flex gap-3">
           <button type="button" onclick="navigateTo('order')" class="btn-outline px-5 py-2.5 rounded-xl text-xs font-bold">+ Pengajuan Baru</button>
@@ -34,23 +36,23 @@ function renderClientWorkspace() {
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="bg-panel border border-border rounded-2xl p-6 flex flex-col justify-between">
+        <div class="bg-panel border border-border/80 rounded-2xl p-6 flex flex-col justify-between">
           <div>
             <span class="text-xs text-primary font-bold uppercase tracking-wider">Penawaran</span>
             <p class="text-2xl text-textMain font-mono font-bold mt-3">${formatRupiah(proj.totalPrice)}</p>
           </div>
         </div>
-        <div class="bg-panel border border-border rounded-2xl p-6 flex flex-col justify-between">
+        <div class="bg-panel border border-border/80 rounded-2xl p-6 flex flex-col justify-between">
           <div>
             <span class="text-xs text-primary font-bold uppercase tracking-wider">Persetujuan</span>
             ${isAgreementSigned ? `<p class="text-lg text-emerald-500 font-bold mt-3">✓ Disetujui</p>` : `<p class="text-sm text-textMuted mt-3 mb-4">Tanda tangan perjanjian diperlukan.</p>`}
           </div>
           ${!isAgreementSigned ? `<button type="button" onclick="openContractDocModal('${proj.id}', true)" class="btn-primary w-full py-2.5 rounded-xl text-xs font-bold mt-4">Setujui Perjanjian</button>` : ''}
         </div>
-        <div class="bg-panel border border-border rounded-2xl p-6 flex flex-col justify-between">
+        <div class="bg-panel border border-border/80 rounded-2xl p-6 flex flex-col justify-between">
           <div>
             <span class="text-xs text-primary font-bold uppercase tracking-wider">Pembayaran</span>
-            ${isFirstPaymentVerified ? `<p class="text-lg text-emerald-500 font-bold mt-3">✓ Lunas</p>` : `<p class="text-sm text-textMuted mt-3">Status: ${proj.dpStatus}</p>`}
+            ${isFirstPaymentVerified ? `<p class="text-lg text-emerald-500 font-bold mt-3">✓ DP Lunas</p>` : `<p class="text-sm text-textMuted mt-3">Status: ${proj.dpStatus}</p>`}
           </div>
           ${isAgreementSigned && !isFirstPaymentVerified ? `
             <div class="mt-4 space-y-3">
@@ -58,24 +60,15 @@ function renderClientWorkspace() {
                 ${appState.settings.paymentMethods.map(pm => `<option value="${pm.id}">${pm.name}</option>`).join('')}
               </select>
               <div id="payment-detail-box-${proj.id}" class="bg-surface border border-border rounded-xl p-3"></div>
-              <label class="btn-primary w-full py-2.5 rounded-xl text-xs font-bold text-center block cursor-pointer shadow-glow">
-                Unggah Bukti Transfer
-                <input type="file" onchange="uploadClientStagePayment('${proj.id}', 'dp', this.files[0])" class="hidden" />
-              </label>
+              <label class="btn-primary w-full py-2.5 rounded-xl text-xs font-bold text-center block cursor-pointer shadow-glow">Unggah Bukti Transfer<input type="file" accept="image/*,application/pdf" onchange="uploadClientStagePayment('${proj.id}', 'dp', this.files[0])" class="hidden" /></label>
             </div>
           ` : ''}
         </div>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6 border-t border-border">
-        <button type="button" onclick="openOfficialDocModal('${proj.id}', 'invoice', 'dp')" class="btn-outline w-full py-3.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
-          Lihat Invoice
-        </button>
-        <button type="button" onclick="downloadMasterAsset('${proj.id}')" class="btn-outline w-full py-3.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Unduh Hasil Akhir
-        </button>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6 border-t border-border/60">
+        <button type="button" onclick="openOfficialDocModal('${proj.id}', 'invoice', 'dp')" class="btn-outline w-full py-3.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2">Lihat Invoice</button>
+        ${isFullyPaid ? `<button type="button" onclick="showToast('Sukses', 'File master berhasil diunduh.');" class="btn-primary w-full py-3.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2">Unduh Hasil Akhir</button>` : `<button type="button" disabled class="w-full py-3.5 rounded-xl bg-panel border border-border/50 text-textMuted text-sm font-bold cursor-not-allowed">Hasil Terkunci (Belum Lunas)</button>`}
       </div>
     </div>
   `;
@@ -98,9 +91,15 @@ function uploadClientStagePayment(projId, kind, file) {
   const reader = new FileReader();
   reader.onload = async () => {
     const proj = appState.projects.find(p => p.id === projId); if (!proj) return;
-    proj.dpProofDataUrl = reader.result; proj.dpStatus = 'Menunggu Verifikasi';
-    await syncProjectToCloud(proj); renderClientWorkspace(); showToast('Terkirim', 'Menunggu verifikasi Admin.');
+    proj.dpProofDataUrl = reader.result; 
+    proj.dpStatus = 'Menunggu Verifikasi';
+    await syncProjectToCloud(proj); 
+    renderClientWorkspace(); 
+    showToast('Terkirim', 'Bukti transfer sedang diperiksa Admin.');
   };
   reader.readAsDataURL(file);
 }
+
+function changeClientPaymentScheme() {}
+function confirmClientFinalReceipt() {}
 function downloadMasterAsset() { showToast('Unduh', 'File master berhasil diunduh.'); }
