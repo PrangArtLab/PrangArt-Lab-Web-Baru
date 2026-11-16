@@ -5,7 +5,15 @@ function navigateTo(page) {
     page = 'client';
   }
 
-  window.location.hash = page;
+  if (page === 'home') {
+    const cleanUrl = `${location.pathname}${location.search}`;
+    if (location.href !== cleanUrl) {
+      window.history.replaceState(null, '', cleanUrl);
+    }
+  } else if (window.location.hash !== `#${page}`) {
+    window.location.hash = page;
+  }
+
   appState.currentPage = page;
   
   document.querySelectorAll('.page-section').forEach(sec => sec.classList.add('hidden'));
