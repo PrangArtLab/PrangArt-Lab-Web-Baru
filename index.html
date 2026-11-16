@@ -109,7 +109,7 @@ tailwind.config = {
 <main class="flex-1 relative">
   <!-- HALAMAN BERANDA -->
   <section id="page-home" class="page-section page-dissolve">
-    <!-- Hero Section dengan efek glow -->
+    <!-- Hero Section -->
     <div class="relative overflow-hidden border-b border-border bg-surface">
       <div class="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-primary/20 blur-[120px] rounded-full pointer-events-none"></div>
       <div class="absolute bottom-[-20%] right-[-10%] w-[40%] h-[40%] bg-accent/20 blur-[100px] rounded-full pointer-events-none"></div>
@@ -121,9 +121,10 @@ tailwind.config = {
               <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
               <span>PrangArt Lab • Music Production Studio</span>
             </div>
+            <!-- PERUBAHAN JUDUL UTAMA -->
             <h1 class="text-5xl sm:text-7xl font-display font-bold tracking-tight text-textMain leading-[1.1]">
-              Diskusi Jelas, <br/>
-              <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">Hasil Musik Presisi</span>
+              Wujudkan <br/>
+              <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">Musik Impian Anda</span>
             </h1>
             <p class="text-base sm:text-lg text-textMuted leading-relaxed max-w-2xl font-light">
               PrangArt Lab menempatkan sesi diskusi kebutuhan sebagai tahap awal sebelum penawaran harga dan pembayaran. Konsultasikan konsep karya Anda terlebih dahulu.
@@ -194,7 +195,8 @@ tailwind.config = {
             <p class="text-sm text-textMuted leading-relaxed">Aransemen lagu orisinal, ilustrasi teater, jingle instansi, dan produksi audio digital.</p>
             <div class="pt-4 border-t border-border">
               <span class="text-xs text-textMuted block mb-1">Mulai dari</span>
-              <span class="text-xl font-mono font-bold text-textMain">Rp750.000</span>
+              <!-- PERUBAHAN HARGA NON-TARI -->
+              <span class="text-xl font-mono font-bold text-textMain">Rp100.000</span>
             </div>
           </div>
           <button type="button" onclick="selectServiceAndGoOrder('digital')" class="btn-outline w-full py-3.5 rounded-xl text-sm font-bold mt-8">Ajukan Layanan →</button>
@@ -210,7 +212,8 @@ tailwind.config = {
             <p class="text-sm text-textMuted leading-relaxed">Penulisan ulang audio/video menjadi partitur Not Angka, Not Balok, atau keduanya.</p>
             <div class="pt-4 border-t border-border">
               <span class="text-xs text-textMuted block mb-1">Mulai dari</span>
-              <span class="text-xl font-mono font-bold text-textMain">Rp350.000</span>
+              <!-- PERUBAHAN HARGA TRANSKRIPSI -->
+              <span class="text-xl font-mono font-bold text-textMain">Rp300.000</span>
             </div>
           </div>
           <button type="button" onclick="selectServiceAndGoOrder('transkripsi')" class="btn-outline w-full py-3.5 rounded-xl text-sm font-bold mt-8">Ajukan Layanan →</button>
@@ -412,7 +415,7 @@ tailwind.config = {
   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
 </button>
 
-<!-- MODALS (Wajib Ada) -->
+<!-- MODALS -->
 <div id="client-auth-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[72] hidden items-center justify-center p-4">
   <div class="bg-surface border border-border rounded-3xl max-w-md w-full p-8 shadow-2xl space-y-6">
     <div class="flex items-center justify-between border-b border-border pb-4">
@@ -455,7 +458,6 @@ tailwind.config = {
   </div>
 </div>
 
-<!-- Modals for Brief/Invoice/Contract -->
 <div id="brief-card-modal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-[68] hidden items-center justify-center p-4"><div class="bg-surface border border-border rounded-2xl max-w-4xl w-full p-5 shadow-2xl space-y-4"><div class="flex items-center justify-between border-b border-border pb-3"><h3 class="text-base font-bold text-textMain">Kartu Brief</h3><button type="button" onclick="closeBriefCardModal()" class="text-xl text-textMuted">×</button></div><img id="modal-brief-img" src="" class="w-full h-auto rounded-xl" /></div></div>
 <div id="official-doc-modal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-[66] hidden items-center justify-center p-3 sm:p-6 overflow-y-auto"><div class="bg-surface border border-border rounded-2xl max-w-3xl w-full p-4 sm:p-6 shadow-2xl space-y-4 my-auto"><div class="flex flex-wrap items-center justify-between gap-2 border-b border-border pb-3"><h3 class="text-base font-bold text-textMain">Dokumen</h3><button type="button" onclick="closeOfficialDocModal()" class="text-xl text-textMuted">×</button></div><div id="official-doc-canvas" class="bg-white text-neutral-900 rounded-xl p-6 sm:p-10 shadow-xl overflow-x-auto"></div></div></div>
 <div id="contract-doc-modal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-[67] hidden items-center justify-center p-3 sm:p-6 overflow-y-auto"><div class="bg-surface border border-border rounded-2xl max-w-4xl w-full p-4 sm:p-6 shadow-2xl space-y-4 my-auto"><div class="flex flex-wrap items-center justify-between gap-2 border-b border-border pb-3"><h3 class="text-base font-bold text-textMain">Perjanjian</h3><button type="button" onclick="closeContractDocModal()" class="text-xl text-textMuted">×</button></div><div id="contract-doc-canvas" class="bg-white text-neutral-900 rounded-xl p-6 shadow-xl max-h-[65vh] overflow-y-auto font-serif text-xs sm:text-sm"></div></div></div>
