@@ -11,7 +11,7 @@ function renderClientWorkspace() {
   const myProjects = appState.projects.filter(p => p.clientEmail === appState.currentClientUser.email);
 
   if (!myProjects.length) {
-    ws.innerHTML = `<div class="bg-surface border border-border rounded-3xl p-10 text-center"><h3 class="text-lg font-bold text-textMain mb-4">Belum Ada Pengajuan</h3><button type="button" onclick="navigateTo('order')" class="btn-primary px-6 py-3 rounded-xl text-sm font-bold">+ Buat Pengajuan</button></div>`;
+    ws.innerHTML = `<div class="bg-surface border border-border rounded-[2rem] p-12 text-center max-w-lg mx-auto"><h3 class="text-2xl font-display font-bold text-textMain mb-4">Belum Ada Pengajuan</h3><p class="text-textMuted text-sm mb-8">Silakan buat pengajuan pertama Anda untuk melihat progres.</p><button type="button" onclick="navigateTo('order')" class="btn-primary px-8 py-3.5 rounded-xl text-sm font-bold">+ Buat Pengajuan</button></div>`;
     return;
   }
 
@@ -22,38 +22,60 @@ function renderClientWorkspace() {
   const isFirstPaymentVerified = proj.dpStatus === 'Terverifikasi';
 
   ws.innerHTML = `
-    <div class="bg-surface border border-border rounded-3xl p-6 space-y-6">
-      <div class="flex justify-between items-center border-b border-border pb-4">
-        <h2 class="text-xl font-bold text-textMain font-display">${proj.judul}</h2>
-        <button type="button" onclick="navigateTo('order')" class="text-primary text-xs font-bold">+ Baru</button>
+    <div class="bg-surface border border-border rounded-[2rem] p-8 space-y-8 shadow-sm">
+      <div class="flex flex-wrap justify-between items-center border-b border-border pb-6 gap-4">
+        <div>
+          <span class="text-xs font-mono text-primary font-bold uppercase tracking-wider block mb-1">Ruang Klien</span>
+          <h2 class="text-3xl font-display font-bold text-textMain">${proj.judul}</h2>
+        </div>
+        <div class="flex gap-3">
+          <button type="button" onclick="navigateTo('order')" class="btn-outline px-5 py-2.5 rounded-xl text-xs font-bold">+ Pengajuan Baru</button>
+        </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-panel border border-border rounded-xl p-4">
-          <span class="text-xs text-primary font-bold">Penawaran</span>
-          <p class="text-sm text-textMain font-mono mt-2">${formatRupiah(proj.totalPrice)}</p>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-panel border border-border rounded-2xl p-6 flex flex-col justify-between">
+          <div>
+            <span class="text-xs text-primary font-bold uppercase tracking-wider">Penawaran</span>
+            <p class="text-2xl text-textMain font-mono font-bold mt-3">${formatRupiah(proj.totalPrice)}</p>
+          </div>
         </div>
-        <div class="bg-panel border border-border rounded-xl p-4">
-          <span class="text-xs text-primary font-bold">Persetujuan</span>
-          ${isAgreementSigned ? `<p class="text-sm text-emerald-500 mt-2 font-bold">✓ Disetujui</p>` : `<button type="button" onclick="openContractDocModal('${proj.id}', true)" class="btn-primary w-full py-2 mt-2 rounded-lg text-xs">Setujui</button>`}
+        <div class="bg-panel border border-border rounded-2xl p-6 flex flex-col justify-between">
+          <div>
+            <span class="text-xs text-primary font-bold uppercase tracking-wider">Persetujuan</span>
+            ${isAgreementSigned ? `<p class="text-lg text-emerald-500 font-bold mt-3">✓ Disetujui</p>` : `<p class="text-sm text-textMuted mt-3 mb-4">Tanda tangan perjanjian diperlukan.</p>`}
+          </div>
+          ${!isAgreementSigned ? `<button type="button" onclick="openContractDocModal('${proj.id}', true)" class="btn-primary w-full py-2.5 rounded-xl text-xs font-bold mt-4">Setujui Perjanjian</button>` : ''}
         </div>
-        <div class="bg-panel border border-border rounded-xl p-4">
-          <span class="text-xs text-primary font-bold">Pembayaran</span>
-          ${isAgreementSigned ? `
-            ${!isFirstPaymentVerified ? `
-              <select id="payment-method-select-${proj.id}" onchange="changePaymentMethodDisplay('${proj.id}')" class="w-full bg-surface border border-border rounded-lg px-2 py-1.5 text-xs text-textMain mt-2">
+        <div class="bg-panel border border-border rounded-2xl p-6 flex flex-col justify-between">
+          <div>
+            <span class="text-xs text-primary font-bold uppercase tracking-wider">Pembayaran</span>
+            ${isFirstPaymentVerified ? `<p class="text-lg text-emerald-500 font-bold mt-3">✓ Lunas</p>` : `<p class="text-sm text-textMuted mt-3">Status: ${proj.dpStatus}</p>`}
+          </div>
+          ${isAgreementSigned && !isFirstPaymentVerified ? `
+            <div class="mt-4 space-y-3">
+              <select id="payment-method-select-${proj.id}" onchange="changePaymentMethodDisplay('${proj.id}')" class="w-full bg-surface border border-border rounded-xl px-3 py-2.5 text-xs text-textMain font-bold focus:outline-none">
                 ${appState.settings.paymentMethods.map(pm => `<option value="${pm.id}">${pm.name}</option>`).join('')}
               </select>
-              <div id="payment-detail-box-${proj.id}" class="bg-surface border border-border rounded-lg p-2 mt-2"></div>
-              <label class="btn-primary w-full py-2 mt-2 rounded-lg text-xs font-bold text-center block cursor-pointer">Unggah Bukti<input type="file" onchange="uploadClientStagePayment('${proj.id}', 'dp', this.files[0])" class="hidden" /></label>
-            ` : `<p class="text-sm text-emerald-500 mt-2 font-bold">✓ Lunas</p>`}
-          ` : `<p class="text-xs text-textMuted mt-2">Terkunci</p>`}
+              <div id="payment-detail-box-${proj.id}" class="bg-surface border border-border rounded-xl p-3"></div>
+              <label class="btn-primary w-full py-2.5 rounded-xl text-xs font-bold text-center block cursor-pointer shadow-glow">
+                Unggah Bukti Transfer
+                <input type="file" onchange="uploadClientStagePayment('${proj.id}', 'dp', this.files[0])" class="hidden" />
+              </label>
+            </div>
+          ` : ''}
         </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-border">
-        <button type="button" onclick="openOfficialDocModal('${proj.id}', 'invoice', 'dp')" class="btn-outline w-full py-3 rounded-xl text-sm font-bold">Lihat Invoice</button>
-        <button type="button" onclick="downloadMasterAsset('${proj.id}')" class="btn-primary w-full py-3 rounded-xl text-sm font-bold">Unduh Hasil</button>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6 border-t border-border">
+        <button type="button" onclick="openOfficialDocModal('${proj.id}', 'invoice', 'dp')" class="btn-outline w-full py-3.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+          Lihat Invoice
+        </button>
+        <button type="button" onclick="downloadMasterAsset('${proj.id}')" class="btn-outline w-full py-3.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Unduh Hasil Akhir
+        </button>
       </div>
     </div>
   `;
@@ -67,8 +89,8 @@ function changePaymentMethodDisplay(projId) {
   const method = appState.settings.paymentMethods.find(m => m.id === select.value);
   if (!method) return;
   box.innerHTML = method.type === 'bank' 
-    ? `<div class="flex items-center gap-2"><img src="${method.logo}" class="h-5 object-contain" /><p class="font-mono text-xs font-bold text-textMain">${method.number}</p></div>`
-    : `<div class="text-center"><img src="${method.logo}" class="w-24 h-24 object-contain mx-auto rounded border border-border" /></div>`;
+    ? `<div class="flex items-center justify-between"><div class="flex items-center gap-3"><img src="${method.logo}" class="h-6 object-contain" /><div><p class="font-mono text-sm font-bold text-textMain">${method.number}</p><p class="text-[10px] text-textMuted">${method.holder}</p></div></div><button type="button" onclick="navigator.clipboard.writeText('${method.number}'); showToast('Disalin','Nomor disalin')" class="text-primary text-xs font-bold bg-primary/10 px-2 py-1 rounded">Salin</button></div>`
+    : `<div class="text-center"><img src="${method.logo}" class="w-32 h-32 object-contain mx-auto rounded-lg border border-border" /></div>`;
 }
 
 function uploadClientStagePayment(projId, kind, file) {
@@ -77,9 +99,8 @@ function uploadClientStagePayment(projId, kind, file) {
   reader.onload = async () => {
     const proj = appState.projects.find(p => p.id === projId); if (!proj) return;
     proj.dpProofDataUrl = reader.result; proj.dpStatus = 'Menunggu Verifikasi';
-    await syncProjectToCloud(proj); renderClientWorkspace(); showToast('Terkirim', 'Menunggu verifikasi.');
+    await syncProjectToCloud(proj); renderClientWorkspace(); showToast('Terkirim', 'Menunggu verifikasi Admin.');
   };
   reader.readAsDataURL(file);
 }
-function changeClientPaymentScheme() {}
-function downloadMasterAsset() { showToast('Unduh', 'File master berhasil diunduh.'); } 
+function downloadMasterAsset() { showToast('Unduh', 'File master berhasil diunduh.'); }
