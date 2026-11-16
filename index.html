@@ -88,7 +88,17 @@
 
     <section id="page-client" class="page-section hidden page-dissolve bg-base"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
       <div id="client-login-wall" class="max-w-md mx-auto bg-surface border border-border/80 rounded-[2rem] p-8 md:p-10 shadow-premium"><div class="text-center mb-8"><h2 class="text-3xl font-display font-bold">Ruang Klien</h2><p class="text-textMuted text-sm mt-2">Masuk untuk melihat proyek Anda.</p></div>
-        <form onsubmit="handleClientPortalLogin(event)" class="space-y-4"><div><label class="block text-xs font-bold mb-2">Email</label><input type="email" id="portal-login-email" required class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3.5 text-sm" /></div><div><label class="block text-xs font-bold mb-2">Kata Sandi</label><input type="password" id="portal-login-pass" required class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3.5 text-sm" /></div>
+        <form onsubmit="handleClientPortalLogin(event)" class="space-y-4">
+          <div><label class="block text-xs font-bold mb-2">Email</label><input type="email" id="portal-login-email" required class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3.5 text-sm" /></div>
+          <div>
+            <label class="block text-xs font-bold mb-2">Kata Sandi</label>
+            <div class="relative">
+              <input type="password" id="portal-login-pass" required class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3.5 text-sm pr-12" />
+              <button type="button" onclick="togglePasswordVisibility('portal-login-pass', 'eye-icon-login')" class="absolute inset-y-0 right-0 pr-4 flex items-center text-textMuted hover:text-primary transition">
+                <svg id="eye-icon-login" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+              </button>
+            </div>
+          </div>
           <div class="flex justify-between items-center text-xs"><button type="button" onclick="openClientAuthModal('register')" class="text-primary font-bold hover:underline">Daftar Akun</button><button type="button" onclick="handleForgotPassword(document.getElementById('portal-login-email').value)" class="text-textMuted hover:text-primary">Lupa Sandi?</button></div>
           <button type="submit" class="btn-primary w-full py-4 rounded-xl text-sm font-bold">Masuk →</button><div class="relative flex py-2 items-center"><div class="flex-grow border-t border-border/60"></div><span class="mx-4 text-textMuted text-xs">atau</span><div class="flex-grow border-t border-border/60"></div></div><button type="button" onclick="handleGoogleLogin()" class="w-full py-3.5 rounded-xl bg-white text-gray-800 border border-gray-300 font-bold text-sm hover:bg-gray-50 transition">Masuk dengan Google</button>
         </form>
@@ -116,7 +126,14 @@
         <input type="text" id="reg-name" required placeholder="Nama Lengkap" class="w-full bg-panel border rounded-xl px-4 py-3"/>
         <input type="email" id="reg-email" required placeholder="Email" class="w-full bg-panel border rounded-xl px-4 py-3"/>
         <input type="tel" id="reg-wa" required placeholder="No. WhatsApp" class="w-full bg-panel border rounded-xl px-4 py-3"/>
-        <input type="password" id="reg-pass" required placeholder="Kata Sandi" class="w-full bg-panel border rounded-xl px-4 py-3"/>
+        <div>
+          <div class="relative">
+            <input type="password" id="reg-pass" required placeholder="Kata Sandi (Min. 8 huruf & angka)" class="w-full bg-panel border rounded-xl px-4 py-3 pr-12"/>
+            <button type="button" onclick="togglePasswordVisibility('reg-pass', 'eye-icon-reg')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-textMuted hover:text-primary">
+              <svg id="eye-icon-reg" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+            </button>
+          </div>
+        </div>
         
         <button type="submit" class="btn-primary w-full py-3 rounded-xl font-bold">Daftar Manual &rarr;</button>
         
