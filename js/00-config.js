@@ -1,5 +1,5 @@
 const LOGO_URL = 'https://iili.io/o9B6HXa.md.png';
-const STORAGE_KEY = 'prangart_lab_state_v8'; // Versi dinaikkan agar cache lama ter-reset
+const STORAGE_KEY = 'prangart_lab_state_v9';
 
 const STUDIO_FIREBASE_CONFIG = {
   apiKey: "AIzaSyDJX7Y95gJ8j3A3te5pvTONrAJBxZ5yS2s",
@@ -49,7 +49,7 @@ const DEFAULT_STATE = {
     directorIdNumber: '6472050000000001',
     studioAddress: 'Jl. Wiraguna Gang 4, Kel. Sidodadi, Samarinda',
     studioEmail: 'prangart.studios@gmail.com',
-    studioWhatsApp: '628977250597', // NOMOR WA DIPERBARUI
+    studioWhatsApp: '628977250597',
     recaptchaSiteKey: '6LeDaSEuAAAAAIDdp1Ir_V-wkmOXE-e8imq9Alzj',
     adminPin: '2026',
     paymentMethods: [
@@ -59,7 +59,7 @@ const DEFAULT_STATE = {
   },
   serviceCatalog: {
     tari: {
-      label:'Aransemen Musik Tari', addonLabel:'Rekaman Vokal', addonPrice:50000,
+      label:'Aransemen Musik Tari', addonLabel:'Tambahan Vokal / Session Player', addonPrice:250000, // HARGA DIUBAH 250RB
       packages: {
         dasar: { label:'Paket Dasar (1 Juta)', price:1000000, desc:'Maks 5 menit. Musik dasar, maks 5 instrumen, 3x revisi, MP3. Pengerjaan 7 hari.' },
         standar: { label:'Paket Standar (1,5 Juta)', price:1500000, desc:'Maks 7 menit. Sesuai alur gerak, 5-8 instrumen, MP3 & WAV. Pengerjaan 14 hari.' },
@@ -67,7 +67,7 @@ const DEFAULT_STATE = {
       }
     },
     digital: {
-      label:'Aransemen Musik Non-Tari', addonLabel:'Rekaman Vokal', addonPrice:50000,
+      label:'Aransemen Musik Non-Tari', addonLabel:'Tambahan Vokal / Session Player', addonPrice:250000, // HARGA DIUBAH 250RB
       packages: {
         dasar: { label:'Paket Dasar (1 Juta)', price:1000000, desc:'Maks 4-5 menit. Aransemen akustik, maks 5 instrumen, 3x revisi, MP3/WAV. 14 hari.' },
         standar: { label:'Paket Standar (1,5 Juta)', price:1500000, desc:'Maks 7 menit. Struktur lengkap (Intro, Verse, Chorus, dll), MP3/WAV. 14 hari.' },
@@ -75,7 +75,7 @@ const DEFAULT_STATE = {
       }
     },
     transkripsi: {
-      label:'Layanan Transkripsi Musik', addonLabel:'Partitur Lengkap', addonPrice:50000,
+      label:'Layanan Transkripsi Musik', addonLabel:'Tambahan Vokal / Session Player', addonPrice:250000, // HARGA DIUBAH 250RB
       packages: {
         dasar: { label:'Tarif Minimum (50rb)', price:50000, desc:'Durasi ≤ 1 Menit / pola berulang. Tarif per instrumen.' },
         standar: { label:'Paket Bundling Dasar (300rb)', price:300000, desc:'± 3 Menit. Melodi utama, 1 jenis notasi.' },
@@ -87,7 +87,6 @@ const DEFAULT_STATE = {
   faqs: [
     { q:'Bagaimana ketentuan revisi?', a:'Paket Dasar mencakup 3x revisi. Paket Pro mencakup revisi UNLIMITED (maksimal 1 bulan setelah selesai). Revisi di luar kuota dikenakan biaya Rp250.000 per sesi.' },
     { q:'Apa yang terjadi jika klien tidak merespon >14 hari?', a:'Proyek akan dicatat sebagai selesai sementara/diarsipkan. Pembatalan sepihak menyebabkan DP hangus (non-refundable).' },
-    { q:'Bagaimana jika PrangArt Lab terlambat?', a:'Klien berhak atas potongan harga 1% - 2% per hari dari sisa pelunasan, dengan maksimal potongan 10%.' },
     { q:'Bagaimana prosedur pemesanan?', a:'Seluruh proyek diawali dengan konsultasi via WhatsApp (08977250597) sebelum kesepakatan harga dan pengerjaan.' }
   ],
   users: [
@@ -98,8 +97,14 @@ const DEFAULT_STATE = {
 
 let appState = {
   ...structuredClone(DEFAULT_STATE),
-  currentPage:'home', currentClientUser:null, isAdminAuthenticated:false,
-  selectedServiceLine:'tari', selectedPackage:'standar', customPrice: null,
+  currentPage:'home', 
+  currentClientUser: null,
+  clientTab: 'projects', // 'projects' atau 'settings'
+  isAdminAuthenticated:false,
+  selectedServiceLine:'tari', 
+  selectedPackage:'standar', 
+  customPrice: null,
+  synopsisMode: 'manual', // 'manual' atau 'ai'
   basicInstruments:['Sampe','Kendang','Gong'],
   proScenes:[{ title:'Babak 1', detail:'Tempo lambat.', link:'' }],
   previousSynopsisBackup:'',
@@ -110,6 +115,7 @@ let appState = {
   docModalState:{ projectId:null, docType:'invoice', stage:'dp' }
 };
 
+// SESSION PERSISTENCE: Load user dari localStorage agar tidak logout saat refresh
 try {
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved) {
@@ -119,6 +125,8 @@ try {
     if (Array.isArray(parsed.projects)) appState.projects = parsed.projects;
     if (Array.isArray(parsed.portfolioItems)) appState.portfolioItems = parsed.portfolioItems;
   }
+  const savedUser = localStorage.getItem('prangart_current_user');
+  if (savedUser) appState.currentClientUser = JSON.parse(savedUser);
 } catch(_) {}
 
 function persistLocalState() {
@@ -129,6 +137,8 @@ function persistLocalState() {
       projects: appState.projects,
       portfolioItems: appState.portfolioItems
     }));
+    if (appState.currentClientUser) localStorage.setItem('prangart_current_user', JSON.stringify(appState.currentClientUser));
+    else localStorage.removeItem('prangart_current_user');
   } catch(_) {}
 }
 window.appState = appState;
