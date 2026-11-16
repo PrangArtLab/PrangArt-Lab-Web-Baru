@@ -114,3 +114,59 @@
   #page-home > .home-hero p { margin-left: auto; margin-right: auto; }
   #page-home > .home-hero .home-hero-actions { justify-content: center; }
 }
+
+/* Hero buttons */
+#page-home > .home-hero .btn-primary,
+#page-home > .home-hero .btn-outline {
+  min-height: 52px;
+  padding: 0.9rem 1.5rem;
+  border-radius: 14px;
+  font-size: 0.94rem;
+  font-weight: 700;
+  transition: background-color 0.2s ease, border-color 0.2s ease,
+              box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+#page-home > .home-hero .btn-primary {
+  color: #fff;
+  background: linear-gradient(120deg, rgb(var(--primary)), rgb(var(--accent)));
+  border: 1px solid transparent;
+  box-shadow: 0 10px 24px -14px rgba(var(--primary), 0.75);
+}
+
+#page-home > .home-hero .btn-primary::after {
+  content: none;
+}
+
+#page-home > .home-hero .btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+  box-shadow: 0 14px 28px -14px rgba(var(--primary), 0.65);
+}
+
+#page-home > .home-hero .btn-outline {
+  color: rgb(var(--text-main));
+  background: rgba(var(--surface), 0.82);
+  border: 1px solid rgba(var(--border), 0.95);
+  box-shadow: none;
+}
+
+#page-home > .home-hero .btn-outline:hover {
+  color: rgb(var(--primary));
+  background: rgb(var(--surface));
+  border-color: rgba(var(--primary), 0.35);
+  transform: translateY(-2px);
+}
+
+#page-home > .home-hero .btn-primary:focus-visible,
+#page-home > .home-hero .btn-outline:focus-visible {
+  outline: 3px solid rgba(var(--primary), 0.35);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #page-home > .home-hero .btn-primary,
+  #page-home > .home-hero .btn-outline {
+    transition: none;
+  }
+}
