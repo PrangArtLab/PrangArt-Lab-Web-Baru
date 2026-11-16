@@ -39,11 +39,26 @@ window.addEventListener('hashchange', () => {
 function updateHeaderAuthBadge() {
   const box = document.getElementById('header-auth-status');
   if (!box) return;
-  if (appState.currentClientUser) {
-    // Tanda silang (x) dihilangkan dari sini
-    box.innerHTML = `<div class="flex items-center gap-1.5 bg-surface border border-border rounded-xl px-3 py-1.5 text-xs"><span class="w-2 h-2 rounded-full bg-emerald-500"></span><span class="font-bold text-textMain">${appState.currentClientUser.name}</span></div>`;
+  
+  if (appState.isAdminAuthenticated) {
+    // Tampilan jika yang login adalah Admin
+    box.innerHTML = `
+      <div class="flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-xl px-3 py-1.5 text-xs">
+        <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+        <span class="font-bold text-primary">Admin Mode</span>
+        <button onclick="appState.isAdminAuthenticated=false; refreshAdminPageUI(); updateHeaderAuthBadge();" class="text-primary hover:text-red-500 ml-1 font-bold">×</button>
+      </div>`;
+  } else if (appState.currentClientUser) {
+    // Tampilan jika yang login adalah Klien
+    box.innerHTML = `
+      <div class="flex items-center gap-2 bg-surface border border-border rounded-xl px-3 py-1.5 text-xs">
+        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+        <span class="font-bold text-textMain">${appState.currentClientUser.name}</span>
+        <button onclick="logoutClientUser()" class="text-textMuted hover:text-red-500 ml-1 font-bold">×</button>
+      </div>`;
   } else {
-    box.innerHTML = `<button onclick="navigateTo('client')" class="px-4 py-2 rounded-xl bg-surface border border-border text-xs font-bold text-textMain">Masuk</button>`;
+    // Tampilan jika belum login
+    box.innerHTML = `<button onclick="navigateTo('client')" class="px-4 py-2 rounded-xl bg-surface border border-border text-xs font-bold text-textMain hover:border-primary transition">Masuk</button>`;
   }
 }
 
