@@ -40,8 +40,10 @@ function renderEditableHomeContent() {
       : '<p class="site-content-empty">Portofolio akan tampil di sini setelah ditambahkan melalui panel admin.</p>';
   }
 
-  if (testimonialGrid && editableSiteContent.testimonials.length) {
-    testimonialGrid.innerHTML = editableSiteContent.testimonials.map(item => `<article class="testimonial-card"><p>“${escapeSiteText(item.quote)}”</p><div class="testimonial-meta"><strong>${escapeSiteText(item.name)}</strong><span>${escapeSiteText(item.role)}</span></div></article>`).join('');
+  if (testimonialGrid) {
+    testimonialGrid.innerHTML = editableSiteContent.testimonials.length
+      ? editableSiteContent.testimonials.map(item => `<article class="testimonial-card"><p>“${escapeSiteText(item.quote)}”</p><div class="testimonial-meta"><strong>${escapeSiteText(item.name)}</strong><span>${escapeSiteText(item.role)}</span></div></article>`).join('')
+      : '<p class="site-content-empty">Testimoni akan tampil di sini setelah ditambahkan melalui panel admin.</p>';
   }
 }
 
@@ -103,7 +105,6 @@ Object.assign(window, { renderAdminDashboard, removeSiteContent });
 function addHomeLandingSections() {
   const home = document.getElementById('page-home');
   if (!home || home.querySelector('.home-services')) return;
-  /* fallback hanya bila HTML lama tidak punya section layanan */
   const section = document.createElement('section');
   section.className = 'home-services';
   section.innerHTML = `<div class="home-section-wrap">
