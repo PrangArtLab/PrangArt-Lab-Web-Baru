@@ -2,7 +2,7 @@ function refreshOrderPageUI() {
   const banner = document.getElementById('order-account-banner');
   if (banner) {
     if (appState.currentClientUser) {
-      banner.innerHTML = `<span class="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-500 font-mono text-[11px] font-bold">✓ Akun Aktif:</span> <strong>${appState.currentClientUser.name}</strong>`;
+      banner.innerHTML = `<div class="flex items-center gap-2"><span class="text-emerald-500 font-bold">✓ Akun Aktif:</span> <strong>${appState.currentClientUser.name}</strong></div>`;
       const setIfEmpty = (id, val) => { const el = document.getElementById(id); if (el && !el.value && val) el.value = val; };
       setIfEmpty('field-nama', appState.currentClientUser.name);
       setIfEmpty('field-email', appState.currentClientUser.email);
@@ -18,7 +18,7 @@ function selectServiceLine(svcKey) {
     btn.className = 'svc-tab-btn p-4 rounded-2xl border border-border bg-panel text-textMuted hover:text-textMain text-left transition-colors duration-300';
   });
   const activeTab = document.getElementById(`svc-tab-${svcKey}`);
-  if (activeTab) activeTab.className = 'svc-tab-btn p-4 rounded-2xl border border-primary bg-primary/10 text-primary text-left transition-colors duration-300';
+  if (activeTab) activeTab.className = 'svc-tab-btn p-4 rounded-2xl border border-primary bg-primary/10 text-primary text-left transition-colors duration-300 shadow-glow';
   renderPackageCards(); renderDynamicSpecFields(); recalculateLivePrice();
 }
 
@@ -29,11 +29,11 @@ function renderPackageCards() {
   grid.innerHTML = Object.entries(svc.packages).map(([pkgKey, pkg]) => {
     const isSelected = appState.selectedPackage === pkgKey;
     return `
-      <button type="button" onclick="selectPackageTier('${pkgKey}')" class="p-4 rounded-xl border text-left transition flex flex-col justify-between ${isSelected ? 'border-primary bg-primary/10 shadow-md' : 'border-border bg-surface hover:border-primary/40'}">
+      <button type="button" onclick="selectPackageTier('${pkgKey}')" class="p-5 rounded-2xl border text-left transition-all duration-300 flex flex-col justify-between ${isSelected ? 'border-primary bg-primary/10 shadow-md transform scale-[1.02]' : 'border-border bg-surface hover:border-primary/40'}">
         <div>
           <span class="text-sm font-bold text-textMain block">${pkg.label}</span>
-          <span class="text-sm font-mono font-bold text-primary block mt-1">${formatRupiah(pkg.price)}</span>
-          <p class="text-[11px] text-textMuted mt-1.5 leading-relaxed">${pkg.desc}</p>
+          <span class="text-lg font-mono font-bold text-primary block mt-1">${formatRupiah(pkg.price)}</span>
+          <p class="text-xs text-textMuted mt-2 leading-relaxed">${pkg.desc}</p>
         </div>
       </button>`;
   }).join('');
@@ -48,32 +48,16 @@ function renderDynamicSpecFields() {
   if (!container) return;
   const svc = appState.selectedServiceLine;
   const pkg = appState.selectedPackage;
-
   if (svc === 'tari') {
-    if (pkg === 'dasar') {
-      container.innerHTML = `
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div><label class="block text-xs font-semibold text-textMain mb-1.5">BPM</label><input type="number" id="spec-dasar-bpm" value="110" class="w-full bg-panel border border-border rounded-xl px-3 py-2 text-sm text-textMain" /></div>
-          <div><label class="block text-xs font-semibold text-textMain mb-1.5">Nuansa</label><select id="spec-dasar-mood" class="w-full bg-panel border border-border rounded-xl px-3 py-2 text-sm text-textMain"><option value="Sakral">Sakral</option><option value="Dinamis">Dinamis</option></select></div>
-        </div>`;
-      renderBasicInstrumentTags();
-    } else if (pkg === 'standar') {
-      container.innerHTML = `<div class="text-sm text-textMuted">Struktur tari standar (timestamp & link referensi) akan tampil di sini.</div>`;
-    } else { container.innerHTML = `<div class="text-sm text-textMuted">Alur dramatik bebas (Pro).</div>`; }
-  } else if (svc === 'transkripsi') {
-    container.innerHTML = `<div><label class="block text-xs font-semibold text-textMain mb-1.5">Jenis Notasi</label><select class="w-full bg-panel border border-border rounded-xl px-3 py-2 text-sm text-textMain"><option>Not Angka & Balok</option><option>Not Angka</option></select></div>`;
+    container.innerHTML = `
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div><label class="block text-xs font-bold text-textMain mb-2">Tempo Utama (BPM)</label><input type="number" id="spec-dasar-bpm" value="110" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm text-textMain focus:outline-none" /></div>
+        <div><label class="block text-xs font-bold text-textMain mb-2">Nuansa Dominan</label><select class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm text-textMain focus:outline-none"><option>Agung / Sakral</option><option>Dinamis / Energik</option><option>Melankolis</option></select></div>
+      </div>`;
   } else {
-    container.innerHTML = `<div><label class="block text-xs font-semibold text-textMain mb-1.5">Genre Musik</label><input type="text" class="w-full bg-panel border border-border rounded-xl px-3 py-2 text-sm text-textMain" /></div>`;
+    container.innerHTML = `<div><label class="block text-xs font-bold text-textMain mb-2">Catatan Spesifikasi</label><textarea rows="3" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm text-textMain focus:outline-none"></textarea></div>`;
   }
 }
-
-function addBasicInstrument() { /* logika sama */ }
-function removeBasicInstrument(idx) { /* logika sama */ }
-function renderBasicInstrumentTags() { /* logika sama */ }
-function toggleStandarStructCard(idx) { /* logika sama */ }
-function addProSceneBlock() { /* logika sama */ }
-function removeProSceneBlock(idx) { /* logika sama */ }
-function renderProSceneBlocks() { /* logika sama */ }
 
 function recalculateLivePrice() {
   const svc = appState.serviceCatalog[appState.selectedServiceLine];
@@ -87,8 +71,6 @@ function recalculateLivePrice() {
   document.getElementById('calc-pkg-name').textContent = pkg.label;
   document.getElementById('calc-pkg-price').textContent = formatRupiah(pkg.price);
   document.getElementById('calc-total-price').textContent = formatRupiah(total);
-  document.getElementById('calc-terbilang-total').textContent = `Terbilang: ${numberToIndonesianWords(total)} Rupiah`;
-  document.getElementById('calc-dp-price').textContent = formatRupiah(first);
 }
 
 async function generateAISynopsis(isVariation = false) {
