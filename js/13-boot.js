@@ -27,18 +27,16 @@ function escapeSiteText(value) {
 function persistEditableSiteContent() {
   localStorage.setItem(SITE_CONTENT_KEY, JSON.stringify(editableSiteContent));
 }
+
+/* FIX: jangan timpa konten hardcoded saat daftar kosong. */
 function renderEditableHomeContent() {
   const portfolioGrid = document.querySelector('#page-home .portfolio-grid');
   const testimonialGrid = document.querySelector('#page-home .testimonial-grid');
-  if (portfolioGrid) {
-    portfolioGrid.innerHTML = editableSiteContent.portfolio.length
-      ? editableSiteContent.portfolio.map(item => `<article class="portfolio-card">${item.image ? `<div class="portfolio-thumb" style="background-image:linear-gradient(135deg,rgba(17,24,39,.12),rgba(17,24,39,.18)),url('${escapeSiteText(item.image)}')"></div>` : ''}<div class="portfolio-body"><span class="mini-label">${escapeSiteText(item.category)}</span><h3>${escapeSiteText(item.title)}</h3><p>${escapeSiteText(item.description)}</p></div></article>`).join('')
-      : '<p class="site-content-empty">Portofolio pilihan segera hadir.</p>';
+  if (portfolioGrid && editableSiteContent.portfolio.length) {
+    portfolioGrid.innerHTML = editableSiteContent.portfolio.map(item => `<article class="portfolio-card">${item.image ? `<div class="portfolio-thumb" style="background-image:linear-gradient(135deg,rgba(17,24,39,.12),rgba(17,24,39,.18)),url('${escapeSiteText(item.image)}')"></div>` : ''}<div class="portfolio-body"><span class="mini-label">${escapeSiteText(item.category)}</span><h3>${escapeSiteText(item.title)}</h3><p>${escapeSiteText(item.description)}</p></div></article>`).join('');
   }
-  if (testimonialGrid) {
-    testimonialGrid.innerHTML = editableSiteContent.testimonials.length
-      ? editableSiteContent.testimonials.map(item => `<article class="testimonial-card"><p>“${escapeSiteText(item.quote)}”</p><div class="testimonial-meta"><strong>${escapeSiteText(item.name)}</strong><span>${escapeSiteText(item.role)}</span></div></article>`).join('')
-      : '<p class="site-content-empty">Testimoni klien akan ditampilkan di sini.</p>';
+  if (testimonialGrid && editableSiteContent.testimonials.length) {
+    testimonialGrid.innerHTML = editableSiteContent.testimonials.map(item => `<article class="testimonial-card"><p>“${escapeSiteText(item.quote)}”</p><div class="testimonial-meta"><strong>${escapeSiteText(item.name)}</strong><span>${escapeSiteText(item.role)}</span></div></article>`).join('');
   }
 }
 
@@ -100,40 +98,23 @@ Object.assign(window, { renderAdminDashboard, removeSiteContent });
 function addHomeLandingSections() {
   const home = document.getElementById('page-home');
   if (!home || home.querySelector('.home-services')) return;
-  const styles = document.createElement('style');
-  styles.textContent = `
-    .home-services{padding:72px 24px 84px;background:linear-gradient(180deg,rgb(var(--base)),rgba(var(--primary),.035))}
-    .home-services-inner{max-width:1160px;margin:0 auto}.home-services-heading{max-width:680px;margin-bottom:32px}
-    .home-services-kicker{display:inline-block;margin-bottom:12px;color:rgb(var(--primary));font:700 11px/1.3 'JetBrains Mono',monospace;letter-spacing:.16em;text-transform:uppercase}
-    .home-services-heading h2{margin:0;color:rgb(var(--text-main));font:700 clamp(30px,4vw,48px)/1.08 'Space Grotesk',sans-serif;letter-spacing:-.045em}
-    .home-services-heading p{max-width:580px;margin:14px 0 0;color:rgb(var(--text-muted));line-height:1.75}
-    .home-services-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
-    .home-service-card{min-height:225px;padding:26px;border:1px solid rgba(var(--border),.85);border-radius:24px;background:linear-gradient(145deg,rgba(var(--surface),.98),rgba(var(--panel),.72));box-shadow:0 20px 50px -38px rgba(15,23,42,.35);transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease}
-    .home-service-card:hover{transform:translateY(-5px);border-color:rgba(var(--primary),.38);box-shadow:0 26px 52px -34px rgba(var(--primary),.4)}
-    .home-service-card span{color:rgb(var(--primary));font:700 10px/1.4 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase}
-    .home-service-card h3{margin:18px 0 10px;color:rgb(var(--text-main));font:700 22px/1.2 'Space Grotesk',sans-serif;letter-spacing:-.035em}
-    .home-service-card p,.site-content-empty{margin:0;color:rgb(var(--text-muted));font-size:14px;line-height:1.75}
-    .site-admin-list{display:grid;gap:8px;margin-top:14px}.site-admin-row{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid rgba(var(--border),.8);border-radius:12px;padding:10px 12px;font-size:13px}.site-admin-row button{color:#dc2626;font-weight:700}
-    @media(max-width:760px){.home-services{padding:54px 20px 62px}.home-services-grid{grid-template-columns:1fr}.home-service-card{min-height:0}}
-  `;
-  document.head.appendChild(styles);
+  /* fallback hanya bila HTML lama tidak punya section layanan */
   const section = document.createElement('section');
   section.className = 'home-services';
-  section.innerHTML = `<div class="home-services-inner">
-    <header class="home-services-heading"><span class="home-services-kicker">Layanan utama</span><h2>Musik yang menyatu dengan cerita dan visi Anda.</h2><p>Dari komposisi pertunjukan hingga transkripsi, setiap karya dirancang sesuai kebutuhan.</p></header>
-    <div class="home-services-grid">
-      <article class="home-service-card"><span>01 / Musik Tari</span><h3>Komposisi untuk pertunjukan</h3><p>Musik yang mengikuti karakter gerak, tempo, suasana, dan kebutuhan panggung.</p></article>
-      <article class="home-service-card"><span>02 / Aransemen</span><h3>Musik untuk karya digital</h3><p>Aransemen untuk video, konten, dan brand yang memperkuat identitas karya.</p></article>
-      <article class="home-service-card"><span>03 / Transkripsi</span><h3>Audio menjadi notasi terstruktur</h3><p>Dokumentasikan ide musikal untuk evaluasi atau produksi.</p></article>
+  section.innerHTML = `<div class="home-section-wrap">
+    <header class="home-section-heading"><span class="home-kicker">Layanan utama</span><h2>Musik yang menyatu dengan cerita dan visi Anda.</h2></header>
+    <div class="home-service-grid">
+      <article class="home-service-card"><span class="service-tag">01 / Musik Tari</span><h3>Komposisi untuk pertunjukan</h3><p>Musik yang mengikuti karakter gerak, tempo, suasana, dan kebutuhan panggung.</p></article>
+      <article class="home-service-card"><span class="service-tag">02 / Aransemen</span><h3>Musik untuk karya digital</h3><p>Aransemen untuk video, konten, dan brand yang memperkuat identitas karya.</p></article>
+      <article class="home-service-card"><span class="service-tag">03 / Transkripsi</span><h3>Audio menjadi notasi terstruktur</h3><p>Dokumentasikan ide musikal untuk evaluasi atau produksi.</p></article>
     </div></div>`;
   home.appendChild(section);
 }
 
+/* FIX: biarkan hero dari styles.css tampil utuh (label + waveform), hanya poles kartu. */
 function applyNonTraditionalCopyAndStyle() {
   const style = document.createElement('style');
   style.textContent = `
-    .home-hero{background:radial-gradient(ellipse at 50% 35%,rgba(var(--primary),.13),transparent 40%),radial-gradient(ellipse at 12% 20%,rgba(var(--accent),.10),transparent 30%),linear-gradient(145deg,rgb(var(--surface)),rgb(var(--base)) 78%)}
-    .home-hero::before{content:none!important}.home-hero::after{content:none!important}.home-hero .home-hero-actions::after{content:none!important}
     .home-service-card::before{background:linear-gradient(90deg,rgb(var(--primary)),rgb(var(--accent)))}
     .card-tari,.card-digital,.card-transkripsi{background:linear-gradient(180deg,rgba(var(--primary),.035),rgba(var(--surface),.94))}
     .service-tag,.mini-label{color:rgb(var(--primary));border-color:rgba(var(--border),.8)}
