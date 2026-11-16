@@ -55,15 +55,29 @@ async function handleGoogleLogin() {
   try {
     const { GoogleAuthProvider, signInWithPopup } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js');
     const result = await signInWithPopup(window.firebaseAuth, new GoogleAuthProvider());
+    
     let existing = appState.users.find(u => u.email === result.user.email);
     if (!existing) {
-      existing = { name: result.user.displayName, email: result.user.email, pass: 'google-auth' };
+      existing = { 
+        name: result.user.displayName, 
+        email: result.user.email, 
+        wa: '', 
+        pass: 'google-auth' 
+      };
       appState.users.push(existing);
+      persistLocalState();
     }
+    
     appState.currentClientUser = existing;
     localStorage.setItem('prangart_current_user', JSON.stringify(existing));
-    updateHeaderAuthBadge(); refreshClientPageUI(); showToast('Sukses', `Halo, ${existing.name}`);
-  } catch (error) { showToast('Gagal', 'Login Google dibatalkan.', 'error'); }
+    
+    closeClientAuthModal(); 
+    updateHeaderAuthBadge(); 
+    refreshClientPageUI(); 
+    showToast('Sukses', `Halo, ${existing.name}`);
+  } catch (error) { 
+    showToast('Gagal', 'Login Google dibatalkan atau gagal.', 'error'); 
+  }
 }
 
 async function handleForgotPassword(email) {
