@@ -25,7 +25,8 @@ const DEFAULT_STATE = {
     recaptchaSiteKey: '6LeDaSEuAAAAAIDdp1Ir_V-wkmOXE-e8imq9Alzj',
     adminPin: '2026',
     paymentMethods: [
-      { id: 'pay-1', type: 'bank', name: 'Bank BCA', number: '1234567890', holder: 'Fikri Yassaar', logo: 'https://iili.io/oHYybgj.md.png' }
+      { id: 'pay-1', type: 'bank', name: 'Bank BCA', number: '1234567890', holder: 'Fikri Yassaar' },
+      { id: 'pay-2', type: 'qris', name: 'QRIS All Payment', number: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/QR_code_for_mobile_English_Wikipedia.svg/1200px-QR_code_for_mobile_English_Wikipedia.svg.png', holder: 'PrangArt Lab' }
     ]
   },
   serviceCatalog: {
