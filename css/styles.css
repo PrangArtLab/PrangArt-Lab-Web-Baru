@@ -1,165 +1,182 @@
 @import url("https://raw.githubusercontent.com/PrangArtLab/PrangArt-Lab-Web-Baru/15ea44ba8d2bd215136fe1dc997aa367c1315c3b/css/styles.css");
 
-/* Client and admin pages: consistent spacing, clear hierarchy, and responsive cards. */
-#page-client,
-#page-admin {
-  min-height: calc(100vh - 80px);
-  background:
-    radial-gradient(ellipse at 10% 0%, rgba(var(--primary), .055), transparent 34%),
-    rgb(var(--base));
+/* Restore the complete base stylesheet above; keep the homepage styling refined and on-brand. */
+:root {
+  --base: 248 250 252;
+  --surface: 255 255 255;
+  --panel: 241 245 249;
+  --primary: 79 70 229;
+  --accent: 16 185 129;
+  --text-main: 15 23 42;
+  --text-muted: 71 85 105;
+  --border: 226 232 240;
+}
+.dark {
+  --base: 2 6 23;
+  --surface: 15 23 42;
+  --panel: 30 41 59;
+  --primary: 129 140 248;
+  --accent: 52 211 153;
+  --text-main: 248 250 252;
+  --text-muted: 148 163 184;
+  --border: 51 65 85;
 }
 
-#page-client > div,
-#page-admin > div {
-  width: min(100% - 32px, 1120px);
-  margin-inline: auto;
-  padding: clamp(40px, 7vw, 88px) 0;
-}
-
-#client-login-wall,
-#admin-pin-gate {
-  width: min(100%, 470px);
-  margin: 0 auto;
-  padding: clamp(24px, 5vw, 40px);
-  border: 1px solid rgba(var(--border), .9);
-  border-radius: 24px;
-  background: rgb(var(--surface));
-  box-shadow: 0 24px 70px -48px rgba(15, 23, 42, .38);
-}
-
-#client-login-wall h2,
-#admin-pin-gate h2,
-#admin-workspace-content h2 {
-  color: rgb(var(--text-main));
-  letter-spacing: -.045em;
-}
-
-#client-login-wall form,
-#admin-pin-gate form {
-  display: grid;
-  gap: 16px;
-}
-
-#client-login-wall label,
-#admin-pin-gate label {
-  display: block;
-  margin-bottom: 7px;
-  color: rgb(var(--text-main));
-  font-size: .78rem;
-  font-weight: 700;
-}
-
-#client-login-wall input,
-#admin-pin-gate input,
-#client-workspace-content input,
-#client-workspace-content textarea,
-#admin-workspace-content input,
-#admin-workspace-content textarea,
-#admin-workspace-content select {
-  width: 100%;
-  min-height: 48px;
-  padding: 12px 14px;
-  border: 1px solid rgba(var(--border), .95);
-  border-radius: 12px;
-  outline: none;
-  background: rgb(var(--surface));
-  color: rgb(var(--text-main));
-  font: inherit;
-  transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
-}
-#client-login-wall input:focus,
-#admin-pin-gate input:focus,
-#client-workspace-content input:focus,
-#client-workspace-content textarea:focus,
-#admin-workspace-content input:focus,
-#admin-workspace-content textarea:focus,
-#admin-workspace-content select:focus {
-  border-color: rgba(var(--primary), .55);
-  box-shadow: 0 0 0 3px rgba(var(--primary), .12) !important;
-}
-
-#client-login-wall form > button,
-#admin-pin-gate form > button {
-  width: 100%;
-  min-height: 48px;
-  border-radius: 12px;
-}
-
-#client-workspace-content {
-  display: grid;
-  gap: 20px;
-}
-#client-workspace-content > div {
-  padding: clamp(20px, 4vw, 36px);
-  border: 1px solid rgba(var(--border), .9);
-  border-radius: 22px;
-  background: rgb(var(--surface));
-  box-shadow: 0 20px 55px -44px rgba(15, 23, 42, .32);
-}
-#client-workspace-content > div > div:first-child {
+#page-home > .home-hero {
+  position: relative;
+  isolation: isolate;
+  min-height: min(650px, calc(100vh - 80px));
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
-  border-bottom: 1px solid rgba(var(--border), .85);
-  padding-bottom: 16px;
-  margin-bottom: 22px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  overflow: hidden;
+  padding: clamp(72px, 10vh, 112px) clamp(28px, 10vw, 150px);
+  text-align: left;
+  background:
+    radial-gradient(ellipse at 82% 48%, rgba(var(--accent), .14), transparent 28%),
+    radial-gradient(ellipse at 76% 38%, rgba(var(--primary), .12), transparent 35%),
+    linear-gradient(135deg, rgb(var(--surface)) 12%, rgb(var(--base)) 100%);
 }
-#client-workspace-content > div > div:first-child button {
-  padding: 9px 14px;
-  border: 1px solid transparent;
-  border-radius: 10px;
-  font-size: .84rem;
-  font-weight: 700;
-  transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease;
+#page-home > .home-hero::before {
+  content: 'PRANGART LAB  /  MUSIC PRODUCTION STUDIO';
+  position: relative;
+  inset: auto;
+  display: block;
+  margin: 0 0 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: rgb(var(--primary));
+  font: 700 11px/1.5 'JetBrains Mono', monospace;
+  letter-spacing: .16em;
+  pointer-events: none;
 }
-#client-workspace-content > div > div:first-child button:hover {
-  border-color: rgba(var(--primary), .18);
+#page-home > .home-hero::after {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  width: min(38vw, 500px);
+  height: 240px;
+  right: clamp(24px, 8vw, 120px);
+  top: 50%;
+  transform: translateY(-42%);
+  opacity: .7;
+  pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 520 240' fill='none'%3E%3Cpath d='M8 120h52l18-25 22 52 25-92 26 126 26-86 23 42 21-17h34l22-48 24 93 24-70 22 34h54l21-26 22 46 20-29h42' stroke='%234f46e5' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' opacity='.72'/%3E%3Cpath d='M8 151h78m286 0h140' stroke='%2310b981' stroke-width='2' stroke-linecap='round' opacity='.38'/%3E%3Ccircle cx='260' cy='120' r='83' stroke='%234f46e5' stroke-width='1' opacity='.10'/%3E%3Ccircle cx='260' cy='120' r='112' stroke='%2310b981' stroke-width='1' opacity='.10'/%3E%3C/svg%3E") center/contain no-repeat;
+  mask-image: linear-gradient(90deg, transparent, #000 22%, #000 82%, transparent);
 }
-#client-workspace-content > div > div:not(:first-child) {
+#page-home > .home-hero > * { position: relative; z-index: 1; }
+#page-home > .home-hero h1 {
+  max-width: 760px;
+  margin: 0;
+  font-size: clamp(3.2rem, 6.8vw, 6rem);
+  line-height: .98;
+  letter-spacing: -.075em;
+  text-wrap: balance;
+}
+#page-home > .home-hero h1 span {
+  color: transparent;
+  background: linear-gradient(110deg, rgb(var(--primary)), rgb(var(--accent)));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+#page-home > .home-hero p {
+  max-width: 520px;
+  margin: 20px 0 0;
+  color: rgb(var(--text-muted));
+  font-size: clamp(1rem, 1.45vw, 1.16rem);
+  line-height: 1.75;
+}
+#page-home > .home-hero .home-hero-actions {
+  z-index: 1;
+  justify-content: flex-start;
+  gap: 12px;
+  margin-top: 28px;
+}
+#page-home > .home-hero .home-hero-actions::after { content: none; }
+
+#page-home > .home-hero .btn-primary,
+#page-home > .home-hero .btn-outline {
+  min-height: 52px;
+  padding: .9rem 1.5rem;
   border-radius: 14px;
+  font-size: .94rem;
+  font-weight: 700;
+  transition: transform 280ms cubic-bezier(.2,.7,.2,1), box-shadow 280ms ease,
+    background-color 280ms ease, border-color 280ms ease, color 280ms ease, filter 280ms ease;
 }
-#client-workspace-content .max-w-md {
-  width: 100%;
+#page-home > .home-hero .btn-primary {
+  color: #fff;
+  background: linear-gradient(120deg, rgb(var(--primary)), rgb(var(--accent)));
+  border: 1px solid transparent;
+  box-shadow: 0 10px 24px -14px rgba(var(--primary), .7);
 }
-
-#admin-pin-gate { text-align: center; }
-#admin-pin-gate form { text-align: left; }
-#admin-pin-gate input { text-align: center; letter-spacing: .18em; }
-#admin-workspace-content {
-  display: grid;
-  gap: 20px;
+#page-home > .home-hero .btn-primary::after { content: none; }
+#page-home > .home-hero .btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.04);
+  box-shadow: 0 14px 28px -16px rgba(var(--primary), .62);
 }
-#admin-workspace-content > div,
-#admin-workspace-content > section {
-  padding: clamp(20px, 4vw, 36px);
-  border: 1px solid rgba(var(--border), .9);
-  border-radius: 22px;
+#page-home > .home-hero .btn-outline {
+  color: rgb(var(--text-main));
+  background: rgba(var(--surface), .86);
+  border: 1px solid rgba(var(--border), .95);
+  box-shadow: none;
+}
+#page-home > .home-hero .btn-outline:hover {
+  color: rgb(var(--primary));
   background: rgb(var(--surface));
-  box-shadow: 0 20px 55px -44px rgba(15, 23, 42, .32);
-}
-#admin-workspace-content > div > div,
-#admin-workspace-content > section > div {
-  min-width: 0;
-}
-#admin-workspace-content .site-admin-row {
-  background: rgba(var(--panel), .55);
+  border-color: rgba(var(--primary), .35);
+  transform: translateY(-2px);
 }
 
-@media (max-width: 640px) {
-  #page-client > div,
-  #page-admin > div {
-    width: min(100% - 24px, 1120px);
-    padding: 32px 0 48px;
+#page-home .home-service-card,
+#page-home .portfolio-card,
+#page-home .testimonial-card {
+  transition: transform 280ms cubic-bezier(.2,.7,.2,1), box-shadow 280ms ease, border-color 280ms ease;
+}
+#page-home .home-service-card:hover,
+#page-home .portfolio-card:hover,
+#page-home .testimonial-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(var(--primary), .32);
+  box-shadow: 0 18px 34px -26px rgba(15, 23, 42, .28);
+}
+
+@media (max-width: 768px) {
+  #page-home > .home-hero {
+    min-height: 590px;
+    align-items: center;
+    padding: 78px 22px 110px;
+    text-align: center;
   }
-  #client-login-wall,
-  #admin-pin-gate {
-    border-radius: 20px;
+  #page-home > .home-hero::before { margin-bottom: 20px; font-size: 9px; letter-spacing: .12em; }
+  #page-home > .home-hero::after {
+    width: 88vw;
+    height: 150px;
+    right: 6vw;
+    top: auto;
+    bottom: 8px;
+    transform: none;
+    opacity: .48;
   }
-  #client-workspace-content > div > div:first-child {
-    align-items: stretch;
-  }
-  #client-workspace-content > div > div:first-child button {
-    flex: 1 1 auto;
-  }
+  #page-home > .home-hero h1 { font-size: clamp(3rem, 12vw, 4.4rem); }
+  #page-home > .home-hero p { margin-left: auto; margin-right: auto; }
+  #page-home > .home-hero .home-hero-actions { justify-content: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #page-home > .home-hero .btn-primary,
+  #page-home > .home-hero .btn-outline,
+  #page-home .home-service-card,
+  #page-home .portfolio-card,
+  #page-home .testimonial-card { transition: none; }
+  #page-home > .home-hero .btn-primary:hover:not(:disabled),
+  #page-home > .home-hero .btn-outline:hover,
+  #page-home .home-service-card:hover,
+  #page-home .portfolio-card:hover,
+  #page-home .testimonial-card:hover { transform: none; }
 }
