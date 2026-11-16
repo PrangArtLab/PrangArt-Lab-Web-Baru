@@ -148,7 +148,7 @@
   outline-offset: 3px;
 }
 
-/* ================= GLOBAL BUTTONS (fix tombol form/modal/CTA) ================= */
+/* ================= GLOBAL BUTTONS ================= */
 .btn-primary,
 .btn-outline {
   display: inline-flex;
@@ -385,6 +385,19 @@
   box-shadow: 0 10px 30px -12px rgba(0, 0, 0, .35);
 }
 .home-cta .btn-primary:hover:not(:disabled) { transform: translateY(-2px); filter: none; }
+
+/* ================= EMPTY STATE ================= */
+.site-content-empty {
+  grid-column: 1 / -1;
+  padding: 56px 24px;
+  border: 1px dashed rgba(var(--border), .9);
+  border-radius: 24px;
+  background: rgba(var(--panel), .45);
+  color: rgb(var(--text-muted));
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.7;
+}
 
 /* ================= NAV PILL ================= */
 .nav-pill { transition: color 220ms ease, background-color 220ms ease, border-color 220ms ease; }
