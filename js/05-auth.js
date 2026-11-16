@@ -1,33 +1,10 @@
 function openClientAuthModal(tab = 'register') {
-  switchAuthModalTab(tab);
-  const m = document.getElementById('client-auth-modal');
-  m?.classList.remove('hidden');
-  m?.classList.add('flex');
+  document.getElementById('client-auth-modal')?.classList.remove('hidden');
+  document.getElementById('client-auth-modal')?.classList.add('flex');
 }
-
 function closeClientAuthModal() {
-  const m = document.getElementById('client-auth-modal');
-  m?.classList.add('hidden');
-  m?.classList.remove('flex');
-}
-
-function switchAuthModalTab(tab) {
-  const regTab = document.getElementById('auth-tab-register');
-  const logTab = document.getElementById('auth-tab-login');
-  const regForm = document.getElementById('form-client-register');
-  const logForm = document.getElementById('form-client-login');
-
-  if (tab === 'register') {
-    regTab.className = 'py-2.5 rounded-lg text-xs font-bold bg-surface shadow text-textMain';
-    logTab.className = 'py-2.5 rounded-lg text-xs font-semibold text-textMuted hover:text-textMain transition';
-    regForm.classList.remove('hidden');
-    logForm.classList.add('hidden');
-  } else {
-    logTab.className = 'py-2.5 rounded-lg text-xs font-bold bg-surface shadow text-textMain';
-    regTab.className = 'py-2.5 rounded-lg text-xs font-semibold text-textMuted hover:text-textMain transition';
-    logForm.classList.remove('hidden');
-    regForm.classList.add('hidden');
-  }
+  document.getElementById('client-auth-modal')?.classList.add('hidden');
+  document.getElementById('client-auth-modal')?.classList.remove('flex');
 }
 
 function handleQuickClientRegister(e) {
@@ -37,40 +14,16 @@ function handleQuickClientRegister(e) {
   const wa = document.getElementById('reg-wa').value.trim();
   const pass = document.getElementById('reg-pass').value;
 
-  const existing = appState.users.find(u => u.email === email);
-  if (existing) {
-    showToast('Email Terdaftar', 'Silakan masuk menggunakan tab Masuk.', 'warning');
-    switchAuthModalTab('login');
-    document.getElementById('login-email').value = email;
-    return;
-  }
+  if (appState.users.find(u => u.email === email)) return showToast('Gagal', 'Email sudah terdaftar.', 'error');
 
-  const newUser = { name, email, wa, pass, instansi: '', kota: '', alamat: '', nik: '' };
+  const newUser = { name, email, wa, pass };
   appState.users.push(newUser);
   appState.currentClientUser = newUser;
   syncUserToCloud(newUser);
   updateHeaderAuthBadge();
   closeClientAuthModal();
-  showToast('Akun Dibuat', `Selamat datang, ${name}!`);
-  if (appState.currentPage === 'client') refreshClientPageUI();
-  if (appState.currentPage === 'order') refreshOrderPageUI();
-}
-
-function handleQuickClientLogin(e) {
-  e.preventDefault();
-  const email = document.getElementById('login-email').value.trim().toLowerCase();
-  const pass = document.getElementById('login-pass').value;
-  const found = appState.users.find(u => u.email === email && u.pass === pass);
-  if (!found) {
-    showToast('Gagal Masuk', 'Email atau kata sandi salah.', 'error');
-    return;
-  }
-  appState.currentClientUser = found;
-  updateHeaderAuthBadge();
-  closeClientAuthModal();
-  showToast('Berhasil Masuk', `Halo, ${found.name}.`);
-  if (appState.currentPage === 'client') refreshClientPageUI();
-  if (appState.currentPage === 'order') refreshOrderPageUI();
+  showToast('Berhasil', 'Akun berhasil dibuat.');
+  navigateTo('client');
 }
 
 function handleClientPortalLogin(e) {
@@ -78,18 +31,77 @@ function handleClientPortalLogin(e) {
   const email = document.getElementById('portal-login-email').value.trim().toLowerCase();
   const pass = document.getElementById('portal-login-pass').value;
   const found = appState.users.find(u => u.email === email && u.pass === pass);
-  if (!found) {
-    showToast('Gagal Masuk', 'Email atau kata sandi tidak sesuai.', 'error');
-    return;
-  }
+  
+  if (!found) return showToast('Gagal', 'Email atau sandi salah.', 'error');
+  
   appState.currentClientUser = found;
   updateHeaderAuthBadge();
   refreshClientPageUI();
+  showToast('Sukses', `Selamat datang, ${found.name}`);
+}
+
+async function handleGoogleLogin() {
+  if (!window.firebaseAuth) return showToast('Info', 'Firebase belum siap, gunakan login manual.', 'warning');
+  try {
+    const { GoogleAuthProvider, signInWithPopup } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js');
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(window.firebaseAuth, provider);
+    const user = result.user;
+    
+    // Cek apakah user sudah ada di data lokal
+    let existing = appState.users.find(u => u.email === user.email);
+    if (!existing) {
+      existing = { name: user.displayName, email: user.email, wa: '', pass: 'google-auth' };
+      appState.users.push(existing);
+      syncUserToCloud(existing);
+    }
+    appState.currentClientUser = existing;
+    updateHeaderAuthBadge();
+    refreshClientPageUI();
+    showToast('Sukses', `Halo, ${user.displayName}`);
+  } catch (error) {
+    showToast('Gagal', 'Login Google dibatalkan.', 'error');
+  }
+}
+
+async function handleForgotPassword(email) {
+  if (!email) return showToast('Info', 'Ketik email Anda di kolom Email terlebih dahulu.', 'warning');
+  if (!window.firebaseAuth) return showToast('Info', 'Fitur reset sandi membutuhkan Firebase.', 'warning');
+  try {
+    const { sendPasswordResetEmail } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js');
+    await sendPasswordResetEmail(window.firebaseAuth, email);
+    showToast('Email Terkirim', 'Cek kotak masuk Anda untuk link reset sandi.', 'success');
+  } catch (error) {
+    showToast('Gagal', 'Email tidak ditemukan atau terjadi kesalahan.', 'error');
+  }
+}
+
+function openChangePasswordModal() {
+  document.getElementById('custom-modal-title').textContent = 'Ganti Kata Sandi';
+  document.getElementById('custom-modal-body').innerHTML = `
+    <div class="space-y-3">
+      <input type="password" id="new-pass-input" placeholder="Sandi Baru" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
+      <button onclick="submitChangePassword()" class="btn-primary w-full py-3 rounded-xl text-sm font-bold">Simpan Sandi</button>
+    </div>
+  `;
+  document.getElementById('custom-modal')?.classList.remove('hidden');
+  document.getElementById('custom-modal')?.classList.add('flex');
+}
+
+function submitChangePassword() {
+  const newPass = document.getElementById('new-pass-input').value;
+  if (!newPass || newPass.length < 4) return showToast('Gagal', 'Sandi minimal 4 karakter.', 'warning');
+  if (appState.currentClientUser) {
+    appState.currentClientUser.pass = newPass;
+    syncUserToCloud(appState.currentClientUser);
+    showToast('Sukses', 'Sandi berhasil diubah.');
+    closeCustomModal();
+  }
 }
 
 function logoutClientUser() {
   appState.currentClientUser = null;
   updateHeaderAuthBadge();
-  showToast('Keluar Akun', 'Anda telah keluar dari sesi klien.');
   navigateTo('client');
+  showToast('Logout', 'Anda telah keluar.');
 }
