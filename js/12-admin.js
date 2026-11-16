@@ -2,11 +2,30 @@ let adminActiveTab = 'projects';
 
 function verifyAdminPin(e) { 
   e.preventDefault(); 
-  if(document.getElementById('admin-pin-input').value === appState.settings.adminPin){ 
+  const pin = document.getElementById('admin-pin-input').value;
+  if(pin === appState.settings.adminPin){ 
+    // Isolasi Sesi: Jika Admin login, Klien otomatis logout
     appState.isAdminAuthenticated = true; 
+    appState.currentClientUser = null;
+    localStorage.removeItem('prangart_current_user');
+    
+    updateHeaderAuthBadge();
     refreshAdminPageUI(); 
+    showToast('Akses Diberikan', 'Selamat datang, Admin.', 'success');
   } else {
-    showToast('Salah', 'PIN Salah', 'error'); 
+    showToast('Gagal', 'PIN Admin yang Anda masukkan salah.', 'error'); 
+  }
+}
+
+/* Fungsi Reset PIN jika Admin lupa */
+function resetAdminPin() {
+  const secret = prompt("Masukkan kode pemulihan rahasia untuk mereset PIN (Kode bawaan: prangart2026):");
+  if (secret === 'prangart2026') {
+    appState.settings.adminPin = '2026';
+    persistLocalState();
+    showToast('Sukses', 'PIN Admin telah direset menjadi 2026.', 'success');
+  } else if (secret !== null) {
+    showToast('Gagal', 'Kode pemulihan salah!', 'error');
   }
 }
 
@@ -131,7 +150,7 @@ function renderAdminDashboard() {
           <button type="submit" class="btn-primary w-full py-3 rounded-xl font-bold mt-4">Simpan Pengaturan</button>
         </form>
         <hr class="my-6 border-border/60"/>
-        <button onclick="appState.isAdminAuthenticated=false; refreshAdminPageUI();" class="w-full py-3 rounded-xl bg-red-500/10 text-red-500 font-bold hover:bg-red-500 hover:text-white transition">Logout Admin</button>
+        <button onclick="appState.isAdminAuthenticated=false; refreshAdminPageUI(); updateHeaderAuthBadge();" class="w-full py-3 rounded-xl bg-red-500/10 text-red-500 font-bold hover:bg-red-500 hover:text-white transition">Logout Admin</button>
       </div>
     `;
   }
