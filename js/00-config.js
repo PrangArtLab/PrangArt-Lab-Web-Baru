@@ -1,5 +1,5 @@
 const LOGO_URL = 'https://iili.io/o9B6HXa.md.png';
-const STORAGE_KEY = 'prangart_lab_v12'; // Naikkan versi untuk hapus cache lama
+const STORAGE_KEY = 'prangart_lab_v12'; 
 
 const STUDIO_FIREBASE_CONFIG = {
   apiKey: "AIzaSyDJX7Y95gJ8j3A3te5pvTONrAJBxZ5yS2s",
@@ -21,7 +21,7 @@ const TRACKER_MILESTONES = [
 
 const DEFAULT_STATE = {
   settings: {
-    studioWhatsApp: '628977250597', // NOMOR WA DIUPDATE
+    studioWhatsApp: '628977250597',
     recaptchaSiteKey: '6LeDaSEuAAAAAIDdp1Ir_V-wkmOXE-e8imq9Alzj',
     adminPin: '2026',
     paymentMethods: [
@@ -32,25 +32,25 @@ const DEFAULT_STATE = {
     tari: {
       label:'Aransemen Musik Tari', addonLabel:'Tambahan Vokal', addonPrice:250000,
       packages: {
-        dasar: { label:'Paket Dasar (1 Juta)', price:1000000, desc:'Maks 5 menit.' },
-        standar: { label:'Paket Standar (1,5 Juta)', price:1500000, desc:'Maks 7 menit.' },
-        pro: { label:'Paket Pro (2 Juta)', price:2000000, desc:'Maks 7 menit. Revisi UNLIMITED.' }
+        dasar: { label:'Paket Dasar (1 Juta)', price:1000000, desc:'Maks 5 menit. Musik dasar (tanpa vokal), maks 5 instrumen, penyesuaian tempo, 3x revisi, file MP3, pengerjaan maks 7 hari.' },
+        standar: { label:'Paket Standar (1,5 Juta)', price:1500000, desc:'Maks 7 menit. Mengikuti alur gerak tari, 5–8 instrumen fleksibel, file MP3 & WAV, pengerjaan maks 14 hari.' },
+        pro: { label:'Paket Pro (2 Juta)', price:2000000, desc:'Maks 7 menit. Garapan detail & diskusi mendalam, revisi UNLIMITED (1 bln), file MP3 & WAV Master, pengerjaan maks 14 hari.' }
       }
     },
     digital: {
       label:'Aransemen Musik Non-Tari', addonLabel:'Tambahan Vokal', addonPrice:250000,
       packages: {
-        dasar: { label:'Paket Dasar (1 Juta)', price:1000000, desc:'Maks 4-5 menit.' },
-        standar: { label:'Paket Standar (1,5 Juta)', price:1500000, desc:'Maks 7 menit.' },
-        pro: { label:'Paket Pro (2 Juta)', price:2000000, desc:'Maks 7 menit. Revisi UNLIMITED.' }
+        dasar: { label:'Paket Dasar (1 Juta)', price:1000000, desc:'Maks 4–5 menit. Aransemen sederhana/akustik, maks 5 instrumen, penyesuaian kunci nada, 3x revisi, file MP3 & WAV, pengerjaan maks 14 hari.' },
+        standar: { label:'Paket Standar (1,5 Juta)', price:1500000, desc:'Maks 7 menit. Struktur lagu lengkap (Intro, Verse, Chorus, Bridge, Outro), 5–8 instrumen fleksibel, file MP3 & WAV Master, pengerjaan maks 14 hari.' },
+        pro: { label:'Paket Pro (2 Juta)', price:2000000, desc:'Maks 7 menit. Pengerjaan lebih kompleks dan mendetail, revisi UNLIMITED (1 bln), file MP3 & WAV Master, pengerjaan maks 14 hari.' }
       }
     },
     transkripsi: {
       label:'Transkripsi Musik', addonLabel:'Tambahan Vokal', addonPrice:250000,
       packages: {
-        dasar: { label:'Tarif Minimum (50rb)', price:50000, desc:'Durasi ≤ 1 Menit.' },
-        standar: { label:'Bundling Dasar (300rb)', price:300000, desc:'± 3 Menit.' },
-        pro: { label:'Bundling Standar (600rb)', price:600000, desc:'± 3 Menit.' }
+        dasar: { label:'Tarif Minimum (50rb)', price:50000, desc:'Durasi ≤ 1 Menit / pola berulang (loop / ostinato 4 bar).' },
+        standar: { label:'Bundling Dasar (300rb)', price:300000, desc:'± 3 Menit. Melodi utama, 1 jenis notasi.' },
+        pro: { label:'Bundling Pro (1 Juta)', price:1000000, desc:'± 3 Menit. Full skor multi-instrumen/karawitan + file MIDI.' }
       }
     }
   },
