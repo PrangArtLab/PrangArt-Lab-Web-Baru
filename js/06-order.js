@@ -14,12 +14,19 @@ function refreshOrderPageUI() {
 
 function selectServiceLine(svcKey) {
   appState.selectedServiceLine = svcKey;
+  appState.customPrice = null;
+  const customInp = document.getElementById('custom-price-input');
+  if(customInp) customInp.value = '';
+  
   document.querySelectorAll('.svc-tab-btn').forEach(btn => {
     btn.className = 'svc-tab-btn p-4 rounded-2xl border border-border bg-panel text-textMuted hover:text-textMain text-left transition-colors duration-300';
   });
   const activeTab = document.getElementById(`svc-tab-${svcKey}`);
   if (activeTab) activeTab.className = 'svc-tab-btn p-4 rounded-2xl border border-primary bg-primary/10 text-primary text-left transition-colors duration-300 shadow-glow';
-  renderPackageCards(); renderDynamicSpecFields(); recalculateLivePrice();
+  
+  renderPackageCards(); 
+  renderDynamicSpecFields(); 
+  recalculateLivePrice();
 }
 
 function renderPackageCards() {
@@ -27,7 +34,9 @@ function renderPackageCards() {
   if (!grid) return;
   const svc = appState.serviceCatalog[appState.selectedServiceLine];
   grid.innerHTML = Object.entries(svc.packages).map(([pkgKey, pkg]) => {
-    const isSelected = appState.selectedPackage === pkgKey;
+    // Jika customPrice diisi, maka visual kartu paket tidak ada yang terpilih (selected)
+    const isSelected = appState.selectedPackage === pkgKey && !appState.customPrice;
+    
     return `
       <button type="button" onclick="selectPackageTier('${pkgKey}')" class="p-5 rounded-2xl border text-left transition-all duration-300 flex flex-col justify-between ${isSelected ? 'border-primary bg-primary/10 shadow-md transform scale-[1.02]' : 'border-border bg-surface hover:border-primary/40'}">
         <div>
@@ -40,7 +49,26 @@ function renderPackageCards() {
 }
 
 function selectPackageTier(pkgKey) {
-  appState.selectedPackage = pkgKey; renderPackageCards(); renderDynamicSpecFields(); recalculateLivePrice();
+  appState.selectedPackage = pkgKey; 
+  appState.customPrice = null; // Reset custom price jika memilih paket standar
+  
+  const customInp = document.getElementById('custom-price-input');
+  if(customInp) customInp.value = ''; // Kosongkan input custom
+
+  renderPackageCards(); 
+  renderDynamicSpecFields(); 
+  recalculateLivePrice();
+}
+
+// Fungsi baru untuk menangkap input bebas
+function handleCustomPrice(val) {
+  if (val && Number(val) > 0) {
+    appState.customPrice = Number(val);
+  } else {
+    appState.customPrice = null;
+  }
+  renderPackageCards(); // Update visual kartu (hapus highlight)
+  recalculateLivePrice();
 }
 
 function renderDynamicSpecFields() {
@@ -62,14 +90,22 @@ function renderDynamicSpecFields() {
 function recalculateLivePrice() {
   const svc = appState.serviceCatalog[appState.selectedServiceLine];
   const pkg = svc.packages[appState.selectedPackage];
+  
+  // HARGA DASAR: Gunakan custom price jika ada, jika tidak gunakan harga paket
+  const basePrice = appState.customPrice ? appState.customPrice : pkg.price;
   const addonCost = Boolean(document.getElementById('field-addon-vocal')?.checked) ? svc.addonPrice : 0;
-  const total = pkg.price + addonCost;
-  const plan = document.querySelector('input[name="payment-plan"]:checked')?.value || 'DP 50%';
-  const first = plan === 'DP 50%' ? Math.round(total * 0.5) : total;
-
+  const total = basePrice + addonCost;
+  
   document.getElementById('calc-service-name').textContent = svc.label;
-  document.getElementById('calc-pkg-name').textContent = pkg.label;
-  document.getElementById('calc-pkg-price').textContent = formatRupiah(pkg.price);
+  
+  // Tampilkan label yang sesuai di kalkulator
+  if (appState.customPrice) {
+    document.getElementById('calc-pkg-name').textContent = 'Harga Kesepakatan';
+  } else {
+    document.getElementById('calc-pkg-name').textContent = pkg.label;
+  }
+  
+  document.getElementById('calc-pkg-price').textContent = formatRupiah(basePrice);
   document.getElementById('calc-total-price').textContent = formatRupiah(total);
 }
 
@@ -98,18 +134,33 @@ async function generateAISynopsis(isVariation = false) {
 async function handleOrderFormSubmit(e) {
   e.preventDefault();
   if (!appState.currentClientUser) return showToast('Error', 'Masuk dulu.', 'error');
+  
   const svcObj = appState.serviceCatalog[appState.selectedServiceLine];
   const pkgObj = svcObj.packages[appState.selectedPackage];
-  const totalPrice = pkgObj.price + (Boolean(document.getElementById('field-addon-vocal')?.checked) ? svcObj.addonPrice : 0);
+  const basePrice = appState.customPrice ? appState.customPrice : pkgObj.price;
+  const totalPrice = basePrice + (Boolean(document.getElementById('field-addon-vocal')?.checked) ? svcObj.addonPrice : 0);
   
   const newProject = {
-    id: `PAL-${Date.now()}`, createdAt: new Date().toLocaleDateString(), clientEmail: appState.currentClientUser.email,
-    clientName: document.getElementById('field-nama').value, judul: document.getElementById('field-judul').value,
-    serviceLine: appState.selectedServiceLine, serviceLineLabel: svcObj.label, packageName: pkgObj.label,
-    totalPrice: totalPrice, dpAmount: Math.round(totalPrice * 0.5), paymentScheme: 'DP 50%',
-    dpStatus: 'Belum Dibayar', pelunasanStatus: 'Belum Lunas', agreementSigned: false, quoteStatus: 'Diterbitkan',
-    productionStatus: TRACKER_MILESTONES[0], clientAcceptedFinal: false, wa: document.getElementById('field-wa').value
+    id: `PAL-${Date.now()}`, 
+    createdAt: new Date().toLocaleDateString(), 
+    clientEmail: appState.currentClientUser.email,
+    clientName: document.getElementById('field-nama').value, 
+    judul: document.getElementById('field-judul').value,
+    serviceLine: appState.selectedServiceLine, 
+    serviceLineLabel: svcObj.label, 
+    packageName: appState.customPrice ? 'Harga Kesepakatan' : pkgObj.label,
+    totalPrice: totalPrice, 
+    dpAmount: Math.round(totalPrice * 0.5), 
+    paymentScheme: 'DP 50%',
+    dpStatus: 'Belum Dibayar', 
+    pelunasanStatus: 'Belum Lunas', 
+    agreementSigned: false, 
+    quoteStatus: 'Diterbitkan',
+    productionStatus: TRACKER_MILESTONES[0], 
+    clientAcceptedFinal: false, 
+    wa: document.getElementById('field-wa').value
   };
+  
   appState.projects.unshift(newProject);
   await syncProjectToCloud(newProject);
   showToast('Berhasil', 'Pengajuan terkirim.');
