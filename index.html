@@ -160,16 +160,58 @@
                   <div><label class="block text-xs font-bold mb-2">Jenis Karya *</label><input id="field-jenis-tari" required class="w-full bg-panel border rounded-xl px-4 py-3" /></div>
                   <div><label class="block text-xs font-bold mb-2">Durasi (MM:SS) *</label><input id="field-durasi" required placeholder="05:30" class="w-full bg-panel border rounded-xl px-4 py-3" /></div>
                 </div>
-                <div>
-                  <div class="flex justify-between items-center mb-2">
+
+                <!-- Bagian Sinopsis (Khusus Layanan Musik Tari) -->
+                <div id="synopsis-section-wrapper" class="space-y-4 pt-2">
+                  <div class="flex justify-between items-center">
                     <label class="text-xs font-bold">Sinopsis *</label>
                     <div class="flex bg-panel p-1 rounded-lg">
                       <button type="button" id="btn-mode-manual" onclick="setSynopsisMode('manual')" class="px-3 py-1 text-xs">Ketik Manual</button>
                       <button type="button" id="btn-mode-ai" onclick="setSynopsisMode('ai')" class="px-3 py-1 text-xs">Gunakan AI</button>
                     </div>
                   </div>
-                  <textarea id="field-sinopsis" rows="4" required class="w-full bg-panel border rounded-xl px-4 py-3"></textarea>
-                  <div id="ai-action-wrapper" class="hidden mt-2"><button type="button" id="btn-ai-synopsis" onclick="generateAISynopsis()" class="w-full py-2 rounded-lg">Generate Sinopsis AI</button></div>
+
+                  <!-- Panel Isian Manual Bahan Prompt AI -->
+                  <div id="ai-action-wrapper" class="hidden bg-panel/60 border border-border rounded-2xl p-5 space-y-4">
+                    <p class="text-xs text-textMuted">Isi parameter detail garapan Anda di bawah ini, lalu klik tombol susun agar AI merangkainya menjadi sinopsis profesional:</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                      <div>
+                        <label class="block font-bold mb-1">Tipe &amp; Tema Tarian</label>
+                        <input type="text" id="ai-param-tema" placeholder="Cth: Tari Kreasi / Perjuangan" class="w-full bg-surface border border-border rounded-xl px-3 py-2.5" />
+                      </div>
+                      <div>
+                        <label class="block font-bold mb-1">Akar Etnis / Suku / Budaya</label>
+                        <input type="text" id="ai-param-etnis" placeholder="Cth: Suku Banjar / Kutai / Dayak" class="w-full bg-surface border border-border rounded-xl px-3 py-2.5" />
+                      </div>
+                      <div>
+                        <label class="block font-bold mb-1">Emosi &amp; Suasana</label>
+                        <input type="text" id="ai-param-emosi" placeholder="Cth: Tegas, sakral, berwibawa" class="w-full bg-surface border border-border rounded-xl px-3 py-2.5" />
+                      </div>
+                      <div>
+                        <label class="block font-bold mb-1">Gaya Musik (Garis Besar)</label>
+                        <input type="text" id="ai-param-musik" placeholder="Cth: Perkusi etnik dinamis &amp; akustik modern" class="w-full bg-surface border border-border rounded-xl px-3 py-2.5" />
+                      </div>
+                      <div class="sm:col-span-2">
+                        <label class="block font-bold mb-1">Ide Gagasan / Filosofi</label>
+                        <input type="text" id="ai-param-gagasan" placeholder="Cth: Keteguhan pendirian menghadapi arus zaman" class="w-full bg-surface border border-border rounded-xl px-3 py-2.5" />
+                      </div>
+                      <div class="sm:col-span-2">
+                        <label class="block font-bold mb-1">Alur / Struktur Gerak &amp; Musik</label>
+                        <input type="text" id="ai-param-alur" placeholder="Cth: Awal kontemplatif, klimaks bertenaga, penutup tenang" class="w-full bg-surface border border-border rounded-xl px-3 py-2.5" />
+                      </div>
+                      <div>
+                        <label class="block font-bold mb-1">Tata Busana &amp; Rias</label>
+                        <input type="text" id="ai-param-busana" placeholder="Cth: Adat modifikasi gelap-emas, rias tegas" class="w-full bg-surface border border-border rounded-xl px-3 py-2.5" />
+                      </div>
+                      <div>
+                        <label class="block font-bold mb-1">Properti Pendukung</label>
+                        <input type="text" id="ai-param-properti" placeholder="Cth: Tongkat etnik / selendang panjang" class="w-full bg-surface border border-border rounded-xl px-3 py-2.5" />
+                      </div>
+                    </div>
+                    <button type="button" id="btn-ai-synopsis" onclick="generateAISynopsis()" class="btn-primary w-full py-2.5 rounded-xl text-xs font-bold">✦ Susun Sinopsis Profesional dengan AI</button>
+                  </div>
+
+                  <textarea id="field-sinopsis" rows="5" required placeholder="Tulis sinopsis karya Anda secara manual di sini, atau pilih 'Gunakan AI' di atas untuk menyusunnya..." class="w-full bg-panel border rounded-xl px-4 py-3 text-sm"></textarea>
                 </div>
               </div>
 
@@ -177,7 +219,7 @@
               <div class="bg-surface border border-border/80 rounded-3xl p-6 sm:p-10 space-y-6">
                 <div>
                   <span class="text-xs font-mono text-primary font-bold uppercase">Langkah 03</span>
-                  <h2 class="text-2xl font-display font-bold mt-1">Spesifikasi & Referensi</h2>
+                  <h2 class="text-2xl font-display font-bold mt-1">Spesifikasi &amp; Referensi</h2>
                 </div>
                 
                 <div id="dynamic-spec-fields" class="space-y-4"></div>
@@ -202,7 +244,7 @@
                 </label>
 
                 <div class="mt-8 pt-6 border-t border-border/60">
-                  <h3 class="text-lg font-bold text-textMain mb-4">Ketentuan & Aturan Layanan</h3>
+                  <h3 class="text-lg font-bold text-textMain mb-4">Ketentuan &amp; Aturan Layanan</h3>
                   <div class="text-[13px] text-textMuted space-y-3 leading-relaxed bg-panel p-5 rounded-2xl border border-border/50">
                     <p><strong class="text-textMain">1. Penyesuaian Custom:</strong> Permintaan di luar paket standar dapat dikonsultasikan terlebih dahulu sebelum kesepakatan harga dan pengerjaan.</p>
                     <p><strong class="text-textMain">2. Instrumen Tambahan:</strong> Penambahan 1–2 instrumen khusus (session player) dapat dikoordinasikan secara fleksibel.</p>
