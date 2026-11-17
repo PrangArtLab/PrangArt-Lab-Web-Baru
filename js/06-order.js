@@ -33,20 +33,19 @@ function selectServiceLine(svcKey) {
   const active = document.getElementById(`svc-tab-${svcKey}`);
   if(active) active.className = 'svc-tab-btn p-4 rounded-2xl border border-primary bg-primary/10 text-primary text-left shadow-glow';
   
-  // Kontrol tampilan form sinopsis: HANYA muncul untuk layanan Musik Tari ('tari')
-  // Disembunyikan otomatis untuk Musik Non-Tari ('digital') dan Transkripsi ('transkripsi')
-  const sinopsisContainer = document.getElementById('field-sinopsis')?.closest('.space-y-4, div:has(#field-sinopsis), div');
+  // Sembunyikan bagian sinopsis secara otomatis jika memilih Non-Tari atau Transkripsi
+  const sinopsisWrap = document.getElementById('synopsis-section-wrapper');
   const sinopsisInput = document.getElementById('field-sinopsis');
   
-  if (sinopsisContainer) {
+  if (sinopsisWrap) {
     if (svcKey === 'tari') {
-      sinopsisContainer.style.display = 'block';
+      sinopsisWrap.classList.remove('hidden');
       if (sinopsisInput) sinopsisInput.required = true;
     } else {
-      sinopsisContainer.style.display = 'none';
+      sinopsisWrap.classList.add('hidden');
       if (sinopsisInput) {
         sinopsisInput.required = false;
-        sinopsisInput.value = ''; // Kosongkan nilai jika beralih ke non-tari/transkripsi
+        sinopsisInput.value = '';
       }
     }
   }
@@ -138,25 +137,45 @@ function recalculateLivePrice() {
 }
 
 async function generateAISynopsis() {
-  const judul = document.getElementById('field-judul').value;
-  if (!judul) return showToast('Info', 'Isi judul karya terlebih dahulu.', 'warning');
-  
+  const judul = document.getElementById('field-judul')?.value.trim();
+  if (!judul) return showToast('Info', 'Isi Judul Karya terlebih dahulu.', 'warning');
+
+  const tema = document.getElementById('ai-param-tema')?.value.trim() || 'Tari Kreasi Tradisional';
+  const etnis = document.getElementById('ai-param-etnis')?.value.trim() || 'Tradisi Nusantara';
+  const emosi = document.getElementById('ai-param-emosi')?.value.trim() || 'Tegas, berwibawa, dan sakral';
+  const gayaMusik = document.getElementById('ai-param-musik')?.value.trim() || 'Perpaduan perkusi etnik yang dinamis dan lapisan bebunyian akustik modern';
+  const gagasan = document.getElementById('ai-param-gagasan')?.value.trim() || 'Refleksi keteguhan jiwa dan dinamika perjalanan hidup';
+  const alur = document.getElementById('ai-param-alur')?.value.trim() || 'Progresif dari bagian awal yang kontemplatif, menuju klimaks bertenaga, lalu mereda dalam keheningan yang kokoh';
+  const busana = document.getElementById('ai-param-busana')?.value.trim() || 'Busana adat modifikasi bernuansa elegan dan tata rias karakter yang kuat';
+  const properti = document.getElementById('ai-param-properti')?.value.trim() || 'Properti simbolis pendukung gerak';
+
   const btn = document.getElementById('btn-ai-synopsis'); 
-  if (btn) { btn.textContent = 'Menyusun...'; btn.disabled = true; }
+  if (btn) { btn.textContent = 'Menyusun Sinopsis...'; btn.disabled = true; }
   
+  const masterPrompt = `Bertindaklah sebagai seorang Penata Tari (Koreografer) dan Komposer Musik profesional yang berpengalaman luas dalam kancah seni pertunjukan. Buatlah sebuah sinopsis karya tari dan aransemen musik yang utuh, puitis, berbobot artistik tinggi, serta bernada profesional, berdasarkan parameter lengkap berikut:
+- Judul Karya: ${judul}
+- Tipe & Tema Tarian: ${tema}
+- Akar Etnis / Suku / Budaya: ${etnis}
+- Emosi & Suasana (Atmosphere): ${emosi}
+- Ide Gagasan / Filosofi: ${gagasan}
+- Alur / Struktur Gerak & Musik: ${alur}
+- Tata Busana & Rias: ${busana}
+- Properti Pendukung: ${properti}
+- Gaya Musik: ${gayaMusik}
+
+Susun seluruh parameter di atas ke dalam satu kesatuan paragraf deskriptif yang padu, mengalir indah, dan sinergis—menyatukan elemen visual (busana, rias, properti) dengan elemen auditif (gaya musik dan dinamika tempo) serta penjiwaan (karakter, emosi, dan alur tari) secara utuh. Jangan gunakan format poin-poin atau daftar ke bawah, melainkan buatlah dalam bentuk narasi sinopsis artistik profesional siap pakai.`;
+
   try {
     if (!window.firebaseAI) throw new Error();
     const { getGenerativeModel } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-ai.js');
-    
-    // Menggunakan Master Prompt Profesional yang disesuaikan
-    const promptText = `Bertindaklah sebagai seorang Penata Tari (Koreografer) dan Komposer Musik profesional. Buatlah sinopsis karya tari berbobot artistik tinggi dan profesional untuk judul "${judul}". Masukkan elemen suasana yang berwibawa, ide gagasan keteguhan, alur dramaturgi progresif, busana/rias, properti, serta gaya musik perkusi etnik yang dinamis berpadu akustik modern. Buat dalam bentuk 1 paragraf narasi padu tanpa poin-poin.`;
-    
-    const res = await getGenerativeModel(window.firebaseAI, { model: "gemini-1.5-flash" }).generateContent(promptText);
-    document.getElementById('field-sinopsis').value = (await res.response).text();
+    const res = await getGenerativeModel(window.firebaseAI, { model: "gemini-1.5-flash" }).generateContent(masterPrompt);
+    document.getElementById('field-sinopsis').value = (await res.response).text().trim();
+    showToast('Berhasil', 'Sinopsis profesional berhasil disusun.');
   } catch { 
-    document.getElementById('field-sinopsis').value = `Karya tari bertajuk "${judul}" merupakan sebuah manifestasi seni pertunjukan yang berakar kuat pada nilai tradisi Nusantara, merepresentasikan simbol keteguhan jiwa dan ketahanan raga. Ditopang suasana berwibawa dengan alur progresif, garapan ini menyatukan visual busana elegan dan gaya musik perkusi etnik yang dinamis. (Mode Offline)`; 
+    document.getElementById('field-sinopsis').value = `Karya tari bertajuk "${judul}" merupakan sebuah manifestasi seni pertunjukan bertema ${tema} yang berakar kuat pada budaya ${etnis}, merepresentasikan ${gagasan}. Ditopang oleh suasana ${emosi}, garapan ini dirancang dengan alur ${alur}. Visualisasi pertunjukan diperkuat melalui ${busana}, serta penggunaan ${properti}. Dari sisi auditif, gaya musik digarap dengan ${gayaMusik}, menciptakan lanskap audio yang megah serta selaras secara organik dengan setiap jengkal gerak penari di atas panggung.`; 
+    showToast('Info', 'Sinopsis disusun menggunakan template offline.');
   } finally { 
-    if (btn) { btn.textContent = '✦ Generate Sinopsis AI'; btn.disabled = false; }
+    if (btn) { btn.textContent = '✦ Susun Sinopsis Profesional dengan AI'; btn.disabled = false; }
   }
 }
 
@@ -183,6 +202,7 @@ async function handleOrderFormSubmit(e) {
     clientEmail: appState.currentClientUser.email, 
     clientName: appState.currentClientUser.name, 
     judul: document.getElementById('field-judul').value, 
+    sinopsis: appState.selectedServiceLine === 'tari' ? document.getElementById('field-sinopsis').value : '',
     serviceLine: appState.selectedServiceLine, 
     serviceLineLabel: svc.label, 
     packageName: appState.customPrice ? 'Kustom' : pkg.label, 
