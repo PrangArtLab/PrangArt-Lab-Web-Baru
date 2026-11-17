@@ -8,9 +8,12 @@ function renderClientWorkspace() {
   const ws = document.getElementById('client-workspace-content'); if (!ws) return;
   
   const tabs = `
-    <div class="flex gap-2 border-b border-border/60 pb-4 mb-6">
-      <button onclick="appState.clientTab='projects'; renderClientWorkspace();" class="px-4 py-2 rounded-xl text-sm font-bold ${appState.clientTab==='projects'?'bg-primary text-white':'bg-panel text-textMuted'}">Proyek Saya</button>
-      <button onclick="appState.clientTab='settings'; renderClientWorkspace();" class="px-4 py-2 rounded-xl text-sm font-bold ${appState.clientTab==='settings'?'bg-primary text-white':'bg-panel text-textMuted'}">Pengaturan Akun</button>
+    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 pb-4 mb-6">
+      <div class="flex gap-2">
+        <button onclick="appState.clientTab='projects'; renderClientWorkspace();" class="px-4 py-2 rounded-xl text-sm font-bold ${appState.clientTab==='projects'?'bg-primary text-white':'bg-panel text-textMuted'}">Proyek Saya</button>
+        <button onclick="appState.clientTab='settings'; renderClientWorkspace();" class="px-4 py-2 rounded-xl text-sm font-bold ${appState.clientTab==='settings'?'bg-primary text-white':'bg-panel text-textMuted'}">Pengaturan Akun</button>
+      </div>
+      <button onclick="logoutClientUser()" class="px-4 py-2 rounded-xl text-sm font-bold bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition">Log Out</button>
     </div>`;
 
   if (appState.clientTab === 'settings') {
@@ -22,15 +25,17 @@ function renderClientWorkspace() {
         <hr class="my-6 border-border/60"/>
         <div><label class="block text-xs font-bold mb-2">Sandi Baru</label><input type="password" id="set-pass" placeholder="Minimal 8 huruf & angka" class="w-full bg-panel border p-3 rounded-xl text-sm" /></div>
         <button onclick="updatePass()" class="btn-outline w-full py-3 rounded-xl text-sm font-bold">Ganti Sandi</button>
-        <button onclick="logoutClientUser()" class="w-full py-3 rounded-xl bg-red-500/10 text-red-500 font-bold text-sm mt-4 hover:bg-red-500 hover:text-white transition">Logout</button>
       </div>
     </div>`; return;
   }
 
   const myP = appState.projects.filter(p => p.clientEmail === appState.currentClientUser.email);
-  if (!myP.length) return ws.innerHTML = `<div class="text-center p-10 bg-surface rounded-3xl border border-border/80">${tabs}<h3 class="text-xl font-bold mb-4">Belum ada proyek</h3><button onclick="navigateTo('order')" class="btn-primary px-6 py-2.5 rounded-xl font-bold">+ Buat Pengajuan</button></div>`;
+  if (!myP.length) return ws.innerHTML = `<div class="bg-surface rounded-3xl border border-border/80 p-8">${tabs}<div class="text-center py-8"><h3 class="text-xl font-bold mb-4">Belum ada proyek</h3><button onclick="navigateTo('order')" class="btn-primary px-6 py-2.5 rounded-xl font-bold">+ Buat Pengajuan</button></div></div>`;
   
   ws.innerHTML = `<div class="bg-surface border border-border/80 p-8 rounded-3xl shadow-premium">${tabs}
+    <div class="flex justify-end mb-4">
+      <button onclick="navigateTo('order')" class="btn-primary px-5 py-2.5 rounded-xl text-xs font-bold">+ Ajukan Proyek Baru</button>
+    </div>
     ${myP.map(p => `
       <div class="border border-border/80 p-5 rounded-2xl mb-4 flex flex-col md:flex-row justify-between md:items-center gap-4 bg-panel">
         <div>
