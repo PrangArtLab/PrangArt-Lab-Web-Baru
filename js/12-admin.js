@@ -42,22 +42,36 @@ function renderAdminDashboard() {
   const ws = document.getElementById('admin-workspace-content');
   if (!ws) return;
 
+  const paymentMethodsListHTML = appState.settings.paymentMethods.map(m => `
+    <div class="flex items-center justify-between p-4 rounded-xl bg-panel border border-border">
+      <div>
+        <span class="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-primary/10 text-primary font-bold">${m.type}</span>
+        <strong class="block text-sm text-textMain mt-1">${m.name}</strong>
+        <span class="block text-xs text-textMuted">${m.type === 'qris' ? 'URL Gambar QRIS' : 'No. Rek: ' + m.number} • a.n. ${m.holder}</span>
+      </div>
+      <button type="button" onclick="deleteAdminPayment('${m.id}')" class="px-3 py-1.5 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-lg text-xs font-bold transition">
+        Hapus
+      </button>
+    </div>
+  `).join('') || '<p class="text-sm text-textMuted italic">Belum ada metode pembayaran.</p>';
+
   ws.innerHTML = `
     <div class="bg-surface border border-border rounded-3xl p-6 sm:p-8 shadow-premium space-y-6">
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border pb-5">
         <div>
           <span class="text-xs font-mono text-primary font-bold uppercase">Dashboard</span>
-          <h2 class="text-2xl font-display font-bold mt-1">Panel Pengelolaan Studio</h2>
+          <h2 class="text-2xl font-display font-bold mt-1">Panel Pengelolaan</h2>
         </div>
         <button onclick="logoutAdmin()" class="px-4 py-2 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-xl text-xs font-bold transition shadow-sm">
           Log Out Admin
         </button>
       </div>
 
-      <div class="flex gap-2 border-b border-border/60 pb-4">
+      <div class="flex flex-wrap gap-2 border-b border-border/60 pb-4">
         <button onclick="adminActiveTab='projects'; renderAdminDashboard();" class="px-4 py-2 rounded-xl text-xs font-bold ${adminActiveTab==='projects'?'bg-primary text-white':'bg-panel text-textMuted'}">Proyek & Klien</button>
+        <button onclick="adminActiveTab='payments'; renderAdminDashboard();" class="px-4 py-2 rounded-xl text-xs font-bold ${adminActiveTab==='payments'?'bg-primary text-white':'bg-panel text-textMuted'}">Metode Pembayaran</button>
         <button onclick="adminActiveTab='content'; renderAdminDashboard(); if(window.renderSiteContentAdmin) renderSiteContentAdmin();" class="px-4 py-2 rounded-xl text-xs font-bold ${adminActiveTab==='content'?'bg-primary text-white':'bg-panel text-textMuted'}">Konten Beranda</button>
-        <button onclick="adminActiveTab='settings'; renderAdminDashboard();" class="px-4 py-2 rounded-xl text-xs font-bold ${adminActiveTab==='settings'?'bg-primary text-white':'bg-panel text-textMuted'}">Pengaturan</button>
+        <button onclick="adminActiveTab='settings'; renderAdminDashboard();" class="px-4 py-2 rounded-xl text-xs font-bold ${adminActiveTab==='settings'?'bg-primary text-white':'bg-panel text-textMuted'}">Pengaturan Umum</button>
       </div>
 
       ${adminActiveTab === 'projects' ? `
@@ -94,6 +108,37 @@ function renderAdminDashboard() {
             `).join('') : '<p class="text-sm text-textMuted italic">Belum ada data proyek masuk.</p>'}
           </div>
         </div>
+      ` : adminActiveTab === 'payments' ? `
+        <div class="grid lg:grid-cols-2 gap-8">
+          <form onsubmit="saveAdminPayment(event)" class="space-y-4 bg-panel/40 p-6 rounded-2xl border border-border">
+            <h3 class="font-bold text-lg">Tambah Rekening / QRIS</h3>
+            <div>
+              <label class="block text-xs font-bold mb-1.5">Jenis Pembayaran</label>
+              <select id="pay-type" class="w-full bg-panel border border-border rounded-xl p-3 text-sm">
+                <option value="bank">Transfer Bank / E-Wallet</option>
+                <option value="qris">QRIS (Link Gambar QR)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5">Nama Bank / Penyedia</label>
+              <input type="text" id="pay-name" required placeholder="Cth: Bank BCA / Dana / QRIS" class="w-full bg-panel border border-border rounded-xl p-3 text-sm" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5">Nomor Rekening / URL Gambar QRIS</label>
+              <input type="text" id="pay-number" required placeholder="Cth: 1234567890 atau https://..." class="w-full bg-panel border border-border rounded-xl p-3 text-sm" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5">Atas Nama (Pemilik Rekening)</label>
+              <input type="text" id="pay-holder" required placeholder="Cth: Fikri Yassaar" class="w-full bg-panel border border-border rounded-xl p-3 text-sm" />
+            </div>
+            <button type="submit" class="btn-primary w-full py-3 rounded-xl text-xs font-bold">+ Simpan Metode Pembayaran</button>
+          </form>
+
+          <div class="space-y-3">
+            <h3 class="font-bold text-lg mb-2">Daftar Metode Aktif</h3>
+            ${paymentMethodsListHTML}
+          </div>
+        </div>
       ` : adminActiveTab === 'content' ? `
         <div id="site-content-admin-inner"></div>
       ` : `
@@ -113,17 +158,45 @@ function renderAdminDashboard() {
   `;
 }
 
+function saveAdminPayment(e) {
+  if (e) e.preventDefault();
+  const type = document.getElementById('pay-type')?.value || 'bank';
+  const name = document.getElementById('pay-name')?.value.trim();
+  const number = document.getElementById('pay-number')?.value.trim();
+  const holder = document.getElementById('pay-holder')?.value.trim();
+
+  if (!name || !number || !holder) {
+    return showToast('Perhatian', 'Semua kolom metode pembayaran wajib diisi.', 'warning');
+  }
+
+  appState.settings.paymentMethods.push({
+    id: `pay-${Date.now()}`,
+    type,
+    name,
+    number,
+    holder
+  });
+
+  persistLocalState();
+  showToast('Berhasil', 'Metode pembayaran baru ditambahkan.');
+  renderAdminDashboard();
+}
+
+function deleteAdminPayment(id) {
+  appState.settings.paymentMethods = appState.settings.paymentMethods.filter(m => m.id !== id);
+  persistLocalState();
+  showToast('Info', 'Metode pembayaran dihapus.');
+  renderAdminDashboard();
+}
+
 function saveAdminSettings() {
   const newWa = document.getElementById('admin-wa-input')?.value.trim();
   const newPin = document.getElementById('admin-pin-setting')?.value.trim();
   if (newWa) appState.settings.studioWhatsApp = newWa;
   if (newPin) appState.settings.adminPin = newPin;
   persistLocalState();
-  showToast('Berhasil', 'Pengaturan disimpan.');
+  showToast('Berhasil', 'Pengaturan umum disimpan.');
 }
-
-function saveAdminPayment() {}
-function deleteAdminPayment() {}
 
 function resetAdminPin() {
   showToast('Info', 'PIN default Anda adalah 2026.', 'warning');
