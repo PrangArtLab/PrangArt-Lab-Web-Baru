@@ -28,6 +28,9 @@ function navigateTo(page) {
   if (page === 'client') refreshClientPageUI();
   if (page === 'admin') refreshAdminPageUI();
 
+  // Update header badge setiap kali pindah halaman agar status login terisolasi sesuai halaman
+  updateHeaderAuthBadge();
+
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -40,25 +43,31 @@ function updateHeaderAuthBadge() {
   const box = document.getElementById('header-auth-status');
   if (!box) return;
   
-  if (appState.isAdminAuthenticated) {
-    // Tampilan jika yang login adalah Admin
+  // Jika sedang di halaman admin, JANGAN tampilkan status/login klien di header
+  if (appState.currentPage === 'admin') {
+    if (appState.isAdminAuthenticated) {
+      box.innerHTML = `
+        <div class="flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-xl px-3 py-1.5 text-xs">
+          <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+          <span class="font-bold text-primary">Admin Aktif</span>
+          <button onclick="appState.isAdminAuthenticated=false; refreshAdminPageUI(); updateHeaderAuthBadge();" class="text-red-500 font-bold ml-2 hover:underline">Log Out Admin</button>
+        </div>`;
+    } else {
+      box.innerHTML = `<span class="text-xs text-textMuted font-mono">Panel Admin</span>`;
+    }
+    return;
+  }
+
+  // Jika sedang di halaman klien / lainnya
+  if (appState.currentClientUser) {
     box.innerHTML = `
-      <div class="flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-xl px-3 py-1.5 text-xs">
-        <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-        <span class="font-bold text-primary">Admin Mode</span>
-        <button onclick="appState.isAdminAuthenticated=false; refreshAdminPageUI(); updateHeaderAuthBadge();" class="text-primary hover:text-red-500 ml-1 font-bold">×</button>
-      </div>`;
-  } else if (appState.currentClientUser) {
-    // Tampilan jika yang login adalah Klien
-    box.innerHTML = `
-      <div class="flex items-center gap-2 bg-surface border border-border rounded-xl px-3 py-1.5 text-xs">
+      <div class="flex items-center gap-2 bg-surface border border-border rounded-xl px-3 py-1.5 text-xs shadow-sm">
         <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
         <span class="font-bold text-textMain">${appState.currentClientUser.name}</span>
-        <button onclick="logoutClientUser()" class="text-textMuted hover:text-red-500 ml-1 font-bold">×</button>
+        <button onclick="logoutClientUser()" class="px-2 py-1 bg-red-500/10 text-red-500 rounded-lg font-bold hover:bg-red-500 hover:text-white transition">Log Out</button>
       </div>`;
   } else {
-    // Tampilan jika belum login
-    box.innerHTML = `<button onclick="navigateTo('client')" class="px-4 py-2 rounded-xl bg-surface border border-border text-xs font-bold text-textMain hover:border-primary transition">Masuk</button>`;
+    box.innerHTML = `<button onclick="navigateTo('client')" class="px-4 py-2 rounded-xl bg-surface border border-border text-xs font-bold text-textMain hover:border-primary transition shadow-sm">Masuk Klien</button>`;
   }
 }
 
