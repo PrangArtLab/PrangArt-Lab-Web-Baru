@@ -1,70 +1,97 @@
-function navigateTo(page) {
-  if (page === 'order' && !appState.currentClientUser) {
-    showToast('Perhatian', 'Silakan masuk atau daftar akun terlebih dahulu untuk mengajukan layanan.', 'warning');
-    page = 'client';
-  }
-
-  if (page === 'home') {
-    const cleanUrl = `${location.pathname}${location.search}`;
-    if (location.href !== cleanUrl) {
-      window.history.replaceState(null, '', cleanUrl);
-    }
-  } else if (window.location.hash !== `#${page}`) {
-    window.location.hash = page;
-  }
-
-  appState.currentPage = page;
-  
-  document.querySelectorAll('.page-section').forEach(sec => sec.classList.add('hidden'));
-  const target = document.getElementById(`page-${page}`);
-  if (target) { target.classList.remove('hidden'); target.classList.remove('page-dissolve'); void target.offsetWidth; target.classList.add('page-dissolve'); }
-
-  document.querySelectorAll('.nav-pill, .mnav-pill').forEach(btn => btn.classList.remove('bg-primary', 'text-white'));
-  const activeNav = document.getElementById(`nav-${page}`) || document.getElementById(`mnav-${page}`);
-  if (activeNav) activeNav.classList.add('bg-primary', 'text-white');
-
-  if (page === 'portfolio') renderPortfolioGrid();
-  if (page === 'order') refreshOrderPageUI();
-  if (page === 'client') refreshClientPageUI();
-  if (page === 'admin') refreshAdminPageUI();
-
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-window.addEventListener('hashchange', () => {
-  const page = window.location.hash.replace('#', '') || 'home';
-  if (appState.currentPage !== page) navigateTo(page);
-});
-
-function updateHeaderAuthBadge() {
-  const box = document.getElementById('header-auth-status');
-  if (!box) return;
-  
-  if (appState.isAdminAuthenticated) {
-    // Tampilan jika yang login adalah Admin
-    box.innerHTML = `
-      <div class="flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-xl px-3 py-1.5 text-xs">
-        <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-        <span class="font-bold text-primary">Admin Mode</span>
-        <button onclick="appState.isAdminAuthenticated=false; refreshAdminPageUI(); updateHeaderAuthBadge();" class="text-primary hover:text-red-500 ml-1 font-bold">×</button>
-      </div>`;
-  } else if (appState.currentClientUser) {
-    // Tampilan jika yang login adalah Klien
-    box.innerHTML = `
-      <div class="flex items-center gap-2 bg-surface border border-border rounded-xl px-3 py-1.5 text-xs">
-        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-        <span class="font-bold text-textMain">${appState.currentClientUser.name}</span>
-        <button onclick="logoutClientUser()" class="text-textMuted hover:text-red-500 ml-1 font-bold">×</button>
-      </div>`;
+// Fungsi verifikasi PIN Admin
+function verifyAdminPin(e) {
+  e.preventDefault();
+  const inputPin = document.getElementById('admin-pin-input').value;
+  if (inputPin === appState.settings.adminPin) {
+    appState.isAdminAuthenticated = true;
+    showToast('Berhasil', 'Masuk sebagai Admin.');
+    refreshAdminPageUI();
+    updateHeaderAuthBadge();
   } else {
-    // Tampilan jika belum login
-    box.innerHTML = `<button onclick="navigateTo('client')" class="px-4 py-2 rounded-xl bg-surface border border-border text-xs font-bold text-textMain hover:border-primary transition">Masuk</button>`;
+    showToast('Gagal', 'PIN Admin salah.', 'error');
   }
 }
 
-function selectServiceAndGoOrder(svcKey) {
-  appState.selectedServiceLine = svcKey;
-  appState.selectedPackage = 'standar';
-  navigateTo('order'); 
+function logoutAdmin() {
+  appState.isAdminAuthenticated = false;
+  showToast('Info', 'Admin berhasil Log Out.');
+  refreshAdminPageUI();
+  updateHeaderAuthBadge();
 }
-function renderSop14Grid() { const el = document.getElementById('sop-14-grid'); if(el) el.innerHTML = `<div class="p-4 bg-surface border rounded-xl">SOP 14 Tahap</div>`; }
+
+function refreshAdminPageUI() {
+  const pinGate = document.getElementById('admin-pin-gate');
+  const ws = document.getElementById('admin-workspace-content');
+  if (!pinGate || !ws) return;
+
+  if (!appState.isAdminAuthenticated) {
+    pinGate.classList.remove('hidden');
+    ws.classList.add('hidden');
+    const inp = document.getElementById('admin-pin-input');
+    if (inp) inp.value = '';
+  } else {
+    pinGate.classList.add('hidden');
+    ws.classList.remove('hidden');
+    renderAdminDashboard();
+  }
+}
+
+function renderAdminDashboard() {
+  const ws = document.getElementById('admin-workspace-content');
+  if (!ws) return;
+
+  ws.innerHTML = `
+    <div class="bg-surface border border-border rounded-3xl p-6 sm:p-8 shadow-premium space-y-6">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border pb-5">
+        <div>
+          <span class="text-xs font-mono text-primary font-bold uppercase">Dashboard</span>
+          <h2 class="text-2xl font-display font-bold mt-1">Panel Pengelolaan Studio</h2>
+        </div>
+        <button onclick="logoutAdmin()" class="px-4 py-2 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-xl text-xs font-bold transition shadow-sm">
+          Log Out Admin
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="p-5 rounded-2xl bg-panel border border-border/60">
+          <span class="text-xs text-textMuted font-bold uppercase block">Total Proyek Masuk</span>
+          <strong class="text-3xl font-mono text-primary mt-2 block">${appState.projects.length}</strong>
+        </div>
+        <div class="p-5 rounded-2xl bg-panel border border-border/60">
+          <span class="text-xs text-textMuted font-bold uppercase block">Daftar Klien Terdaftar</span>
+          <strong class="text-3xl font-mono text-emerald-500 mt-2 block">${appState.users.length}</strong>
+        </div>
+        <div class="p-5 rounded-2xl bg-panel border border-border/60">
+          <span class="text-xs text-textMuted font-bold uppercase block">Status Sistem</span>
+          <strong class="text-sm font-bold text-textMain mt-3 block flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Online & Terhubung
+          </strong>
+        </div>
+      </div>
+
+      <div class="pt-4">
+        <h3 class="text-lg font-bold mb-4">Daftar Proyek Klien</h3>
+        <div class="space-y-3">
+          ${appState.projects.length ? appState.projects.map(p => `
+            <div class="p-4 rounded-xl bg-panel border border-border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+              <div>
+                <strong class="text-base text-textMain block">${p.judul}</strong>
+                <span class="text-xs text-textMuted">Klien: ${p.clientName} (${p.clientEmail}) • Layanan: ${p.serviceLineLabel}</span>
+              </div>
+              <div class="text-right">
+                <span class="text-sm font-mono font-bold text-primary block">${formatRupiah(p.totalPrice)}</span>
+                <span class="text-xs bg-surface px-2.5 py-1 rounded-full border border-border font-semibold">${p.productionStatus}</span>
+              </div>
+            </div>
+          `).join('') : '<p class="text-sm text-textMuted italic">Belum ada data proyek masuk.</p>'}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function resetAdminPin() {
+  showToast('Info', 'PIN default Anda adalah 2026.', 'warning');
+}
+
+Object.assign(window, { verifyAdminPin, logoutAdmin, refreshAdminPageUI, renderAdminDashboard, resetAdminPin });
