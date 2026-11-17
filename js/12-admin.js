@@ -60,7 +60,7 @@ function renderAdminDashboard() {
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border pb-5">
         <div>
           <span class="text-xs font-mono text-primary font-bold uppercase">Dashboard</span>
-          <h2 class="text-2xl font-display font-bold mt-1">Panel Pengelolaan</h2>
+          <h2 class="text-2xl font-display font-bold mt-1">Panel Pengelolaan Studio</h2>
         </div>
         <button onclick="logoutAdmin()" class="px-4 py-2 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-xl text-xs font-bold transition shadow-sm">
           Log Out Admin
