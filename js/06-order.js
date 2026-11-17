@@ -1,202 +1,208 @@
-function refreshOrderPageUI() {
-  if (!appState.currentClientUser) return; 
-  const setIf = (id, val) => { const el = document.getElementById(id); if (el && !el.value && val) el.value = val; };
-  setIf('field-nama', appState.currentClientUser.name);
-  selectServiceLine(appState.selectedServiceLine);
-}
+let adminActiveTab = 'projects';
 
-function setSynopsisMode(mode) {
-  appState.synopsisMode = mode;
-  const btnManual = document.getElementById('btn-mode-manual');
-  const btnAi = document.getElementById('btn-mode-ai');
-  const aiWrap = document.getElementById('ai-action-wrapper');
-  if(!btnManual || !btnAi || !aiWrap) return;
-
-  if (mode === 'manual') {
-    btnManual.className = 'px-3 py-1 rounded-md text-[10px] font-bold bg-surface text-textMain shadow-sm';
-    btnAi.className = 'px-3 py-1 rounded-md text-[10px] font-bold text-textMuted';
-    aiWrap.classList.add('hidden');
+function verifyAdminPin(e) {
+  e.preventDefault();
+  const inputPin = document.getElementById('admin-pin-input').value;
+  if (inputPin === appState.settings.adminPin) {
+    appState.isAdminAuthenticated = true;
+    showToast('Berhasil', 'Masuk sebagai Admin.');
+    refreshAdminPageUI();
+    updateHeaderAuthBadge();
   } else {
-    btnAi.className = 'px-3 py-1 rounded-md text-[10px] font-bold bg-surface text-textMain shadow-sm';
-    btnManual.className = 'px-3 py-1 rounded-md text-[10px] font-bold text-textMuted';
-    aiWrap.classList.remove('hidden');
+    showToast('Gagal', 'PIN Admin salah.', 'error');
   }
 }
 
-function selectServiceLine(svcKey) {
-  appState.selectedServiceLine = svcKey; 
-  appState.customPrice = null;
-  const inp = document.getElementById('custom-price-input');
-  if(inp) inp.value = '';
-  
-  document.querySelectorAll('.svc-tab-btn').forEach(b => b.className = 'svc-tab-btn p-4 rounded-2xl border border-border bg-panel text-textMuted text-left');
-  const active = document.getElementById(`svc-tab-${svcKey}`);
-  if(active) active.className = 'svc-tab-btn p-4 rounded-2xl border border-primary bg-primary/10 text-primary text-left shadow-glow';
-  
-  // Kontrol tampilan form sinopsis: HANYA muncul untuk layanan Musik Tari ('tari')
-  // Disembunyikan otomatis untuk Musik Non-Tari ('digital') dan Transkripsi ('transkripsi')
-  const sinopsisContainer = document.getElementById('field-sinopsis')?.closest('.space-y-4, div:has(#field-sinopsis), div');
-  const sinopsisInput = document.getElementById('field-sinopsis');
-  
-  if (sinopsisContainer) {
-    if (svcKey === 'tari') {
-      sinopsisContainer.style.display = 'block';
-      if (sinopsisInput) sinopsisInput.required = true;
-    } else {
-      sinopsisContainer.style.display = 'none';
-      if (sinopsisInput) {
-        sinopsisInput.required = false;
-        sinopsisInput.value = ''; // Kosongkan nilai jika beralih ke non-tari/transkripsi
-      }
-    }
-  }
-
-  renderPackageCards(); 
-  renderDynamicSpecFields(); 
-  recalculateLivePrice();
+function logoutAdmin() {
+  appState.isAdminAuthenticated = false;
+  showToast('Info', 'Admin berhasil Log Out.');
+  refreshAdminPageUI();
+  updateHeaderAuthBadge();
+  navigateTo('home');
 }
 
-function renderPackageCards() {
-  const grid = document.getElementById('package-cards-grid'); if(!grid) return;
-  const svc = appState.serviceCatalog[appState.selectedServiceLine];
-  
-  grid.innerHTML = Object.entries(svc.packages).map(([k, p]) => {
-    const sel = appState.selectedPackage === k && !appState.customPrice;
-    return `<button type="button" onclick="selectPackageTier('${k}')" class="p-5 rounded-2xl border text-left flex flex-col justify-between h-full ${sel ? 'border-primary bg-primary/10' : 'border-border bg-surface'}">
-      <div class="mb-3">
-        <span class="text-sm font-bold text-textMain block">${p.label}</span>
-        <span class="text-lg font-mono text-primary block mt-1">${formatRupiah(p.price)}</span>
+function refreshAdminPageUI() {
+  const pinGate = document.getElementById('admin-pin-gate');
+  const ws = document.getElementById('admin-workspace-content');
+  if (!pinGate || !ws) return;
+
+  if (!appState.isAdminAuthenticated) {
+    pinGate.classList.remove('hidden');
+    ws.classList.add('hidden');
+    const inp = document.getElementById('admin-pin-input');
+    if (inp) inp.value = '';
+  } else {
+    pinGate.classList.add('hidden');
+    ws.classList.remove('hidden');
+    renderAdminDashboard();
+  }
+}
+
+function renderAdminDashboard() {
+  const ws = document.getElementById('admin-workspace-content');
+  if (!ws) return;
+
+  const paymentMethodsListHTML = appState.settings.paymentMethods.map(m => `
+    <div class="flex items-center justify-between p-4 rounded-xl bg-panel border border-border">
+      <div>
+        <span class="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-primary/10 text-primary font-bold">${m.type}</span>
+        <strong class="block text-sm text-textMain mt-1">${m.name}</strong>
+        <span class="block text-xs text-textMuted">${m.type === 'qris' ? 'URL Gambar QRIS' : 'No. Rek: ' + m.number} • a.n. ${m.holder}</span>
       </div>
-      <span class="text-[11px] text-textMuted leading-relaxed">${p.desc}</span>
-    </button>`;
-  }).join('');
-}
-
-function selectPackageTier(k) { 
-  appState.selectedPackage = k; 
-  appState.customPrice = null; 
-  const customInp = document.getElementById('custom-price-input');
-  if (customInp) customInp.value = ''; 
-  renderPackageCards(); 
-  renderDynamicSpecFields(); 
-  recalculateLivePrice(); 
-}
-
-function handleCustomPrice(v) { 
-  appState.customPrice = (v && Number(v) > 0) ? Number(v) : null; 
-  renderPackageCards(); 
-  renderDynamicSpecFields(); 
-  recalculateLivePrice(); 
-}
-
-/* === SPESIFIKASI DINAMIS === */
-function renderDynamicSpecFields() {
-  const c = document.getElementById('dynamic-spec-fields'); if(!c) return;
-  
-  c.innerHTML = `
-    <div class="flex justify-between items-center mb-3">
-      <label class="text-xs font-bold text-textMain">Spesifikasi &amp; Detail Kebutuhan</label>
-      <button type="button" onclick="addSpecFieldRow()" class="px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-xs font-bold hover:bg-primary/20 transition">+ Tambah Baris</button>
-    </div>
-    <div id="spec-rows-container" class="space-y-3">
-      ${specRowTemplate('Kebutuhan Utama', '')}
-    </div>
-  `;
-}
-
-function specRowTemplate(key = '', val = '') {
-  return `
-    <div class="flex gap-2 items-center spec-row">
-      <input type="text" placeholder="Label (cth: BPM / Waktu)" value="${key}" class="w-1/3 bg-panel border border-border rounded-xl px-3 py-2.5 text-sm spec-key" />
-      <input type="text" placeholder="Detail (cth: 120 / 00:00-01:30)" value="${val}" class="flex-1 bg-panel border border-border rounded-xl px-3 py-2.5 text-sm spec-val" />
-      <button type="button" onclick="this.parentElement.remove()" class="p-2.5 text-red-500 hover:bg-red-50 rounded-xl transition" aria-label="Hapus">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+      <button type="button" onclick="deleteAdminPayment('${m.id}')" class="px-3 py-1.5 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-lg text-xs font-bold transition">
+        Hapus
       </button>
     </div>
+  `).join('') || '<p class="text-sm text-textMuted italic">Belum ada metode pembayaran.</p>';
+
+  ws.innerHTML = `
+    <div class="bg-surface border border-border rounded-3xl p-6 sm:p-8 shadow-premium space-y-6">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border pb-5">
+        <div>
+          <span class="text-xs font-mono text-primary font-bold uppercase">Dashboard</span>
+          <h2 class="text-2xl font-display font-bold mt-1">Panel Pengelolaan Studio</h2>
+        </div>
+        <button onclick="logoutAdmin()" class="px-4 py-2 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-xl text-xs font-bold transition shadow-sm">
+          Log Out Admin
+        </button>
+      </div>
+
+      <div class="flex flex-wrap gap-2 border-b border-border/60 pb-4">
+        <button onclick="adminActiveTab='projects'; renderAdminDashboard();" class="px-4 py-2 rounded-xl text-xs font-bold ${adminActiveTab==='projects'?'bg-primary text-white':'bg-panel text-textMuted'}">Proyek & Klien</button>
+        <button onclick="adminActiveTab='payments'; renderAdminDashboard();" class="px-4 py-2 rounded-xl text-xs font-bold ${adminActiveTab==='payments'?'bg-primary text-white':'bg-panel text-textMuted'}">Metode Pembayaran</button>
+        <button onclick="adminActiveTab='content'; renderAdminDashboard(); if(window.renderSiteContentAdmin) renderSiteContentAdmin();" class="px-4 py-2 rounded-xl text-xs font-bold ${adminActiveTab==='content'?'bg-primary text-white':'bg-panel text-textMuted'}">Konten Beranda</button>
+        <button onclick="adminActiveTab='settings'; renderAdminDashboard();" class="px-4 py-2 rounded-xl text-xs font-bold ${adminActiveTab==='settings'?'bg-primary text-white':'bg-panel text-textMuted'}">Pengaturan Umum</button>
+      </div>
+
+      ${adminActiveTab === 'projects' ? `
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="p-5 rounded-2xl bg-panel border border-border/60">
+            <span class="text-xs text-textMuted font-bold uppercase block">Total Proyek Masuk</span>
+            <strong class="text-3xl font-mono text-primary mt-2 block">${appState.projects.length}</strong>
+          </div>
+          <div class="p-5 rounded-2xl bg-panel border border-border/60">
+            <span class="text-xs text-textMuted font-bold uppercase block">Klien Terdaftar</span>
+            <strong class="text-3xl font-mono text-emerald-500 mt-2 block">${appState.users.length}</strong>
+          </div>
+          <div class="p-5 rounded-2xl bg-panel border border-border/60">
+            <span class="text-xs text-textMuted font-bold uppercase block">Status Layanan</span>
+            <strong class="text-sm font-bold text-textMain mt-3 block flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Aktif
+            </strong>
+          </div>
+        </div>
+        <div class="pt-4">
+          <h3 class="text-lg font-bold mb-4">Daftar Proyek Klien</h3>
+          <div class="space-y-3">
+            ${appState.projects.length ? appState.projects.map(p => `
+              <div class="p-4 rounded-xl bg-panel border border-border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div>
+                  <strong class="text-base text-textMain block">${p.judul}</strong>
+                  <span class="text-xs text-textMuted">Klien: ${p.clientName} (${p.clientEmail}) • Layanan: ${p.serviceLineLabel}</span>
+                </div>
+                <div class="text-right">
+                  <span class="text-sm font-mono font-bold text-primary block">${formatRupiah(p.totalPrice)}</span>
+                  <span class="text-xs bg-surface px-2.5 py-1 rounded-full border border-border font-semibold">${p.productionStatus}</span>
+                </div>
+              </div>
+            `).join('') : '<p class="text-sm text-textMuted italic">Belum ada data proyek masuk.</p>'}
+          </div>
+        </div>
+      ` : adminActiveTab === 'payments' ? `
+        <div class="grid lg:grid-cols-2 gap-8">
+          <form onsubmit="saveAdminPayment(event)" class="space-y-4 bg-panel/40 p-6 rounded-2xl border border-border">
+            <h3 class="font-bold text-lg">Tambah Rekening / QRIS</h3>
+            <div>
+              <label class="block text-xs font-bold mb-1.5">Jenis Pembayaran</label>
+              <select id="pay-type" class="w-full bg-panel border border-border rounded-xl p-3 text-sm">
+                <option value="bank">Transfer Bank / E-Wallet</option>
+                <option value="qris">QRIS (Link Gambar QR)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5">Nama Bank / Penyedia</label>
+              <input type="text" id="pay-name" required placeholder="Cth: Bank BCA / Dana / QRIS" class="w-full bg-panel border border-border rounded-xl p-3 text-sm" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5">Nomor Rekening / URL Gambar QRIS</label>
+              <input type="text" id="pay-number" required placeholder="Cth: 1234567890 atau https://..." class="w-full bg-panel border border-border rounded-xl p-3 text-sm" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5">Atas Nama (Pemilik Rekening)</label>
+              <input type="text" id="pay-holder" required placeholder="Cth: Fikri Yassaar" class="w-full bg-panel border border-border rounded-xl p-3 text-sm" />
+            </div>
+            <button type="submit" class="btn-primary w-full py-3 rounded-xl text-xs font-bold">+ Simpan Metode Pembayaran</button>
+          </form>
+
+          <div class="space-y-3">
+            <h3 class="font-bold text-lg mb-2">Daftar Metode Aktif</h3>
+            ${paymentMethodsListHTML}
+          </div>
+        </div>
+      ` : adminActiveTab === 'content' ? `
+        <div id="site-content-admin-inner"></div>
+      ` : `
+        <div class="max-w-md space-y-4">
+          <div>
+            <label class="block text-xs font-bold mb-2">Nomor WhatsApp Tujuan</label>
+            <input type="text" id="admin-wa-input" value="${appState.settings.studioWhatsApp}" class="w-full bg-panel border border-border rounded-xl p-3 text-sm" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold mb-2">PIN Akses Admin</label>
+            <input type="text" id="admin-pin-setting" value="${appState.settings.adminPin}" class="w-full bg-panel border border-border rounded-xl p-3 text-sm" />
+          </div>
+          <button onclick="saveAdminSettings()" class="btn-primary w-full py-3 rounded-xl text-xs font-bold">Simpan Pengaturan</button>
+        </div>
+      `}
+    </div>
   `;
 }
 
-function addSpecFieldRow() {
-  const container = document.getElementById('spec-rows-container');
-  if (container) container.insertAdjacentHTML('beforeend', specRowTemplate());
-}
+function saveAdminPayment(e) {
+  if (e) e.preventDefault();
+  const type = document.getElementById('pay-type')?.value || 'bank';
+  const name = document.getElementById('pay-name')?.value.trim();
+  const number = document.getElementById('pay-number')?.value.trim();
+  const holder = document.getElementById('pay-holder')?.value.trim();
 
-function recalculateLivePrice() {
-  const svc = appState.serviceCatalog[appState.selectedServiceLine];
-  const pkg = svc.packages[appState.selectedPackage];
-  const base = appState.customPrice || pkg.price;
-  const addon = document.getElementById('field-addon-vocal')?.checked ? svc.addonPrice : 0;
-  
-  if(document.getElementById('calc-service-name')) {
-    document.getElementById('calc-service-name').textContent = svc.label;
-    document.getElementById('calc-pkg-name').textContent = appState.customPrice ? 'Harga Kesepakatan' : pkg.label;
-    document.getElementById('calc-pkg-price').textContent = formatRupiah(base);
-    document.getElementById('calc-total-price').textContent = formatRupiah(base + addon);
-    document.getElementById('calc-addon-label').parentElement.classList.toggle('hidden', addon === 0);
-    if(addon > 0) document.getElementById('calc-addon-price').textContent = '+ ' + formatRupiah(addon);
+  if (!name || !number || !holder) {
+    return showToast('Perhatian', 'Semua kolom metode pembayaran wajib diisi.', 'warning');
   }
-}
 
-async function generateAISynopsis() {
-  const judul = document.getElementById('field-judul').value;
-  if (!judul) return showToast('Info', 'Isi judul karya terlebih dahulu.', 'warning');
-  
-  const btn = document.getElementById('btn-ai-synopsis'); 
-  if (btn) { btn.textContent = 'Menyusun...'; btn.disabled = true; }
-  
-  try {
-    if (!window.firebaseAI) throw new Error();
-    const { getGenerativeModel } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-ai.js');
-    
-    // Menggunakan Master Prompt Profesional yang disesuaikan
-    const promptText = `Bertindaklah sebagai seorang Penata Tari (Koreografer) dan Komposer Musik profesional. Buatlah sinopsis karya tari berbobot artistik tinggi dan profesional untuk judul "${judul}". Masukkan elemen suasana yang berwibawa, ide gagasan keteguhan, alur dramaturgi progresif, busana/rias, properti, serta gaya musik perkusi etnik yang dinamis berpadu akustik modern. Buat dalam bentuk 1 paragraf narasi padu tanpa poin-poin.`;
-    
-    const res = await getGenerativeModel(window.firebaseAI, { model: "gemini-1.5-flash" }).generateContent(promptText);
-    document.getElementById('field-sinopsis').value = (await res.response).text();
-  } catch { 
-    document.getElementById('field-sinopsis').value = `Karya tari bertajuk "${judul}" merupakan sebuah manifestasi seni pertunjukan yang berakar kuat pada nilai tradisi Nusantara, merepresentasikan simbol keteguhan jiwa dan ketahanan raga. Ditopang suasana berwibawa dengan alur progresif, garapan ini menyatukan visual busana elegan dan gaya musik perkusi etnik yang dinamis. (Mode Offline)`; 
-  } finally { 
-    if (btn) { btn.textContent = '✦ Generate Sinopsis AI'; btn.disabled = false; }
-  }
-}
-
-async function handleOrderFormSubmit(e) {
-  e.preventDefault();
-  if (!appState.currentClientUser) return navigateTo('client');
-  const svc = appState.serviceCatalog[appState.selectedServiceLine];
-  const pkg = svc.packages[appState.selectedPackage];
-  const total = (appState.customPrice || pkg.price) + (document.getElementById('field-addon-vocal').checked ? svc.addonPrice : 0);
-  
-  const specs = [];
-  document.querySelectorAll('.spec-row').forEach(row => {
-    const key = row.querySelector('.spec-key').value.trim();
-    const val = row.querySelector('.spec-val').value.trim();
-    if (key || val) specs.push({ key, val });
+  appState.settings.paymentMethods.push({
+    id: `pay-${Date.now()}`,
+    type,
+    name,
+    number,
+    holder
   });
 
-  const videoLink = document.getElementById('field-video-link')?.value || '';
-  const videoFileInput = document.getElementById('field-video-file');
-  const videoFileName = videoFileInput?.files[0] ? videoFileInput.files[0].name : '';
-
-  const newP = { 
-    id: `PAL-${Date.now()}`, 
-    clientEmail: appState.currentClientUser.email, 
-    clientName: appState.currentClientUser.name, 
-    judul: document.getElementById('field-judul').value, 
-    serviceLine: appState.selectedServiceLine, 
-    serviceLineLabel: svc.label, 
-    packageName: appState.customPrice ? 'Kustom' : pkg.label, 
-    totalPrice: total, 
-    dpAmount: total/2, 
-    dpStatus: 'Belum Dibayar', 
-    productionStatus: TRACKER_MILESTONES[0],
-    specs: specs,
-    videoLink: videoLink,
-    videoFileName: videoFileName
-  };
-  
-  appState.projects.unshift(newP); 
-  await syncProjectToCloud(newP);
-  showToast('Berhasil', 'Pesanan berhasil dibuat.'); 
-  navigateTo('client');
+  persistLocalState();
+  showToast('Berhasil', 'Metode pembayaran baru ditambahkan.');
+  renderAdminDashboard();
 }
+
+function deleteAdminPayment(id) {
+  appState.settings.paymentMethods = appState.settings.paymentMethods.filter(m => m.id !== id);
+  persistLocalState();
+  showToast('Info', 'Metode pembayaran dihapus.');
+  renderAdminDashboard();
+}
+
+function saveAdminSettings() {
+  const newWa = document.getElementById('admin-wa-input')?.value.trim();
+  const newPin = document.getElementById('admin-pin-setting')?.value.trim();
+  if (newWa) appState.settings.studioWhatsApp = newWa;
+  if (newPin) appState.settings.adminPin = newPin;
+  persistLocalState();
+  showToast('Berhasil', 'Pengaturan umum disimpan.');
+}
+
+function resetAdminPin() {
+  showToast('Info', 'PIN default Anda adalah 2026.', 'warning');
+}
+
+Object.assign(window, {
+  verifyAdminPin, logoutAdmin, refreshAdminPageUI, renderAdminDashboard,
+  saveAdminSettings, saveAdminPayment, deleteAdminPayment, resetAdminPin
+});
