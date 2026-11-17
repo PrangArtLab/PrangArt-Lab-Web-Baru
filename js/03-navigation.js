@@ -42,22 +42,22 @@ function updateHeaderAuthBadge() {
   const box = document.getElementById('header-auth-status');
   if (!box) return;
   
-  // Jika sedang di halaman admin, sembunyikan semua elemen akun klien
+  // Jika berada di halaman admin: tampilkan hanya status & tombol Log Out Admin (sembunyikan login klien)
   if (appState.currentPage === 'admin') {
     if (appState.isAdminAuthenticated) {
       box.innerHTML = `
         <div class="flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-xl px-3 py-1.5 text-xs">
           <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
           <span class="font-bold text-primary">Admin Aktif</span>
-          <button onclick="logoutAdmin()" class="px-2.5 py-1 bg-red-500/10 text-red-500 rounded-lg font-bold hover:bg-red-500 hover:text-white transition ml-1">Log Out Admin</button>
+          <button onclick="logoutAdmin()" class="px-2.5 py-1 bg-red-500/10 text-red-500 rounded-lg font-bold hover:bg-red-500 hover:text-white transition ml-1">Log Out</button>
         </div>`;
     } else {
-      box.innerHTML = `<span class="text-xs text-textMuted font-mono">Panel Admin</span>`;
+      box.innerHTML = `<span class="text-xs text-textMuted font-mono px-3 py-1.5 bg-panel rounded-xl border border-border">Panel Admin</span>`;
     }
     return;
   }
 
-  // Jika di halaman selain admin (beranda, portofolio, ruang klien, dll)
+  // Jika berada di halaman publik / ruang klien: tampilkan status klien & tombol Log Out Klien
   if (appState.currentClientUser) {
     box.innerHTML = `
       <div class="flex items-center gap-2 bg-surface border border-border rounded-xl px-3 py-1.5 text-xs shadow-sm">
