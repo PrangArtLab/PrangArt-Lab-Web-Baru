@@ -161,41 +161,25 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div><label class="block text-xs font-bold mb-2">Nama Lengkap *</label><input id="field-nama" required class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" /></div>
                   <div><label class="block text-xs font-bold mb-2">Judul Karya *</label><input id="field-judul" required class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" /></div>
-                  <div>
-                    <label class="block text-xs font-bold mb-2">Jenis Karya *</label>
-                    <input id="field-jenis-tari" required placeholder="Cth: Tari Tradisi / Tari Kreasi / Tari Kontemporer" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
-                  </div>
+                  <div><label class="block text-xs font-bold mb-2">Jenis Karya *</label><input id="field-jenis-tari" required placeholder="Tari tradisi / Tari kreasi / Tari kontemporer" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" /></div>
                   <div><label class="block text-xs font-bold mb-2">Durasi (MM:SS) *</label><input id="field-durasi" required placeholder="05:30" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" /></div>
                 </div>
-
-                <div class="pt-4 border-t border-border/60">
-                  <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
-                    <label class="text-xs font-bold">Sinopsis Karya *</label>
-                    <div class="flex bg-panel p-1 rounded-xl border border-border/60">
-                      <button type="button" id="btn-mode-manual" onclick="setSynopsisMode('manual')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-surface text-textMain shadow-sm">Ketik Manual</button>
-                      <button type="button" id="btn-mode-ai" onclick="setSynopsisMode('ai')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-textMuted">Gunakan AI</button>
+                <div>
+                  <div class="flex justify-between items-center mb-2">
+                    <label class="text-xs font-bold">Sinopsis *</label>
+                    <div class="flex bg-panel p-1 rounded-lg border border-border/60">
+                      <button type="button" id="btn-mode-manual" onclick="setSynopsisMode('manual')" class="px-3 py-1 rounded-md text-xs font-bold bg-surface text-textMain shadow-sm">Ketik Manual</button>
+                      <button type="button" id="btn-mode-ai" onclick="setSynopsisMode('ai')" class="px-3 py-1 rounded-md text-xs font-bold text-textMuted">Gunakan AI</button>
                     </div>
                   </div>
-
-                  <!-- WADAH FORMULIR DATA KARYA TARI (MUNCUL SAAT KLIK GUNAKAN AI) -->
-                  <div id="ai-action-wrapper" class="hidden space-y-5 mb-4 p-5 sm:p-6 bg-panel/60 border border-primary/30 rounded-2xl">
-                    <div class="border-b border-border/60 pb-3">
-                      <span class="text-[11px] font-mono font-bold uppercase text-primary block">Formulir Data Karya (Bahan Prompt AI)</span>
-                      <p class="text-xs text-textMuted mt-1">Gunakan bahasa sederhana sesuai pemahaman Anda. Untuk pertanyaan yang tidak diketahui atau tidak relevan, boleh dikosongkan.</p>
-                    </div>
-                    
-                    <div id="ai-dynamic-prompt-fields"></div>
-
-                    <button type="button" id="btn-ai-synopsis" onclick="generateAISynopsis()" class="btn-primary w-full py-3.5 rounded-xl text-sm font-bold shadow-glow">
-                      ✦ Generate Sinopsis AI
-                    </button>
+                  <textarea id="field-sinopsis" rows="5" required placeholder="Tulis sinopsis karya Anda di sini, atau isi data di Langkah 03 (Spesifikasi & Referensi) terlebih dahulu lalu klik 'Gunakan AI' untuk menyusun sinopsis otomatis..." class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm leading-relaxed"></textarea>
+                  <div id="ai-action-wrapper" class="hidden mt-3">
+                    <button type="button" id="btn-ai-synopsis" onclick="generateAISynopsis()" class="btn-primary w-full py-3 rounded-xl text-sm font-bold shadow-glow">✦ Generate Sinopsis AI (Dari Data Spesifikasi)</button>
                   </div>
-
-                  <textarea id="field-sinopsis" rows="5" required placeholder="Tulis sinopsis karya Anda secara manual di sini, atau pilih 'Gunakan AI' di atas untuk menyusunnya otomatis..." class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm leading-relaxed"></textarea>
                 </div>
               </div>
 
-              <!-- LANGKAH 03 -->
+              <!-- LANGKAH 03: SPESIFIKASI & REFERENSI -->
               <div class="bg-surface border border-border/80 rounded-3xl p-6 sm:p-10 space-y-6">
                 <div>
                   <span class="text-xs font-mono text-primary font-bold uppercase">Langkah 03</span>
