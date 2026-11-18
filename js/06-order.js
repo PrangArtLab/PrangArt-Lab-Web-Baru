@@ -1,6 +1,5 @@
 /* === SISTEM PEMESANAN & KALKULATOR LAYANAN (PRANGART LAB) === */
 
-// Pastikan helper dasar selalu tersedia agar tidak pernah ReferenceError
 if (typeof window.formatRupiah !== 'function') {
   window.formatRupiah = function (num) {
     return 'Rp' + Number(num || 0).toLocaleString('id-ID');
@@ -104,7 +103,7 @@ function openProductionAgreementModal() {
 
   const svc = appState.serviceCatalog[appState.selectedServiceLine];
   const pkg = svc.packages[appState.selectedPackage];
-  const isCustomPkg = appState.selectedPackage === 'custom';
+  const isCustomPkg = appState.selectedPackage === 'custom' || Boolean(pkg.isCustom);
   const basePrice = isCustomPkg ? Number(appState.customPrice || 0) : (appState.customPrice || Number(pkg.price || 0));
   const hasVocalAddon = (appState.selectedServiceLine !== 'transkripsi') && Boolean(document.getElementById('field-addon-vocal')?.checked);
   const addonAmount = hasVocalAddon ? Number(svc.addonPrice || 250000) : 0;
@@ -168,7 +167,7 @@ function openProductionAgreementModal() {
             <li><strong>Paket Layanan:</strong> ${isCustomPkg || appState.customPrice ? pkg.label + ' (Kesepakatan Khusus)' : pkg.label}</li>
             <li><strong>Judul Karya / Proyek:</strong> ${workTitle}</li>
             <li><strong>Estimasi Durasi:</strong> ${workDuration}</li>
-            <li><strong>Kualifikasi Paket:</strong> ${pkg.desc}</li>
+            <li><strong>Ringkasan Kualifikasi:</strong> ${pkg.summary || pkg.desc || ''}</li>
           </ul>
           <p class="mt-1">2. PIHAK PERTAMA wajib melaksanakan produksi sesuai arahan konsep, referensi, sinopsis (khusus musik tari), maupun rincian teknis yang diserahkan PIHAK KEDUA dalam formulir pemesanan.</p>
         </div>
@@ -298,7 +297,7 @@ function updateCustomPriceFieldUI() {
     inp.placeholder = 'Wajib isi nominal harga sesuai kesepakatan diskusi (contoh: 2500000)';
     const lbl = wrap.querySelector('label');
     if (lbl) {
-      lbl.innerHTML = 'Harga Kesepakatan Paket Custom (Rp) * <span class="text-primary font-semibold">(Wajib diisi manual sesuai hasil diskusi)</span>';
+      lbl.innerHTML = 'Nominal Harga Kesepakatan Paket Custom (Rp) * <span class="text-primary font-semibold">(Tanpa harga patokan — isi manual sesuai hasil diskusi)</span>';
     }
   } else {
     wrap.className = 'space-y-1';
@@ -306,7 +305,7 @@ function updateCustomPriceFieldUI() {
     inp.placeholder = 'Contoh: 2500000 (Kosongkan jika mengikuti harga paket)';
     const lbl = wrap.querySelector('label');
     if (lbl) {
-      lbl.innerHTML = 'Harga Kesepakatan Khusus (Rp) <span class="text-textMuted font-normal">(Opsional — isi jika ada penyesuaian harga hasil diskusi)</span>';
+      lbl.innerHTML = 'Harga Kesepakatan Khusus (Rp) <span class="text-textMuted font-normal">(Opsional — isi hanya jika ada penyesuaian harga hasil diskusi)</span>';
     }
   }
 }
@@ -509,28 +508,90 @@ function renderIdentityFields() {
   }
 }
 
+/* === RENDER KARTU PAKET + PANEL DETAIL FASILITAS & SISTEMATIKA === */
 function renderPackageCards() {
-  const grid = document.getElementById('package-cards-grid'); if (!grid) return;
+  const grid = document.getElementById('package-cards-grid');
+  if (!grid) return;
   const svc = appState.serviceCatalog[appState.selectedServiceLine];
-  
-  grid.innerHTML = Object.entries(svc.packages).map(([k, p]) => {
-    const isCustomPkg = (k === 'custom' || p.isCustom);
-    const sel = appState.selectedPackage === k;
+  const activePkgKey = appState.selectedPackage;
+  const activePkg = svc.packages[activePkgKey] || svc.packages.dasar;
+
+  const cardsHTML = Object.entries(svc.packages).map(([k, p]) => {
+    const isCustomPkg = (k === 'custom' || Boolean(p.isCustom));
+    const sel = activePkgKey === k;
     const priceDisplay = isCustomPkg
       ? (appState.customPrice && sel ? formatRupiah(appState.customPrice) : 'Sesuai Kesepakatan')
       : formatRupiah(p.price);
 
+    const featList = Array.isArray(p.features)
+      ? `<ul class="mt-3 pt-3 border-t border-border/60 space-y-1.5 text-[11px] text-textMuted">
+          ${p.features.slice(0, 3).map(f => `<li class="flex items-start gap-1.5"><span class="text-primary font-bold shrink-0">✓</span><span>${f}</span></li>`).join('')}
+        </ul>`
+      : '';
+
     return `<button type="button" onclick="selectPackageTier('${k}')" class="p-5 rounded-2xl border text-left flex flex-col justify-between h-full transition cursor-pointer ${sel ? 'border-primary bg-primary/10 shadow-glow' : 'border-border bg-surface hover:border-primary/40'}">
-      <div class="mb-3">
-        <div class="flex items-center justify-between gap-2">
+      <div>
+        <div class="flex items-center justify-between gap-2 mb-1">
           <span class="text-sm font-bold text-textMain">${p.label}</span>
-          ${isCustomPkg ? `<span class="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-primary/15 text-primary font-bold">Manual</span>` : ''}
+          ${p.badge ? `<span class="text-[10px] font-mono px-2 py-0.5 rounded bg-primary/15 text-primary font-bold">${p.badge}</span>` : ''}
         </div>
         <span class="text-lg font-mono text-primary block mt-1">${priceDisplay}</span>
+        <p class="text-[11px] text-textMain/80 leading-relaxed mt-2">${p.summary || p.desc || ''}</p>
+        ${featList}
       </div>
-      <span class="text-[11px] text-textMuted leading-relaxed">${p.desc}</span>
+      <div class="mt-3 pt-2 text-[10px] font-mono uppercase tracking-wider ${sel ? 'text-primary font-bold' : 'text-textMuted'}">
+        ${sel ? '● Paket Terpilih (Lihat Detail Lengkap di Bawah)' : 'Klik untuk pilih & lihat detail →'}
+      </div>
     </button>`;
   }).join('');
+
+  grid.innerHTML = cardsHTML;
+
+  // Render kotak rincian lengkap paket & sistematika kerja tepat di bawah grid kartu paket
+  let detailBox = document.getElementById('selected-package-full-detail');
+  if (!detailBox) {
+    detailBox = document.createElement('div');
+    detailBox.id = 'selected-package-full-detail';
+    grid.insertAdjacentElement('afterend', detailBox);
+  }
+
+  const allFeatures = Array.isArray(activePkg.features)
+    ? activePkg.features.map(item => `
+        <li class="flex items-start gap-2 text-xs text-textMain leading-relaxed">
+          <span class="text-primary font-bold mt-0.5">✓</span>
+          <span>${item}</span>
+        </li>
+      `).join('')
+    : `<li class="text-xs text-textMain">${activePkg.desc || ''}</li>`;
+
+  detailBox.className = 'mt-5 p-5 sm:p-6 rounded-2xl bg-panel border border-primary/30 space-y-4';
+  detailBox.innerHTML = `
+    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 pb-3">
+      <div>
+        <span class="text-[10px] font-mono uppercase tracking-widest text-primary font-bold block">Rincian Fasilitas &amp; Sistematika Kerja</span>
+        <h4 class="text-base font-bold text-textMain mt-0.5">${svc.label} — ${activePkg.label}</h4>
+      </div>
+      <span class="px-3 py-1 rounded-full bg-primary/15 text-primary font-mono text-xs font-bold">
+        ${activePkg.isCustom ? 'Tarif Fleksibel (Tanpa Harga Patokan)' : formatRupiah(activePkg.price)}
+      </span>
+    </div>
+
+    ${svc.overview ? `<p class="text-xs text-textMuted leading-relaxed">${svc.overview}</p>` : ''}
+
+    <div class="space-y-2">
+      <span class="text-xs font-bold text-textMain block">Fasilitas &amp; Kualifikasi yang Didapatkan:</span>
+      <ul class="space-y-1.5">
+        ${allFeatures}
+      </ul>
+    </div>
+
+    ${activePkg.workflow ? `
+      <div class="p-3.5 rounded-xl bg-surface border border-border/80 text-xs text-textMain leading-relaxed">
+        <strong class="text-primary block mb-1">Alur &amp; Sistematika Pengerjaan:</strong>
+        ${activePkg.workflow}
+      </div>
+    ` : ''}
+  `;
 }
 
 function selectPackageTier(k) { 
@@ -817,8 +878,8 @@ function renderDynamicSpecFields() {
         <div class="space-y-5">
           <div class="p-5 bg-panel border border-primary/40 rounded-2xl space-y-5">
             <div>
-              <span class="text-[11px] font-mono uppercase text-primary font-bold block">Spesifikasi Musik Tari — Paket Custom Lengkap</span>
-              <p class="text-xs text-textMuted mt-1">Untuk garapan durasi bebas (&gt; 7 menit), sendratari, kolaborasi instrumen khusus, atau struktur dramatik multi-babak.</p>
+              <span class="text-[11px] font-mono uppercase text-primary font-bold block">Spesifikasi Khusus Paket Custom — Musik Iringan Tari</span>
+              <p class="text-xs text-textMuted mt-1">Lengkapi detail kebutuhan garapan kustom Anda (durasi bebas &gt; 7 menit, sendratari, kolaborasi instrumen khusus, dan struktur babak).</p>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -832,7 +893,7 @@ function renderDynamicSpecFields() {
                 </select>
               </div>
               <div>
-                <label class="block text-xs font-bold mb-2">Kebutuhan Instrumen Khusus *</label>
+                <label class="block text-xs font-bold mb-2">Kebutuhan Instrumen Khusus / Live *</label>
                 <input id="spec-custom-instruments" required class="w-full bg-surface border border-border rounded-xl px-4 py-3 text-sm" placeholder="Cth: Full Gambus Kutai + Perkusi Dayak + String Orkestra" />
               </div>
             </div>
@@ -929,7 +990,7 @@ function renderDynamicSpecFields() {
 
         ${isCustom ? `
           <div class="p-4 rounded-xl bg-surface border border-primary/40 space-y-3">
-            <span class="text-xs font-bold text-primary block">Detail Lengkap Paket Custom Non-Tari</span>
+            <span class="text-xs font-bold text-primary block">Spesifikasi Khusus Paket Custom — Musik Non-Tari</span>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label class="block text-xs font-bold mb-1.5">Jumlah Trek / Lagu yang Diproduksi *</label>
@@ -938,7 +999,7 @@ function renderDynamicSpecFields() {
               <div>
                 <label class="block text-xs font-bold mb-1.5">Kebutuhan Lisensi / Hak Pakai Komersial *</label>
                 <select id="nontari-custom-license" required class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm">
-                  <option value="Lisensi Standar (Kredit PrangArt Studios)">Lisensi Standar (Kredit PrangArt Studios)</option>
+                  <option value="Lisensi Standar (Kredit PrangArt Lab)">Lisensi Standar (Kredit PrangArt Lab)</option>
                   <option value="Lisensi Komersial / Iklan Nasional">Lisensi Komersial / Iklan Nasional</option>
                   <option value="Full Buyout / Hak Cipta Eksklusif Klien">Full Buyout / Hak Cipta Eksklusif Klien</option>
                 </select>
@@ -1018,7 +1079,7 @@ function renderDynamicSpecFields() {
 
         ${isCustom ? `
           <div class="p-4 rounded-xl bg-surface border border-primary/40 space-y-3">
-            <span class="text-xs font-bold text-primary block">Detail Lengkap Paket Custom Transkripsi</span>
+            <span class="text-xs font-bold text-primary block">Spesifikasi Khusus Paket Custom — Transkripsi Musik</span>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label class="block text-xs font-bold mb-1.5">Jumlah Repertoar / Karya *</label>
@@ -1136,7 +1197,7 @@ function renderAIDetailForm() {
 function recalculateLivePrice() {
   const svc = appState.serviceCatalog[appState.selectedServiceLine];
   const pkg = svc.packages[appState.selectedPackage];
-  const isCustomPkg = (appState.selectedPackage === 'custom' || pkg.isCustom);
+  const isCustomPkg = (appState.selectedPackage === 'custom' || Boolean(pkg.isCustom));
   const base = isCustomPkg ? Number(appState.customPrice || 0) : (appState.customPrice || Number(pkg.price || 0));
   const addonPrice = Number(svc.addonPrice || 250000);
   const isAddonChecked = (appState.selectedServiceLine !== 'transkripsi') && Boolean(document.getElementById('field-addon-vocal')?.checked);
@@ -1313,7 +1374,7 @@ async function handleOrderFormSubmit(e) {
 
   const svc = appState.serviceCatalog[appState.selectedServiceLine];
   const pkg = svc.packages[appState.selectedPackage];
-  const isCustomPkg = (appState.selectedPackage === 'custom' || pkg.isCustom);
+  const isCustomPkg = (appState.selectedPackage === 'custom' || Boolean(pkg.isCustom));
 
   if (isCustomPkg && (!appState.customPrice || Number(appState.customPrice) <= 0)) {
     document.getElementById('custom-price-input')?.focus();
@@ -1477,7 +1538,6 @@ async function handleOrderFormSubmit(e) {
   if (typeof navigateTo === 'function') navigateTo('client');
 }
 
-// Ekspos segera ke window sebelum event listener apa pun
 Object.assign(window, {
   refreshOrderPageUI,
   selectServiceLine,
@@ -1499,7 +1559,6 @@ Object.assign(window, {
   copyAIResultToClipboard
 });
 
-// Event delegation langsung pada dokumen agar tab layanan SELALU bisa diklik
 document.addEventListener('click', function (ev) {
   const tabBtn = ev.target.closest('.svc-tab-btn, [id^="svc-tab-"]');
   if (tabBtn) {
