@@ -143,7 +143,7 @@
         <div id="order-form-container">
           <form id="prangart-order-form" onsubmit="handleOrderFormSubmit(event)" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             <div class="lg:col-span-8 space-y-8">
-              <!-- LANGKAH 01 -->
+              <!-- LANGKAH 01: LAYANAN & HARGA -->
               <div class="bg-surface border border-border/80 rounded-3xl p-6 sm:p-10 space-y-6 shadow-premium">
                 <div><span class="text-xs font-mono text-primary font-bold uppercase">Langkah 01</span><h2 class="text-2xl font-display font-bold mt-1">Pilih Layanan &amp; Harga</h2></div>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -155,38 +155,22 @@
                 <div><label class="block text-xs font-bold mb-2">Harga Kesepakatan (Rp)</label><input type="number" id="custom-price-input" oninput="handleCustomPrice(this.value)" placeholder="Contoh: 1500000" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" /></div>
               </div>
 
-              <!-- LANGKAH 02 -->
+              <!-- LANGKAH 02: SPESIFIKASI & DATA KARYA (DIISI LEBIH DULU) -->
               <div class="bg-surface border border-border/80 rounded-3xl p-6 sm:p-10 space-y-6">
-                <div><span class="text-xs font-mono text-primary font-bold uppercase">Langkah 02</span><h2 class="text-2xl font-display font-bold mt-1">Informasi Karya</h2></div>
+                <div>
+                  <span class="text-xs font-mono text-primary font-bold uppercase">Langkah 02</span>
+                  <h2 class="text-2xl font-display font-bold mt-1">Informasi &amp; Spesifikasi Karya</h2>
+                </div>
+
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  <div><label class="block text-xs font-bold mb-2">Nama Lengkap *</label><input id="field-nama" required class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" /></div>
-                  <div><label class="block text-xs font-bold mb-2">Judul Karya *</label><input id="field-judul" required class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" /></div>
+                  <div><label class="block text-xs font-bold mb-2">Nama Lengkap Pemesan *</label><input id="field-nama" required class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" /></div>
+                  <div><label class="block text-xs font-bold mb-2">1. Judul Karya *</label><input id="field-judul" required class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" /></div>
                   <div><label class="block text-xs font-bold mb-2">Jenis Karya *</label><input id="field-jenis-tari" required placeholder="Tari tradisi / Tari kreasi / Tari kontemporer" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" /></div>
                   <div><label class="block text-xs font-bold mb-2">Durasi (MM:SS) *</label><input id="field-durasi" required placeholder="05:30" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" /></div>
                 </div>
-                <div>
-                  <div class="flex justify-between items-center mb-2">
-                    <label class="text-xs font-bold">Sinopsis *</label>
-                    <div class="flex bg-panel p-1 rounded-lg border border-border/60">
-                      <button type="button" id="btn-mode-manual" onclick="setSynopsisMode('manual')" class="px-3 py-1 rounded-md text-xs font-bold bg-surface text-textMain shadow-sm">Ketik Manual</button>
-                      <button type="button" id="btn-mode-ai" onclick="setSynopsisMode('ai')" class="px-3 py-1 rounded-md text-xs font-bold text-textMuted">Gunakan AI</button>
-                    </div>
-                  </div>
-                  <textarea id="field-sinopsis" rows="5" required placeholder="Tulis sinopsis karya Anda di sini, atau isi data di Langkah 03 (Spesifikasi & Referensi) terlebih dahulu lalu klik 'Gunakan AI' untuk menyusun sinopsis otomatis..." class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm leading-relaxed"></textarea>
-                  <div id="ai-action-wrapper" class="hidden mt-3">
-                    <button type="button" id="btn-ai-synopsis" onclick="generateAISynopsis()" class="btn-primary w-full py-3 rounded-xl text-sm font-bold shadow-glow">✦ Generate Sinopsis AI (Dari Data Spesifikasi)</button>
-                  </div>
-                </div>
-              </div>
 
-              <!-- LANGKAH 03: SPESIFIKASI & REFERENSI -->
-              <div class="bg-surface border border-border/80 rounded-3xl p-6 sm:p-10 space-y-6">
-                <div>
-                  <span class="text-xs font-mono text-primary font-bold uppercase">Langkah 03</span>
-                  <h2 class="text-2xl font-display font-bold mt-1">Spesifikasi &amp; Referensi</h2>
-                </div>
-                
-                <div id="dynamic-spec-fields" class="space-y-4"></div>
+                <!-- FORMULIR DATA KARYA TARI / SPESIFIKASI DINAMIS -->
+                <div id="dynamic-spec-fields" class="pt-4 border-t border-border/60 space-y-4"></div>
 
                 <div class="pt-6 border-t border-border/60">
                   <label class="block text-xs font-bold mb-3">Referensi Video Garapan (Opsional)</label>
@@ -206,8 +190,33 @@
                   <span class="text-sm font-bold">Tambahan Vokal / Player <small class="block text-textMuted">+ Rp250.000</small></span>
                   <input type="checkbox" id="field-addon-vocal" onchange="recalculateLivePrice()" class="w-5 h-5" />
                 </label>
+              </div>
 
-                <div class="mt-8 pt-6 border-t border-border/60">
+              <!-- LANGKAH 03: SINOPSIS & KETENTUAN (DIISI SETELAH SPESIFIKASI LENGKAP) -->
+              <div class="bg-surface border border-border/80 rounded-3xl p-6 sm:p-10 space-y-6">
+                <div>
+                  <span class="text-xs font-mono text-primary font-bold uppercase">Langkah 03</span>
+                  <h2 class="text-2xl font-display font-bold mt-1">Sinopsis Karya &amp; Ketentuan</h2>
+                </div>
+
+                <div>
+                  <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
+                    <label class="text-xs font-bold">Sinopsis Karya *</label>
+                    <div class="flex bg-panel p-1 rounded-xl border border-border/60">
+                      <button type="button" id="btn-mode-manual" onclick="setSynopsisMode('manual')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-surface text-textMain shadow-sm">Ketik Manual</button>
+                      <button type="button" id="btn-mode-ai" onclick="setSynopsisMode('ai')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-textMuted">Gunakan AI</button>
+                    </div>
+                  </div>
+
+                  <div id="ai-action-wrapper" class="hidden mb-3 p-4 rounded-2xl bg-primary/5 border border-primary/20 space-y-2">
+                    <p class="text-xs text-textMuted">AI akan menyusun sinopsis profesional (150–250 kata) berdasarkan seluruh spesifikasi &amp; data karya yang telah Anda isi pada Langkah 02 di atas.</p>
+                    <button type="button" id="btn-ai-synopsis" onclick="generateAISynopsis()" class="btn-primary w-full py-3 rounded-xl text-sm font-bold shadow-glow">✦ Generate Sinopsis AI dari Spesifikasi</button>
+                  </div>
+
+                  <textarea id="field-sinopsis" rows="6" required placeholder="Tulis sinopsis karya Anda secara manual di sini, atau pilih 'Gunakan AI' di atas untuk menyusunnya otomatis dari data spesifikasi Langkah 02..." class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm leading-relaxed"></textarea>
+                </div>
+
+                <div class="pt-6 border-t border-border/60">
                   <h3 class="text-lg font-bold text-textMain mb-4">Ketentuan &amp; Aturan Layanan</h3>
                   <div class="text-[13px] text-textMuted space-y-3 leading-relaxed bg-panel p-5 rounded-2xl border border-border/50">
                     <p><strong class="text-textMain">1. Penyesuaian Custom:</strong> Permintaan di luar paket standar dapat dikonsultasikan terlebih dahulu sebelum kesepakatan harga dan pengerjaan.</p>
