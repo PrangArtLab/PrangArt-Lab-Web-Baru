@@ -198,15 +198,22 @@ function recalculateLivePrice() {
   const svc = appState.serviceCatalog[appState.selectedServiceLine];
   const pkg = svc.packages[appState.selectedPackage];
   const base = appState.customPrice || pkg.price;
-  const addon = document.getElementById('field-addon-vocal')?.checked ? svc.addonPrice : 0;
+  const addonPrice = Number(svc.addonPrice || 250000);
+  const isAddonChecked = Boolean(document.getElementById('field-addon-vocal')?.checked);
+  const addon = isAddonChecked ? addonPrice : 0;
   
   if(document.getElementById('calc-service-name')) {
     document.getElementById('calc-service-name').textContent = svc.label;
     document.getElementById('calc-pkg-name').textContent = appState.customPrice ? 'Harga Kesepakatan' : pkg.label;
     document.getElementById('calc-pkg-price').textContent = formatRupiah(base);
     document.getElementById('calc-total-price').textContent = formatRupiah(base + addon);
-    document.getElementById('calc-addon-label').parentElement.classList.toggle('hidden', addon === 0);
-    if(addon > 0) document.getElementById('calc-addon-price').textContent = '+ ' + formatRupiah(addon);
+    
+    const addonRow = document.getElementById('calc-addon-label')?.parentElement;
+    if (addonRow) {
+      addonRow.classList.toggle('hidden', !isAddonChecked);
+      document.getElementById('calc-addon-label').textContent = 'Tambahan Vokal / Player';
+      document.getElementById('calc-addon-price').textContent = '+ ' + formatRupiah(addonPrice);
+    }
   }
 }
 
@@ -322,7 +329,10 @@ async function handleOrderFormSubmit(e) {
   if (!appState.currentClientUser) return navigateTo('client');
   const svc = appState.serviceCatalog[appState.selectedServiceLine];
   const pkg = svc.packages[appState.selectedPackage];
-  const total = (appState.customPrice || pkg.price) + (document.getElementById('field-addon-vocal').checked ? svc.addonPrice : 0);
+  const basePrice = appState.customPrice || pkg.price;
+  const hasVocalAddon = Boolean(document.getElementById('field-addon-vocal')?.checked);
+  const addonAmount = hasVocalAddon ? Number(svc.addonPrice || 250000) : 0;
+  const total = basePrice + addonAmount;
   
   const specs = [];
   const pushIfVal = (label, id) => {
@@ -356,6 +366,10 @@ async function handleOrderFormSubmit(e) {
     pushIfVal('Format Notasi', 'spec-format');
   }
 
+  if (hasVocalAddon) {
+    specs.push({ key: 'Tambahan Vokal / Player', val: `+ ${formatRupiah(addonAmount)}` });
+  }
+
   const videoLink = document.getElementById('field-video-link')?.value || '';
   const videoFileInput = document.getElementById('field-video-file');
   const videoFileName = videoFileInput?.files[0] ? videoFileInput.files[0].name : '';
@@ -370,8 +384,10 @@ async function handleOrderFormSubmit(e) {
     serviceLine: appState.selectedServiceLine, 
     serviceLineLabel: svc.label, 
     packageName: appState.customPrice ? 'Kustom' : pkg.label, 
+    hasVocalAddon: hasVocalAddon,
+    addonAmount: addonAmount,
     totalPrice: total, 
-    dpAmount: total/2, 
+    dpAmount: total / 2, 
     dpStatus: 'Belum Dibayar', 
     productionStatus: TRACKER_MILESTONES[0],
     specs: specs,
