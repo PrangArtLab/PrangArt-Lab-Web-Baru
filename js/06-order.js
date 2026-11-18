@@ -1,6 +1,24 @@
+/* === SISTEM PEMESANAN & KALKULATOR LAYANAN (PRANGART LAB) === */
+
+// Pastikan helper dasar selalu tersedia agar tidak pernah ReferenceError
+if (typeof window.formatRupiah !== 'function') {
+  window.formatRupiah = function (num) {
+    return 'Rp' + Number(num || 0).toLocaleString('id-ID');
+  };
+}
+if (typeof window.closeCustomModal !== 'function') {
+  window.closeCustomModal = function () {
+    const m = document.getElementById('custom-modal');
+    if (m) {
+      m.classList.add('hidden');
+      m.classList.remove('flex');
+    }
+  };
+}
+
 const AI_QUOTA_STORAGE_KEY = 'prangart_ai_synopsis_quota_v1';
 const AI_DAILY_LIMIT = 2;
-const AI_COOLDOWN_MS = 10 * 60 * 1000; // 10 menit
+const AI_COOLDOWN_MS = 10 * 60 * 1000;
 
 function getTodayDateString() {
   const now = new Date();
@@ -72,7 +90,7 @@ function validateTariDurationLimit() {
   if (!durInput) return true;
 
   const sec = parseDurationToSeconds(durInput.value);
-  const isOver = sec !== null && sec > 420; // Maksimal 7 menit (420 detik)
+  const isOver = sec !== null && sec > 420;
   if (warnEl) warnEl.classList.toggle('hidden', !isOver);
   return !isOver;
 }
@@ -253,7 +271,7 @@ function setSynopsisMode(mode) {
   const btnManual = document.getElementById('btn-mode-manual');
   const btnAi = document.getElementById('btn-mode-ai');
   const aiWrap = document.getElementById('ai-action-wrapper');
-  if(!btnManual || !btnAi || !aiWrap) return;
+  if (!btnManual || !btnAi || !aiWrap) return;
 
   if (mode === 'manual') {
     btnManual.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-surface text-textMain shadow-sm transition';
@@ -309,7 +327,6 @@ function selectServiceLine(svcKey) {
     active.className = 'svc-tab-btn p-4 rounded-2xl border border-primary bg-primary/10 text-primary text-left shadow-glow transition cursor-pointer';
   }
 
-  // 1. Fitur Baca Perjanjian Produksi: wajib muncul di Musik Tari & Musik Non-Tari
   const contractBox = document.getElementById('contract-agreement-box');
   const contractCheck = document.getElementById('field-contract-agree');
   const requiresContract = (svcKey === 'tari' || svcKey === 'digital');
@@ -318,7 +335,6 @@ function selectServiceLine(svcKey) {
     contractCheck.required = requiresContract;
   }
 
-  // 2. Sinopsis: hanya untuk Musik Tari; Non-Tari & Transkripsi tanpa sinopsis
   const synopsisWrap = document.getElementById('synopsis-section-wrapper');
   const synopsisField = document.getElementById('field-sinopsis');
   const step3Heading = document.getElementById('step3-heading');
@@ -337,7 +353,6 @@ function selectServiceLine(svcKey) {
     termsWrap.className = isTari ? 'pt-6 border-t border-border/60' : '';
   }
 
-  // 3. Label Referensi Utama & Tambahan Vokal sesuai layanan
   const videoLabel = document.getElementById('video-ref-label');
   const addonWrap = document.getElementById('addon-vocal-wrapper');
   if (videoLabel) {
@@ -495,7 +510,7 @@ function renderIdentityFields() {
 }
 
 function renderPackageCards() {
-  const grid = document.getElementById('package-cards-grid'); if(!grid) return;
+  const grid = document.getElementById('package-cards-grid'); if (!grid) return;
   const svc = appState.serviceCatalog[appState.selectedServiceLine];
   
   grid.innerHTML = Object.entries(svc.packages).map(([k, p]) => {
@@ -553,7 +568,6 @@ function toggleNuansaOtherInput(val) {
   }
 }
 
-/* === TAMBAH CEKLIS STRUKTUR / SUASANA BARU SECARA DINAMIS (PAKET STANDAR & CUSTOM) === */
 function addCustomStrukturCheckbox() {
   const input = document.getElementById('spec-struktur-new-input');
   const container = document.getElementById('struktur-checkbox-grid');
@@ -561,7 +575,7 @@ function addCustomStrukturCheckbox() {
 
   const val = input.value.trim();
   if (!val) {
-    return showToast('Info', 'Ketik nama suasana/struktur terlebih dahulu sebelum menekan tombol Tambah Ceklis.', 'warning');
+    return typeof showToast === 'function' && showToast('Info', 'Ketik nama suasana/struktur terlebih dahulu sebelum menekan tombol Tambah Ceklis.', 'warning');
   }
 
   const label = document.createElement('label');
@@ -572,10 +586,9 @@ function addCustomStrukturCheckbox() {
   `;
   container.appendChild(label);
   input.value = '';
-  showToast('Ditambahkan', `"${val}" berhasil ditambahkan sebagai item ceklis baru.`);
+  if (typeof showToast === 'function') showToast('Ditambahkan', `"${val}" berhasil ditambahkan sebagai item ceklis baru.`);
 }
 
-/* === BARIS DINAMIS PAKET STANDAR (+ TAMBAH BAGIAN) === */
 function addStandarSegmentRow(preset = {}) {
   const list = document.getElementById('standar-segments-list');
   if (!list) return;
@@ -609,7 +622,6 @@ function addStandarSegmentRow(preset = {}) {
   list.appendChild(row);
 }
 
-/* === BARIS DINAMIS PAKET PRO & CUSTOM (+ TAMBAH VIDEO / TEMPO) === */
 function addProSegmentRow(preset = {}) {
   const list = document.getElementById('pro-segments-list');
   if (!list) return;
@@ -660,9 +672,8 @@ function removeSegmentRow(btn, listId) {
   });
 }
 
-/* === LANGKAH 02: SPESIFIKASI LENGKAP SESUAI LAYANAN & PAKET === */
 function renderDynamicSpecFields() {
-  const c = document.getElementById('dynamic-spec-fields'); if(!c) return;
+  const c = document.getElementById('dynamic-spec-fields'); if (!c) return;
   const svc = appState.selectedServiceLine;
   const pkg = appState.selectedPackage;
   
@@ -1033,7 +1044,6 @@ function renderDynamicSpecFields() {
   }
 }
 
-/* === FORMULIR DETAIL AI === */
 function renderAIDetailForm() {
   const container = document.getElementById('ai-detail-form-container');
   if (!container) return;
@@ -1156,7 +1166,6 @@ function getResolvedJenisTari() {
   return sel || '(Belum diisi)';
 }
 
-/* === GENERATE SINOPSIS AI === */
 async function generateAISynopsis() {
   const judul = document.getElementById('field-judul')?.value.trim();
   const jenis = getResolvedJenisTari();
@@ -1164,7 +1173,7 @@ async function generateAISynopsis() {
   const asal = document.getElementById('field-budaya-daerah')?.value.trim() || document.getElementById('field-kota-provinsi')?.value.trim() || '(Belum tersedia / dikosongkan)';
   
   if (!judul) {
-    return showToast('Perhatian', 'Isi Judul Tari / Nama Karya pada Langkah 02 terlebih dahulu.', 'warning');
+    return typeof showToast === 'function' && showToast('Perhatian', 'Isi Judul Tari / Nama Karya pada Langkah 02 terlebih dahulu.', 'warning');
   }
 
   const quota = getUserAIQuotaState();
@@ -1172,7 +1181,7 @@ async function generateAISynopsis() {
 
   if (quota.count >= AI_DAILY_LIMIT) {
     updateAIQuotaBanner();
-    return showToast('Batas Tercapai', 'Batas generate AI per akun hanya 2 kali per hari. Silakan coba lagi besok.', 'error');
+    return typeof showToast === 'function' && showToast('Batas Tercapai', 'Batas generate AI per akun hanya 2 kali per hari. Silakan coba lagi besok.', 'error');
   }
 
   if (quota.lastTimestamp > 0 && (now - quota.lastTimestamp) < AI_COOLDOWN_MS) {
@@ -1180,7 +1189,7 @@ async function generateAISynopsis() {
     const min = Math.floor(waitSec / 60);
     const sec = waitSec % 60;
     updateAIQuotaBanner();
-    return showToast('Waktu Jeda Aktif', `Harap tunggu ${min} menit ${sec} detik lagi sebelum generate berikutnya.`, 'warning');
+    return typeof showToast === 'function' && showToast('Waktu Jeda Aktif', `Harap tunggu ${min} menit ${sec} detik lagi sebelum generate berikutnya.`, 'warning');
   }
 
   const btn = document.getElementById('btn-ai-synopsis');
@@ -1188,8 +1197,10 @@ async function generateAISynopsis() {
   const resultBox = document.getElementById('ai-result-box');
   const resultPreview = document.getElementById('ai-generated-preview');
 
-  btn.innerHTML = 'Memproses Generate AI...';
-  btn.disabled = true;
+  if (btn) {
+    btn.innerHTML = 'Memproses Generate AI...';
+    btn.disabled = true;
+  }
   loadingNote?.classList.remove('hidden');
 
   try {
@@ -1199,32 +1210,6 @@ async function generateAISynopsis() {
 Bertindaklah sebagai seorang penulis, pengkaji seni tari, dan dramaturg yang memahami koreografi, etnokoreologi, serta penulisan karya seni pertunjukan.
 
 Buatlah sinopsis karya tari berdasarkan informasi dan konsep yang saya berikan. Susun tulisan secara profesional, sistematis, komunikatif, dan memiliki kedalaman artistik tanpa menggunakan bahasa yang berlebihan atau terlalu puitis.
-
-Sinopsis harus mencakup unsur-unsur berikut:
-1. Identitas Karya: Judul tari dan nama koreografer.
-2. Tema Karya: Pokok persoalan atau gagasan utama yang diangkat.
-3. Latar Belakang Penciptaan: Sumber inspirasi, fenomena, tradisi, budaya, atau pengalaman yang melandasi penciptaan karya.
-4. Ide dan Konsep Garapan: Gagasan artistik serta pendekatan penciptaan yang digunakan.
-5. Gambaran Isi Karya: Penjelasan mengenai substansi, alur, suasana, dan perkembangan dramatik atau artistik tarian dari awal hingga akhir.
-6. Konsep Gerak: Sumber gerak, karakteristik gerak, serta pengembangan atau eksplorasi gerak yang digunakan.
-7. Konsep Musik: Karakter musik pengiring, instrumen, pola musikal, dan hubungannya dengan gerak tari.
-8. Kostum dan Tata Rias: Gambaran visual busana dan tata rias serta relevansinya dengan konsep karya.
-9. Makna dan Pesan Karya: Nilai, filosofi, refleksi, atau pesan yang ingin disampaikan kepada penonton.
-
-Ketentuan Penulisan:
-- Gunakan bahasa Indonesia yang baik dan benar.
-- Gunakan gaya penulisan profesional untuk kebutuhan proposal, festival, pertunjukan, dan katalog karya tari.
-- Susun dalam bentuk narasi yang utuh dan mengalir, bukan sekadar daftar poin.
-- Hindari pengulangan gagasan, kalimat klise, dan ungkapan puitis yang tidak diperlukan.
-- Pastikan setiap informasi saling berkaitan dan membentuk identitas karya yang jelas.
-- Jangan mengarang informasi, filosofi, simbol, sejarah, atau makna yang tidak diberikan.
-- Apabila terdapat informasi yang belum tersedia, jangan membuat asumsi. Tandai bagian tersebut sebagai informasi yang perlu dilengkapi.
-- Bedakan secara jelas antara sumber inspirasi, konsep artistik, dan makna karya.
-- Jangan memaksakan seluruh unsur masuk apabila tidak relevan dengan karya.
-
-Hasil Akhir:
-Buat satu sinopsis tari yang utuh, padat, informatif, memiliki karakter artistik, dan mampu memberikan pemahaman kepada pembaca mengenai latar belakang, gagasan, bentuk penyajian, serta substansi karya tari.
-Panjang sinopsis disesuaikan dengan kebutuhan, dengan rekomendasi sekitar 150–250 kata.
 Berikan HANYA teks sinopsisnya saja tanpa kalimat pengantar.
 
 ---
@@ -1237,21 +1222,21 @@ A. IDENTITAS KARYA
 
 B. KONSEP PENCIPTAAN
 5. Tema karya: ${valOrEmpty('ai-tema')}
-6. Apa yang melatarbelakangi penciptaan karya ini?: ${valOrEmpty('ai-latar')}
-7. Dari mana sumber inspirasi karya ini berasal?: ${valOrEmpty('ai-inspirasi')}
-8. Apa gagasan utama yang ingin diangkat melalui tarian ini?: ${valOrEmpty('ai-gagasan')}
+6. Latar belakang: ${valOrEmpty('ai-latar')}
+7. Sumber inspirasi: ${valOrEmpty('ai-inspirasi')}
+8. Gagasan utama: ${valOrEmpty('ai-gagasan')}
 
 C. KONSEP GARAPAN
-9. Apa yang digambarkan atau diceritakan dalam tarian ini?: ${valOrEmpty('ai-gambaran')}
-10. Bagaimana perkembangan penyajian tari dari awal, tengah, hingga akhir?: ${valOrEmpty('ai-perkembangan')}
-11. Bagaimana karakter gerakan dalam tarian ini?: ${valOrEmpty('ai-karakter')}
-12. Sumber gerakan tari: ${valOrEmpty('ai-sumber-gerak')}
+9. Gambaran/cerita: ${valOrEmpty('ai-gambaran')}
+10. Perkembangan penyajian: ${valOrEmpty('ai-perkembangan')}
+11. Karakter gerak: ${valOrEmpty('ai-karakter')}
+12. Sumber gerak: ${valOrEmpty('ai-sumber-gerak')}
 13. Musik pengiring: ${valOrEmpty('ai-musik')}
-14. Alat musik/instrumen: ${valOrEmpty('ai-instrumen')}
-15. Kostum dan tata rias: ${valOrEmpty('ai-kostum')}
+14. Alat musik: ${valOrEmpty('ai-instrumen')}
+15. Kostum & tata rias: ${valOrEmpty('ai-kostum')}
 
 D. MAKNA DAN PESAN KARYA
-16. Makna, filosofi, atau nilai tertentu: ${valOrEmpty('ai-makna')}
+16. Makna & filosofi: ${valOrEmpty('ai-makna')}
 17. Pesan untuk penonton: ${valOrEmpty('ai-pesan')}`;
 
     let finalGeneratedText = '';
@@ -1275,7 +1260,7 @@ D. MAKNA DAN PESAN KARYA
       resultPreview.value = finalGeneratedText;
       resultBox.classList.remove('hidden');
     }
-    showToast('Selesai', 'Hasil sinopsis AI siap. Silakan tinjau dan salin ke kolom Sinopsis.');
+    if (typeof showToast === 'function') showToast('Selesai', 'Hasil sinopsis AI siap. Silakan tinjau dan salin ke kolom Sinopsis.');
 
   } catch (error) {
     console.error(error);
@@ -1293,10 +1278,12 @@ D. MAKNA DAN PESAN KARYA
       resultPreview.value = fallbackDraft;
       resultBox.classList.remove('hidden');
     }
-    showToast('Draf Tersedia', 'Draf disusun dalam mode cadangan. Silakan tinjau dan salin ke kolom Sinopsis.', 'warning');
+    if (typeof showToast === 'function') showToast('Draf Tersedia', 'Draf disusun dalam mode cadangan. Silakan tinjau dan salin ke kolom Sinopsis.', 'warning');
   } finally {
-    btn.innerHTML = '✦ Generate Sinopsis AI';
-    btn.disabled = false;
+    if (btn) {
+      btn.innerHTML = '✦ Generate Sinopsis AI';
+      btn.disabled = false;
+    }
     loadingNote?.classList.add('hidden');
   }
 }
@@ -1309,19 +1296,19 @@ function copyAIResultToClipboard() {
   navigator.clipboard?.writeText(preview.value).catch(() => {});
   if (targetField && !targetField.value.trim()) {
     targetField.value = preview.value;
-    showToast('Disalin & Ditempel', 'Hasil AI berhasil disalin dan otomatis ditempel ke kolom Sinopsis. Silakan tinjau kembali.');
+    if (typeof showToast === 'function') showToast('Disalin & Ditempel', 'Hasil AI berhasil disalin dan otomatis ditempel ke kolom Sinopsis. Silakan tinjau kembali.');
   } else {
-    showToast('Tersalin', 'Teks hasil AI disalin ke clipboard. Silakan tempel (paste) ke kolom Sinopsis dan tinjau kembali.');
+    if (typeof showToast === 'function') showToast('Tersalin', 'Teks hasil AI disalin ke clipboard. Silakan tempel (paste) ke kolom Sinopsis dan tinjau kembali.');
   }
 }
 
 async function handleOrderFormSubmit(e) {
   e.preventDefault();
-  if (!appState.currentClientUser) return navigateTo('client');
+  if (!appState.currentClientUser) return typeof navigateTo === 'function' && navigateTo('client');
 
   if (!validateTariDurationLimit()) {
     document.getElementById('field-durasi')?.focus();
-    return showToast('Durasi Melebihi Batas', 'Paket Standar & Pro Musik Tari maksimal 07:00 menit. Silakan pilih Paket Custom untuk durasi lebih dari 7 menit.', 'error');
+    return typeof showToast === 'function' && showToast('Durasi Melebihi Batas', 'Paket Standar & Pro Musik Tari maksimal 07:00 menit. Silakan pilih Paket Custom untuk durasi lebih dari 7 menit.', 'error');
   }
 
   const svc = appState.serviceCatalog[appState.selectedServiceLine];
@@ -1330,7 +1317,7 @@ async function handleOrderFormSubmit(e) {
 
   if (isCustomPkg && (!appState.customPrice || Number(appState.customPrice) <= 0)) {
     document.getElementById('custom-price-input')?.focus();
-    return showToast('Harga Belum Diisi', 'Untuk Paket Custom, wajib mengisi nominal Harga Kesepakatan (Rp) sesuai hasil diskusi.', 'error');
+    return typeof showToast === 'function' && showToast('Harga Belum Diisi', 'Untuk Paket Custom, wajib mengisi nominal Harga Kesepakatan (Rp) sesuai hasil diskusi.', 'error');
   }
 
   const basePrice = isCustomPkg ? Number(appState.customPrice) : (appState.customPrice || Number(pkg.price || 0));
@@ -1374,7 +1361,6 @@ async function handleOrderFormSubmit(e) {
       if (checkedStruktur.length) {
         specs.push({ key: 'Struktur Tari / Suasana Dipilih', val: checkedStruktur.join(', ') });
       }
-
       const segItems = Array.from(document.querySelectorAll('#standar-segments-list .standar-segment-item')).map((row, idx) => {
         const dur = row.querySelector('.seg-durasi')?.value.trim() || '-';
         const str = row.querySelector('.seg-struktur')?.value.trim() || '-';
@@ -1485,18 +1471,13 @@ async function handleOrderFormSubmit(e) {
     sinopsis: sinopsis
   };
   
-  appState.projects.unshift(newP); await syncProjectToCloud(newP);
-  showToast('Berhasil', 'Pesanan dibuat.'); navigateTo('client');
+  appState.projects.unshift(newP);
+  if (typeof syncProjectToCloud === 'function') await syncProjectToCloud(newP);
+  if (typeof showToast === 'function') showToast('Berhasil', 'Pesanan dibuat.');
+  if (typeof navigateTo === 'function') navigateTo('client');
 }
 
-// Inisialisasi awal formulir order saat DOM siap
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => refreshOrderPageUI());
-} else {
-  refreshOrderPageUI();
-}
-
-// Ekspos seluruh fungsi order & tombol layanan ke global window
+// Ekspos segera ke window sebelum event listener apa pun
 Object.assign(window, {
   refreshOrderPageUI,
   selectServiceLine,
@@ -1517,3 +1498,23 @@ Object.assign(window, {
   validateTariDurationLimit,
   copyAIResultToClipboard
 });
+
+// Event delegation langsung pada dokumen agar tab layanan SELALU bisa diklik
+document.addEventListener('click', function (ev) {
+  const tabBtn = ev.target.closest('.svc-tab-btn, [id^="svc-tab-"]');
+  if (tabBtn) {
+    ev.preventDefault();
+    const id = tabBtn.id || '';
+    if (id.includes('tari')) selectServiceLine('tari');
+    else if (id.includes('digital')) selectServiceLine('digital');
+    else if (id.includes('transkripsi')) selectServiceLine('transkripsi');
+  }
+});
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    try { refreshOrderPageUI(); } catch (e) { console.error(e); }
+  });
+} else {
+  try { refreshOrderPageUI(); } catch (e) { console.error(e); }
+}
