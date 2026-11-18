@@ -1,103 +1,404 @@
-const DEFAULT_SERVICE_CATALOG = {
-  tari: {
-    label: 'Musik Iringan Tari',
-    addonPrice: 250000,
-    packages: {
-      dasar: {
-        label: 'Paket Dasar',
-        price: 750000,
-        desc: 'Komposisi iringan tari berdasarkan 1 nuansa (Sakral, Ceria, Dramatis, Misterius, atau pilihan khusus). Maks. 3x revisi minor.'
-      },
-      standar: {
-        label: 'Paket Standar',
-        price: 1500000,
-        desc: 'Iringan tari dinamis terstruktur per adegan & perubahan tempo (Maks. durasi 07:00 menit). Sinkronisasi alur suasana & struktur gerak.'
-      },
-      pro: {
-        label: 'Paket Pro',
-        price: 2500000,
-        desc: 'Produksi presisi tinggi mengikuti rekaman video tari per bagian & BPM (Maks. durasi 07:00 menit). Unlimited revisi 1 bulan + stems.'
-      },
-      custom: {
-        label: 'Paket Custom',
-        price: 3500000,
-        desc: 'Durasi bebas (> 7 menit / sendratari), kolaborasi instrumen khusus, konsep dramatika multi-babak & spesifikasi sesuai kesepakatan.'
-      }
-    }
-  },
-  digital: {
-    label: 'Musik Non-Tari',
-    addonPrice: 250000,
-    packages: {
-      dasar: {
-        label: 'Paket Dasar',
-        price: 650000,
-        desc: 'Aransemen minimalis (1–3 instrumen utama), durasi maks. 03:30, mixing bersih standar, maks. 2x revisi minor, output WAV & MP3.'
-      },
-      standar: {
-        label: 'Paket Standar',
-        price: 1350000,
-        desc: 'Aransemen penuh (4–7 instrumen), dinamika intro–verse–chorus–outro, mixing & mastering siap rilis platform digital.'
-      },
-      pro: {
-        label: 'Paket Pro',
-        price: 2300000,
-        desc: 'Scoring sinematik/brand/jingle kompleks, layer orkestra & sound design penuh, unlimited revisi 1 bulan + file Stems/Multitrack.'
-      },
-      custom: {
-        label: 'Paket Custom',
-        price: 3000000,
-        desc: 'Produksi multi-lagu/EP, mars/himne resmi instansi, scoring film berdurasi panjang, atau lisensi hak cipta penuh (buyout).'
-      }
-    }
-  },
-  transkripsi: {
-    label: 'Transkripsi Musik',
-    addonPrice: 250000,
-    packages: {
-      dasar: {
-        label: 'Paket Dasar',
-        price: 250000,
-        desc: 'Transkripsi melodi utama (vokal atau 1 instrumen solo) beserta simbol akor dasar. Output partitur PDF rapi siap cetak.'
-      },
-      standar: {
-        label: 'Paket Standar',
-        price: 550000,
-        desc: 'Transkripsi ensambel kecil / iringan piano 2 tangan / melodi + ritmis. Output PDF partitur + audio simulasi MIDI/MP3.'
-      },
-      pro: {
-        label: 'Paket Pro',
-        price: 1100000,
-        desc: 'Transkripsi lengkap multi-instrumen / band penuh / ansambel tradisi. Termasuk Full Score, Part per instrumen, PDF & MIDI.'
-      },
-      custom: {
-        label: 'Paket Custom',
-        price: 1500000,
-        desc: 'Transkripsi repertoar tradisi kompleks, analisis etnomusikologi, durasi panjang, atau paket file sumber Sibelius/MuseScore/MusicXML.'
-      }
-    }
-  }
-};
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PrangArt Lab — Music Production Studio</title>
+  <script>
+    (() => {
+      const theme = localStorage.getItem('prangart_theme') || 'auto';
+      if (theme === 'dark' || (theme === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.classList.add('dark');
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <script src="https://www.google.com/recaptcha/api.js?render=6LeDaSEuAAAAAIDdp1Ir_V-wkmOXE-e8imq9Alzj"></script>
+  <script>window.__recaptchaSiteKey = '6LeDaSEuAAAAAIDdp1Ir_V-wkmOXE-e8imq9Alzj';</script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { darkMode: 'class', theme: { extend: {
+      colors: { base:'rgb(var(--base) / <alpha-value>)', surface:'rgb(var(--surface) / <alpha-value>)', panel:'rgb(var(--panel) / <alpha-value>)', primary:'rgb(var(--primary) / <alpha-value>)', accent:'rgb(var(--accent) / <alpha-value>)', textMain:'rgb(var(--text-main) / <alpha-value>)', textMuted:'rgb(var(--text-muted) / <alpha-value>)', border:'rgb(var(--border) / <alpha-value>)' },
+      fontFamily: { sans:['"Plus Jakarta Sans"','sans-serif'], display:['"Space Grotesk"','sans-serif'], mono:['"JetBrains Mono"','monospace'] },
+      boxShadow: { glow:'0 0 25px -5px rgba(var(--primary), 0.5)', 'glow-hover':'0 0 35px -2px rgba(var(--primary), 0.6)', premium:'0 10px 40px -10px rgba(0,0,0,0.1)' }
+    } } };
+  </script>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="min-h-screen flex flex-col bg-base text-textMain selection:bg-primary selection:text-white transition-colors duration-300 antialiased">
+  <div id="toast-container" class="fixed top-4 right-4 z-[90] flex flex-col gap-2.5 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+  
+  <header class="sticky top-0 z-50 glass-panel border-b border-border/50 transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+      <button type="button" onclick="navigateTo('home')" class="flex items-center gap-4 text-left group shrink-0">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-primary to-accent p-[2px] shadow-glow group-hover:scale-105 transition-all duration-300">
+          <div class="w-full h-full rounded-xl bg-white flex items-center justify-center overflow-hidden p-1">
+            <img src="https://iili.io/o9B6HXa.md.png" alt="PrangArt Lab" class="w-full h-full object-contain" />
+          </div>
+        </div>
+        <div class="hidden sm:block">
+          <span class="font-display font-bold text-xl tracking-tight text-textMain block leading-none">PrangArt <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">Lab</span></span>
+          <span class="text-[10px] font-mono uppercase tracking-widest text-textMuted block mt-1">Production Studio</span>
+        </div>
+      </button>
 
-const TRACKER_MILESTONES = [
-  '1. Menunggu Verifikasi & Kontrak',
-  '2. Pembayaran DP 50%',
-  '3. Penyusunan Konsep & Aransemen Awal',
-  '4. Pengiriman Draf Pertama',
-  '5. Tahap Revisi & Penyempurnaan',
-  '6. Mixing & Mastering Final',
-  '7. Pelunasan & Penyerahan Master File'
-];
+      <nav class="hidden md:flex items-center gap-1 bg-panel border border-border/80 rounded-2xl p-1.5 shadow-sm">
+        <button type="button" id="nav-home" onclick="navigateTo('home')" class="nav-pill px-5 py-2 rounded-xl text-sm font-semibold transition-all">Beranda</button>
+        <button type="button" id="nav-portfolio" onclick="navigateTo('portfolio')" class="nav-pill px-5 py-2 rounded-xl text-sm font-semibold transition-all">Portofolio</button>
+        <button type="button" id="nav-client" onclick="navigateTo('client')" class="nav-pill px-5 py-2 rounded-xl text-sm font-semibold transition-all">Ruang Klien</button>
+        <button type="button" id="nav-admin" onclick="navigateTo('admin')" class="nav-pill px-5 py-2 rounded-xl text-sm font-semibold transition-all">Admin</button>
+      </nav>
 
-const appState = {
-  currentPage: 'home',
-  selectedServiceLine: 'tari',
-  selectedPackage: 'dasar',
-  customPrice: null,
-  synopsisMode: 'manual',
-  currentClientUser: null,
-  isAdminUnlocked: false,
-  serviceCatalog: JSON.parse(JSON.stringify(DEFAULT_SERVICE_CATALOG)),
-  projects: [],
-  portfolioItems: []
-};
+      <div class="flex items-center gap-3 shrink-0">
+        <div class="relative">
+          <button type="button" onclick="toggleThemeDropdown()" aria-label="Pilih tema" class="p-2.5 rounded-xl bg-panel border border-border/80 hover:border-primary/50 text-textMain transition-all shadow-sm flex items-center justify-center">
+            <svg id="theme-icon-dark" class="hidden w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+            <svg id="theme-icon-light" class="hidden w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path stroke-linecap="round" stroke-width="2" d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg>
+            <svg id="theme-icon-auto" class="hidden w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="14" rx="2"/><path stroke-linecap="round" stroke-width="2" d="M8 22h8m-4-4v4"/></svg>
+          </button>
+          <div id="theme-dropdown" class="hidden absolute right-0 mt-3 w-40 bg-surface border border-border rounded-2xl shadow-premium overflow-hidden z-50">
+            <button type="button" onclick="setTheme('light')" class="w-full text-left px-4 py-3 text-xs font-semibold text-textMain hover:bg-panel hover:text-primary transition">Mode Terang</button>
+            <button type="button" onclick="setTheme('dark')" class="w-full text-left px-4 py-3 text-xs font-semibold text-textMain hover:bg-panel hover:text-primary transition">Mode Gelap</button>
+            <button type="button" onclick="setTheme('auto')" class="w-full text-left px-4 py-3 text-xs font-semibold text-textMain hover:bg-panel hover:text-primary transition">Ikuti Perangkat</button>
+          </div>
+        </div>
+        <div id="header-auth-status"></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 relative">
+    <section id="page-home" class="page-section page-dissolve">
+      <div class="home-hero relative overflow-hidden bg-surface text-center">
+        <h1 class="font-display font-bold text-textMain">Wujudkan <span>Musik Impian</span></h1>
+        <p class="text-textMuted mx-auto">Konsultasikan konsep karya Anda terlebih dahulu.</p>
+        <div class="home-hero-actions flex justify-center">
+          <button type="button" onclick="openProducerWaModal('Diskusi')" class="btn-primary font-bold">Diskusi WA</button>
+          <button type="button" onclick="navigateTo('client')" class="btn-outline font-bold">Masuk Klien</button>
+        </div>
+      </div>
+      <section class="home-services">
+        <div class="home-section-wrap">
+          <header class="home-section-heading"><span class="home-kicker">Layanan utama</span><h2>Musik yang siap menyatu dengan cerita Anda.</h2></header>
+          <div class="home-service-grid">
+            <article class="home-service-card card-tari"><span class="service-tag">Musik Tari</span><h3>Komposisi untuk pertunjukan</h3><p>Skor atau aransemen yang disesuaikan dengan tempo, karakter, dan momen penampilan.</p></article>
+            <article class="home-service-card card-digital"><span class="service-tag">Aransemen</span><h3>Audio untuk video, brand, dan konten digital</h3><p>Musik yang fleksibel untuk mendukung presentasi maupun promosi digital.</p></article>
+            <article class="home-service-card card-transkripsi"><span class="service-tag">Transkripsi</span><h3>Ubah karya audio menjadi struktur musik yang jelas</h3><p>Format tertulis untuk dokumentasi, analisis, maupun kebutuhan produksi.</p></article>
+          </div>
+        </div>
+      </section>
+      <section class="home-portfolio">
+        <div class="home-section-wrap">
+          <header class="home-section-heading"><span class="home-kicker">Portofolio</span><h2>Hasil kerja yang terasa hidup dan berkarakter.</h2></header>
+          <div class="portfolio-grid"></div>
+        </div>
+      </section>
+      <section class="home-testimonials">
+        <div class="home-section-wrap">
+          <header class="home-section-heading"><span class="home-kicker">Testimoni</span><h2>Proses yang jelas, hasil yang berkesan.</h2></header>
+          <div class="testimonial-grid"></div>
+        </div>
+      </section>
+      <section class="home-cta">
+        <div class="home-cta-inner">
+          <div><span class="home-kicker">Mulai proyek</span><h2>Siap membangun musik yang cocok dengan visi Anda?</h2></div>
+          <button type="button" onclick="openProducerWaModal('Diskusi Proyek')" class="btn-primary font-bold">Diskusi Proyek</button>
+        </div>
+      </section>
+    </section>
+
+    <section id="page-portfolio" class="page-section hidden bg-base"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16"><span class="home-kicker">Portofolio</span><h1 class="text-4xl font-display font-bold mt-3">Karya pilihan</h1><div id="portfolio-grid" class="grid md:grid-cols-3 gap-5 mt-8"></div></div></section>
+
+    <section id="page-client" class="page-section hidden page-dissolve bg-base">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+        <div id="client-login-wall" class="max-w-md mx-auto bg-surface border border-border/80 rounded-[2rem] p-8 md:p-10 shadow-premium">
+          <div class="text-center mb-8"><h2 class="text-3xl font-display font-bold">Ruang Klien</h2><p class="text-textMuted text-sm mt-2">Masuk untuk melihat proyek Anda.</p></div>
+          <form onsubmit="handleClientPortalLogin(event)" class="space-y-4">
+            <div><label class="block text-xs font-bold mb-2">Email</label><input type="email" id="portal-login-email" required class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3.5 text-sm" /></div>
+            <div>
+              <label class="block text-xs font-bold mb-2">Kata Sandi</label>
+              <div class="relative">
+                <input type="password" id="portal-login-pass" required class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3.5 text-sm pr-12" />
+                <button type="button" onclick="togglePasswordVisibility('portal-login-pass', 'login-eye-show', 'login-eye-hide')" class="absolute inset-y-0 right-0 pr-4 flex items-center text-textMuted hover:text-primary transition">
+                  <svg id="login-eye-show" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                  <svg id="login-eye-hide" class="hidden w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="flex justify-between items-center text-xs"><button type="button" onclick="openClientAuthModal('register')" class="text-primary font-bold hover:underline">Daftar Akun</button><button type="button" onclick="handleForgotPassword(document.getElementById('portal-login-email').value)" class="text-textMuted hover:text-primary">Lupa Sandi?</button></div>
+            <button type="submit" class="btn-primary w-full py-4 rounded-xl text-sm font-bold">Masuk →</button>
+            <div class="relative flex py-2 items-center"><div class="flex-grow border-t border-border/60"></div><span class="mx-4 text-textMuted text-xs">atau</span><div class="flex-grow border-t border-border/60"></div></div>
+            <button type="button" onclick="handleGoogleLogin()" class="w-full py-3.5 rounded-xl bg-white text-gray-800 border border-gray-300 font-bold text-sm hover:bg-gray-50 transition flex items-center justify-center gap-2">
+              <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+              Masuk dengan Google
+            </button>
+          </form>
+        </div>
+        <div id="client-workspace-content" class="hidden space-y-6"></div>
+      </div>
+    </section>
+
+    <section id="page-order" class="page-section hidden page-dissolve bg-base">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pb-32">
+        <div id="order-form-container">
+          <form id="prangart-order-form" onsubmit="handleOrderFormSubmit(event)" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <div class="lg:col-span-8 space-y-8">
+              <!-- LANGKAH 01: PILIH LAYANAN & PAKET -->
+              <div class="bg-surface border border-border/80 rounded-3xl p-6 sm:p-10 space-y-6 shadow-premium">
+                <div><span class="text-xs font-mono text-primary font-bold uppercase">Langkah 01</span><h2 class="text-2xl font-display font-bold mt-1">Pilih Layanan &amp; Paket</h2></div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <button type="button" id="svc-tab-tari" onclick="selectServiceLine('tari')" class="svc-tab-btn p-4 rounded-2xl border text-left">
+                    <span class="text-sm font-bold block">Musik Tari</span>
+                    <span class="text-[11px] opacity-80 block mt-0.5 leading-snug">Komposisi &amp; aransemen musik iringan pertunjukan tari</span>
+                  </button>
+                  <button type="button" id="svc-tab-digital" onclick="selectServiceLine('digital')" class="svc-tab-btn p-4 rounded-2xl border text-left">
+                    <span class="text-sm font-bold block">Musik Non-Tari</span>
+                    <span class="text-[11px] opacity-80 block mt-0.5 leading-snug">Produksi lagu, aransemen, jingle, mars &amp; scoring</span>
+                  </button>
+                  <button type="button" id="svc-tab-transkripsi" onclick="selectServiceLine('transkripsi')" class="svc-tab-btn p-4 rounded-2xl border text-left">
+                    <span class="text-sm font-bold block">Transkripsi</span>
+                    <span class="text-[11px] opacity-80 block mt-0.5 leading-snug">Penulisan ulang audio menjadi not balok &amp; not angka</span>
+                  </button>
+                </div>
+
+                <div id="package-cards-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2"></div>
+
+                <div id="custom-price-wrapper">
+                  <label class="block text-xs font-bold mb-2">Harga Kesepakatan (Rp) <span class="text-textMuted font-normal">(Isi nominal sesuai hasil diskusi jika memilih Paket Custom atau kesepakatan khusus)</span></label>
+                  <input type="number" id="custom-price-input" oninput="handleCustomPrice(this.value)" placeholder="Contoh: 2500000" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
+                </div>
+              </div>
+
+              <!-- LANGKAH 02: PERJANJIAN PRODUKSI, IDENTITAS & SPESIFIKASI PAKET -->
+              <div class="bg-surface border border-border/80 rounded-3xl p-6 sm:p-10 space-y-6">
+                <div>
+                  <span class="text-xs font-mono text-primary font-bold uppercase">Langkah 02</span>
+                  <h2 id="step2-heading" class="text-2xl font-display font-bold mt-1">Identitas Pemesan &amp; Spesifikasi Layanan</h2>
+                </div>
+
+                <!-- PERJANJIAN PRODUKSI MUSIK (WAJIB DI MUSIK TARI & MUSIK NON-TARI) -->
+                <div id="contract-agreement-box" class="p-5 sm:p-6 rounded-2xl bg-primary/5 border border-primary/25 space-y-4">
+                  <div class="space-y-2 text-xs sm:text-[13px] text-textMain leading-relaxed">
+                    <p>Sebelum mengisi formulir ini, mohon membaca terlebih dahulu ketentuan <strong>Perjanjian Produksi Musik PrangArt Studios</strong> pada tautan di bawah ini.</p>
+                    <div>
+                      <button type="button" onclick="openProductionAgreementModal()" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary/90 transition shadow-sm">
+                        📄 Klik untuk membaca Perjanjian Produksi Musik
+                      </button>
+                    </div>
+                    <p class="text-textMuted">Dokumen perjanjian resmi yang telah disesuaikan dengan data pemesanan Anda akan dikirimkan setelah formulir ini selesai diisi.</p>
+                  </div>
+                  <div class="pt-3 border-t border-primary/20 space-y-2">
+                    <label class="block text-xs font-bold text-textMain">Apakah Anda menyetujui bahwa proses produksi musik akan mengikuti kontrak kerja sama resmi dari PrangArt Studios? *</label>
+                    <label class="flex items-start gap-3 p-3.5 rounded-xl bg-surface border border-border cursor-pointer hover:border-primary transition">
+                      <input type="checkbox" id="field-contract-agree" required class="w-4 h-4 mt-0.5 accent-primary" />
+                      <span class="text-xs font-semibold text-textMain">Ya, saya telah membaca dan menyetujui bahwa proses produksi musik mengikuti kontrak kerja sama resmi dari PrangArt Studios.</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- IDENTITAS & DATA KARYA DINAMIS SESUAI LAYANAN -->
+                <div id="identity-fields-container" class="space-y-5"></div>
+
+                <!-- SPESIFIKASI KHUSUS LAYANAN & PAKET -->
+                <div id="dynamic-spec-fields" class="pt-4 border-t border-border/60 space-y-5"></div>
+
+                <div class="pt-6 border-t border-border/60">
+                  <label id="video-ref-label" class="block text-xs font-bold mb-3">Tautan / File Referensi Utama (Opsional)</label>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <input type="url" id="field-video-link" placeholder="Link Google Drive / YouTube..." class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
+                    <div class="relative group">
+                      <input type="file" id="field-video-file" accept="video/*,audio/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onchange="document.getElementById('video-file-name').textContent = this.files[0] ? this.files[0].name : 'Pilih File Audio/Video...'" />
+                      <div class="w-full bg-panel border border-border border-dashed rounded-xl px-4 py-3 text-sm flex justify-between items-center group-hover:border-primary transition">
+                        <span id="video-file-name" class="text-textMuted truncate">Pilih File Audio/Video...</span>
+                        <svg class="w-5 h-5 text-textMuted group-hover:text-primary transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <label id="addon-vocal-wrapper" class="flex items-center justify-between p-5 rounded-2xl bg-panel border cursor-pointer mt-4">
+                  <span class="text-sm font-bold">Tambahan Vokal / Session Player <small class="block text-textMuted">+ Rp250.000</small></span>
+                  <input type="checkbox" id="field-addon-vocal" onchange="recalculateLivePrice()" class="w-5 h-5" />
+                </label>
+              </div>
+
+              <!-- LANGKAH 03: SINOPSIS (KHUSUS MUSIK TARI) & KETENTUAN LAYANAN -->
+              <div class="bg-surface border border-border/80 rounded-3xl p-6 sm:p-10 space-y-6">
+                <div>
+                  <span class="text-xs font-mono text-primary font-bold uppercase">Langkah 03</span>
+                  <h2 id="step3-heading" class="text-2xl font-display font-bold mt-1">Sinopsis Karya &amp; Ketentuan</h2>
+                </div>
+
+                <!-- BLOK SINOPSIS: HANYA TAMPIL UNTUK MUSIK TARI -->
+                <div id="synopsis-section-wrapper">
+                  <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
+                    <label class="text-xs font-bold">Sinopsis Karya Tari *</label>
+                    <div class="flex bg-panel p-1 rounded-xl border border-border/60">
+                      <button type="button" id="btn-mode-manual" onclick="setSynopsisMode('manual')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-surface text-textMain shadow-sm">Ketik Manual</button>
+                      <button type="button" id="btn-mode-ai" onclick="setSynopsisMode('ai')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-textMuted">Bantu Susun dengan AI</button>
+                    </div>
+                  </div>
+
+                  <!-- PANEL FORMULIR DETAIL AI (HANYA MUNCUL JIKA PILIH OPSI AI) -->
+                  <div id="ai-action-wrapper" class="hidden mb-5 p-5 sm:p-6 rounded-2xl bg-panel/70 border border-primary/30 space-y-5">
+                    <div class="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs space-y-1.5">
+                      <strong class="text-amber-600 dark:text-amber-400 block">⚠️ Perhatian &amp; Ketentuan Penggunaan AI:</strong>
+                      <p class="text-textMain">• Hasil ini disusun oleh <strong>AI (Kecerdasan Buatan)</strong>, sehingga <strong>wajib Anda tinjau dan periksa kembali</strong> kesesuaiannya sebelum dimasukkan ke dalam kolom Sinopsis.</p>
+                      <p class="text-textMain">• Batas penggunaan: Maksimal <strong>2 kali generate per akun per hari</strong> dengan <strong>waktu jeda 10 menit</strong> antar-generate.</p>
+                      <p class="text-textMain">• Setelah hasil muncul, klik tombol <strong>Salin Hasil</strong> lalu tempelkan (paste) ke dalam kotak Sinopsis di bawah.</p>
+                    </div>
+
+                    <div id="ai-quota-status-banner" class="text-xs font-mono text-primary font-semibold bg-primary/10 px-4 py-2.5 rounded-xl border border-primary/20"></div>
+
+                    <div id="ai-detail-form-container"></div>
+
+                    <div class="space-y-3">
+                      <button type="button" id="btn-ai-synopsis" onclick="generateAISynopsis()" class="btn-primary w-full py-3.5 rounded-xl text-sm font-bold shadow-glow">
+                        ✦ Generate Sinopsis AI
+                      </button>
+                      <p id="ai-loading-note" class="hidden text-center text-xs font-semibold text-primary animate-pulse">
+                        ⏳ Mohon tunggu 2–5 menit untuk memproses generate sinopsisnya...
+                      </p>
+                    </div>
+
+                    <div id="ai-result-box" class="hidden space-y-2 pt-3 border-t border-border/60">
+                      <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">✓ Hasil Generate AI (Silakan tinjau &amp; salin ke kolom Sinopsis):</span>
+                        <button type="button" onclick="copyAIResultToClipboard()" class="px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-bold hover:bg-primary/90 transition">
+                          Salin Hasil
+                        </button>
+                      </div>
+                      <textarea id="ai-generated-preview" rows="6" readonly class="w-full bg-surface border border-primary/40 rounded-xl px-4 py-3 text-sm leading-relaxed text-textMain"></textarea>
+                    </div>
+                  </div>
+
+                  <label class="block text-xs font-bold mb-2 text-textMuted">Kolom Sinopsis Final (Tempel / ketik sinopsis akhir di sini) *</label>
+                  <textarea id="field-sinopsis" rows="6" required placeholder="Ketik sinopsis karya tari Anda secara manual di sini, atau tempelkan (paste) hasil sinopsis dari AI setelah Anda tinjau..." class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm leading-relaxed"></textarea>
+                </div>
+
+                <div id="terms-rules-wrapper" class="pt-6 border-t border-border/60">
+                  <h3 class="text-lg font-bold text-textMain mb-4">Ketentuan &amp; Aturan Layanan</h3>
+                  <div class="text-[13px] text-textMuted space-y-3 leading-relaxed bg-panel p-5 rounded-2xl border border-border/50">
+                    <p><strong class="text-textMain">1. Penyesuaian Custom:</strong> Permintaan di luar paket standar (termasuk durasi musik tari di atas 7 menit) menggunakan Paket Custom dan dikonsultasikan terlebih dahulu.</p>
+                    <p><strong class="text-textMain">2. Instrumen Tambahan:</strong> Penambahan 1–2 instrumen khusus (session player / vokal) dapat dikoordinasikan secara fleksibel.</p>
+                    <p><strong class="text-textMain">3. Ketentuan Revisi:</strong> Paket Dasar maks. 2–3x revisi minor. Paket Pro UNLIMITED (maks 1 bulan). Revisi ekstra Rp250.000 per sesi.</p>
+                    <p><strong class="text-textMain">4. Respon Klien:</strong> Tanpa konfirmasi klien selama &gt;14 hari, proyek diarsipkan. Pembatalan sepihak membuat DP non-refundable.</p>
+                    <p><strong class="text-textMain">5. Keterlambatan Jasa:</strong> Keterlambatan tanpa konfirmasi dikenakan potongan 1-2% per hari dari sisa pelunasan (maks 10%).</p>
+                    <p><strong class="text-textMain">6. Prosedur:</strong> Proyek diawali dengan konsultasi WA sebelum kesepakatan harga final.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-surface border border-border/80 rounded-3xl p-6">
+                <button type="submit" class="btn-primary w-full py-4 rounded-xl font-bold">Kirim Pengajuan →</button>
+              </div>
+            </div>
+
+            <aside class="lg:col-span-4 lg:sticky lg:top-28">
+              <div class="bg-surface border border-border/80 rounded-3xl p-8 shadow-premium space-y-5">
+                <span class="text-xs font-mono uppercase text-primary font-bold block border-b pb-3">Ringkasan Biaya</span>
+                <div class="space-y-3 text-sm">
+                  <div class="flex justify-between"><span>Layanan</span><span id="calc-service-name" class="font-semibold"></span></div>
+                  <div class="flex justify-between"><span id="calc-pkg-name"></span><span id="calc-pkg-price" class="font-mono"></span></div>
+                  <div class="flex justify-between"><span id="calc-addon-label">Tambahan Vokal</span><span id="calc-addon-price" class="font-mono"></span></div>
+                </div>
+                <div class="border-t pt-4 flex justify-between items-center"><span>Estimasi Total</span><span id="calc-total-price" class="text-2xl font-bold text-primary"></span></div>
+              </div>
+            </aside>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section id="page-admin" class="page-section hidden page-dissolve bg-base">
+      <div class="max-w-7xl mx-auto px-4 py-16">
+        <div id="admin-pin-gate" class="max-w-md mx-auto bg-surface border border-border rounded-3xl p-8">
+          <h2 class="text-2xl font-bold mb-5 text-center">Panel Admin</h2>
+          <form onsubmit="verifyAdminPin(event)" class="space-y-4">
+            <input id="admin-pin-input" type="password" required placeholder="PIN Admin" class="w-full bg-panel border rounded-xl p-3 text-center text-lg tracking-widest"/>
+            <button class="btn-primary w-full py-3 rounded-xl font-bold">Masuk</button>
+          </form>
+          <div class="mt-4 text-center">
+            <button type="button" onclick="resetAdminPin()" class="text-xs text-textMuted hover:text-red-500 transition">Lupa PIN Admin?</button>
+          </div>
+        </div>
+        <div id="admin-workspace-content" class="hidden"></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="client-auth-modal" class="fixed inset-0 bg-black/70 backdrop-blur-md z-[72] hidden items-center justify-center p-4">
+    <div class="bg-surface border border-border rounded-3xl max-w-md w-full p-8 shadow-2xl">
+      <div class="flex items-center justify-between border-b pb-4 mb-5">
+        <h2 class="text-xl font-bold">Daftar Akun</h2>
+        <button type="button" onclick="closeClientAuthModal()" aria-label="Tutup" class="text-textMuted hover:text-red-500 text-2xl leading-none">&times;</button>
+      </div>
+      <form id="form-client-register" onsubmit="handleQuickClientRegister(event)" class="space-y-4">
+        <input type="text" id="reg-name" required placeholder="Nama Lengkap" class="w-full bg-panel border rounded-xl px-4 py-3"/>
+        <input type="email" id="reg-email" required placeholder="Email" class="w-full bg-panel border rounded-xl px-4 py-3"/>
+        <input type="tel" id="reg-wa" required placeholder="No. WhatsApp" class="w-full bg-panel border rounded-xl px-4 py-3"/>
+        <div>
+          <div class="relative">
+            <input type="password" id="reg-pass" required placeholder="Kata Sandi (Min. 8 huruf & angka)" class="w-full bg-panel border rounded-xl px-4 py-3 pr-12"/>
+            <button type="button" onclick="togglePasswordVisibility('reg-pass', 'reg-eye-show', 'reg-eye-hide')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-textMuted hover:text-primary">
+              <svg id="reg-eye-show" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+              <svg id="reg-eye-hide" class="hidden w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
+            </button>
+          </div>
+        </div>
+        <button type="submit" class="btn-primary w-full py-3 rounded-xl font-bold">Daftar Manual &rarr;</button>
+        <div class="relative flex py-2 items-center">
+          <div class="flex-grow border-t border-border/60"></div>
+          <span class="mx-4 text-textMuted text-xs font-semibold">atau</span>
+          <div class="flex-grow border-t border-border/60"></div>
+        </div>
+        <button type="button" onclick="handleGoogleLogin()" class="w-full py-3.5 rounded-xl bg-white text-gray-800 border border-gray-300 font-bold text-sm hover:bg-gray-50 transition flex items-center justify-center gap-2">
+          <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Daftar dengan Google
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div id="wa-producer-modal" class="fixed inset-0 bg-black/70 z-[72] hidden items-center justify-center p-4">
+    <div class="bg-surface border border-border rounded-3xl max-w-lg w-full p-7">
+      <div class="flex justify-between items-center mb-5">
+        <h2 class="text-xl font-bold">Diskusi dengan PrangArt Lab</h2>
+        <button type="button" onclick="closeProducerWaModal()" aria-label="Tutup">×</button>
+      </div>
+      <label class="block text-sm font-bold mb-2" for="wa-comp-name">Nama</label>
+      <input id="wa-comp-name" class="w-full bg-panel border rounded-xl p-3 mb-4"/>
+      <label class="block text-sm font-bold mb-2" for="wa-comp-intent">Pesan</label>
+      <textarea id="wa-comp-intent" oninput="updateWaComposerPreview()" class="w-full bg-panel border rounded-xl p-3 mb-4"></textarea>
+      <pre id="wa-comp-preview" class="whitespace-pre-wrap bg-panel rounded-xl p-4 text-sm"></pre>
+      <div class="flex gap-3 mt-5">
+        <button type="button" onclick="closeProducerWaModal()" class="btn-outline px-5 py-3 rounded-xl">Batal</button>
+        <button type="button" onclick="submitProducerWaMessage()" class="btn-primary px-5 py-3 rounded-xl font-bold">Kirim WhatsApp</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="custom-modal" class="fixed inset-0 bg-black/85 z-[65] hidden items-center justify-center p-4">
+    <div class="bg-surface border border-border rounded-2xl max-w-2xl w-full p-6">
+      <div class="flex justify-between mb-4"><h2 id="custom-modal-title" class="font-bold"></h2><button type="button" onclick="closeCustomModal()" aria-label="Tutup" class="text-xl leading-none">×</button></div>
+      <div id="custom-modal-body"></div>
+    </div>
+  </div>
+  <div id="sop-14-grid" class="hidden"></div><div id="faq-accordion-list" class="hidden"></div>
+
+  <script src="js/00-config.js"></script>
+  <script src="js/01-utils.js"></script>
+  <script src="js/02-firebase.js"></script>
+  <script src="js/03-navigation.js"></script>
+  <script src="js/04-wa-composer.js"></script>
+  <script src="js/05-auth.js"></script>
+  <script src="js/06-order.js"></script>
+  <script src="js/07-portfolio.js"></script>
+  <script src="js/08-client-portal.js"></script>
+  <script src="js/09-brief-card.js"></script>
+  <script src="js/10-contract.js"></script>
+  <script src="js/11-documents.js"></script>
+  <script src="js/12-admin.js"></script>
+  <script src="js/13-boot.js"></script>
+</body>
+</html>
