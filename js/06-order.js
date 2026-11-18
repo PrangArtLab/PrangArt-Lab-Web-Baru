@@ -13,12 +13,12 @@ function setSynopsisMode(mode) {
   if(!btnManual || !btnAi || !aiWrap) return;
 
   if (mode === 'manual') {
-    btnManual.className = 'px-3 py-1 rounded-md text-xs font-bold bg-surface text-textMain shadow-sm transition';
-    btnAi.className = 'px-3 py-1 rounded-md text-xs font-bold text-textMuted hover:text-textMain transition';
+    btnManual.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-surface text-textMain shadow-sm transition';
+    btnAi.className = 'px-3 py-1.5 rounded-lg text-xs font-bold text-textMuted hover:text-textMain transition';
     aiWrap.classList.add('hidden');
   } else {
-    btnAi.className = 'px-3 py-1 rounded-md text-xs font-bold bg-primary text-white shadow-sm transition';
-    btnManual.className = 'px-3 py-1 rounded-md text-xs font-bold text-textMuted hover:text-textMain transition';
+    btnAi.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-primary text-white shadow-sm transition';
+    btnManual.className = 'px-3 py-1.5 rounded-lg text-xs font-bold text-textMuted hover:text-textMain transition';
     aiWrap.classList.remove('hidden');
   }
 }
@@ -55,7 +55,7 @@ function renderPackageCards() {
 function selectPackageTier(k) { appState.selectedPackage = k; appState.customPrice = null; document.getElementById('custom-price-input').value = ''; renderPackageCards(); renderDynamicSpecFields(); recalculateLivePrice(); }
 function handleCustomPrice(v) { appState.customPrice = (v && Number(v) > 0) ? Number(v) : null; renderPackageCards(); renderDynamicSpecFields(); recalculateLivePrice(); }
 
-/* === LANGKAH 03: BAHAN PENYUSUNAN SINOPSIS KARYA TARI & SPESIFIKASI === */
+/* === LANGKAH 02: SPESIFIKASI & DATA KARYA === */
 function renderDynamicSpecFields() {
   const c = document.getElementById('dynamic-spec-fields'); if(!c) return;
   const svc = appState.selectedServiceLine;
@@ -64,14 +64,14 @@ function renderDynamicSpecFields() {
     c.innerHTML = `
       <div class="space-y-6">
         <div class="p-4 rounded-2xl bg-primary/5 border border-primary/20">
-          <h3 class="text-sm font-bold text-primary uppercase tracking-wider">Bahan Penyusunan Sinopsis &amp; Konsep Karya Tari</h3>
-          <p class="text-xs text-textMuted mt-1">Isian di bawah ini menjadi spesifikasi garapan sekaligus bahan dasar penyusunan Sinopsis AI pada Langkah 02.</p>
+          <h3 class="text-sm font-bold text-primary uppercase tracking-wider">Formulir Data Karya Tari</h3>
+          <p class="text-xs text-textMuted mt-1">Isi spesifikasi konsep karya tari Anda di bawah ini. Data ini juga akan digunakan secara otomatis jika Anda memilih penyusunan Sinopsis AI pada Langkah 03.</p>
         </div>
 
         <!-- A. IDENTITAS KARYA -->
         <div class="p-5 bg-panel border border-border/60 rounded-2xl space-y-4">
           <h4 class="text-sm font-bold text-primary">A. IDENTITAS KARYA</h4>
-          <p class="text-[11px] text-textMuted">*1. Judul karya tari &amp; 4. Jenis karya (Tari tradisi / Tari kreasi / Tari kontemporer) sudah diisi pada Langkah 02.</p>
+          <p class="text-[11px] text-textMuted">*1. Judul karya tari &amp; 4. Jenis karya (Tari tradisi / Tari kreasi / Tari kontemporer) sudah diisi pada kolom di atas.</p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-bold mb-2">2. Nama koreografer/penata tari:</label>
@@ -210,12 +210,12 @@ function recalculateLivePrice() {
   }
 }
 
-/* === GENERATE PROMPT AI DENGAN DATA DARI LANGKAH 03 (SPESIFIKASI) === */
+/* === GENERATE PROMPT AI DENGAN DATA DARI LANGKAH 02 === */
 async function generateAISynopsis() {
   const judul = document.getElementById('field-judul')?.value.trim();
   const jenis = document.getElementById('field-jenis-tari')?.value.trim() || '(Belum diisi)';
   
-  if (!judul) return showToast('Info', 'Isi Judul Karya terlebih dahulu.', 'warning');
+  if (!judul) return showToast('Info', 'Isi Judul Karya pada Langkah 02 terlebih dahulu.', 'warning');
   
   const btn = document.getElementById('btn-ai-synopsis'); 
   btn.innerHTML = 'Menyusun Sinopsis...'; 
@@ -298,7 +298,7 @@ D. MAKNA DAN PESAN KARYA
     const responseText = (await res.response).text();
     
     document.getElementById('field-sinopsis').value = responseText.trim();
-    showToast('Sukses', 'Sinopsis berhasil dibuat oleh AI dari data spesifikasi.', 'success');
+    showToast('Sukses', 'Sinopsis berhasil disusun AI dari spesifikasi.', 'success');
     
   } catch (error) { 
     console.error(error);
@@ -312,7 +312,7 @@ D. MAKNA DAN PESAN KARYA
       document.getElementById('field-sinopsis').value = `Karya "${judul}" dengan pendekatan musikal yang disesuaikan dengan spesifikasi pesanan.`;
     }
   } finally { 
-    btn.innerHTML = '✦ Generate Sinopsis AI (Dari Data Spesifikasi)'; 
+    btn.innerHTML = '✦ Generate Sinopsis AI dari Spesifikasi'; 
     btn.disabled = false; 
   }
 }
