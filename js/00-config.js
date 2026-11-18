@@ -1,96 +1,103 @@
-const LOGO_URL = 'https://iili.io/o9B6HXa.md.png';
-const STORAGE_KEY = 'prangart_lab_v12'; 
-
-const STUDIO_FIREBASE_CONFIG = {
-  apiKey: "AIzaSyDJX7Y95gJ8j3A3te5pvTONrAJBxZ5yS2s",
-  authDomain: "website-prangart-8ceeb.firebaseapp.com",
-  projectId: "website-prangart-8ceeb",
-  storageBucket: "website-prangart-8ceeb.firebasestorage.app",
-  messagingSenderId: "153873576617",
-  appId: "1:153873576617:web:34441945bc26c38d53afb8"
-};
-
-let db = null; let fbStorage = null; let firebaseUser = null; let firebaseAuth = null;
-
-const TRACKER_MILESTONES = [
-  '01. Pengajuan & Pemeriksaan Brief', '02. Diskusi & Penawaran Harga',
-  '03. Persetujuan Administrasi', '04. Pembayaran & Konfirmasi',
-  '05. Proses Pengerjaan Studio', '06. Pratinjau Hasil & Revisi',
-  '07. Pelunasan & Penyerahan Akhir', '08. Selesai & Diarsipkan'
-];
-
-const DEFAULT_STATE = {
-  settings: {
-    studioWhatsApp: '628977250597',
-    recaptchaSiteKey: '6LeDaSEuAAAAAIDdp1Ir_V-wkmOXE-e8imq9Alzj',
-    adminPin: '2026',
-    paymentMethods: [
-      { id: 'pay-1', type: 'bank', name: 'Bank BCA', number: '1234567890', holder: 'Fikri Yassaar' },
-      { id: 'pay-2', type: 'qris', name: 'QRIS All Payment', number: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/QR_code_for_mobile_English_Wikipedia.svg/1200px-QR_code_for_mobile_English_Wikipedia.svg.png', holder: 'PrangArt Lab' }
-    ]
-  },
-  serviceCatalog: {
-    tari: {
-      label:'Aransemen Musik Tari', addonLabel:'Tambahan Vokal', addonPrice:250000,
-      packages: {
-        dasar: { label:'Paket Dasar (1 Juta)', price:1000000, desc:'Maks 5 menit. Musik dasar (tanpa vokal), maks 5 instrumen, penyesuaian tempo, 3x revisi, file MP3, pengerjaan maks 7 hari.' },
-        standar: { label:'Paket Standar (1,5 Juta)', price:1500000, desc:'Maks 7 menit. Mengikuti alur gerak tari, 5–8 instrumen fleksibel, file MP3 & WAV, pengerjaan maks 14 hari.' },
-        pro: { label:'Paket Pro (2 Juta)', price:2000000, desc:'Maks 7 menit. Garapan detail & diskusi mendalam, revisi UNLIMITED (1 bln), file MP3 & WAV Master, pengerjaan maks 14 hari.' }
-      }
-    },
-    digital: {
-      label:'Aransemen Musik Non-Tari', addonLabel:'Tambahan Vokal', addonPrice:250000,
-      packages: {
-        dasar: { label:'Paket Dasar (1 Juta)', price:1000000, desc:'Maks 4–5 menit. Aransemen sederhana/akustik, maks 5 instrumen, penyesuaian kunci nada, 3x revisi, file MP3 & WAV, pengerjaan maks 14 hari.' },
-        standar: { label:'Paket Standar (1,5 Juta)', price:1500000, desc:'Maks 7 menit. Struktur lagu lengkap (Intro, Verse, Chorus, Bridge, Outro), 5–8 instrumen fleksibel, file MP3 & WAV Master, pengerjaan maks 14 hari.' },
-        pro: { label:'Paket Pro (2 Juta)', price:2000000, desc:'Maks 7 menit. Pengerjaan lebih kompleks dan mendetail, revisi UNLIMITED (1 bln), file MP3 & WAV Master, pengerjaan maks 14 hari.' }
-      }
-    },
-    transkripsi: {
-      label:'Transkripsi Musik', addonLabel:'Tambahan Vokal', addonPrice:250000,
-      packages: {
-        dasar: { label:'Tarif Minimum (50rb)', price:50000, desc:'Durasi ≤ 1 Menit / pola berulang (loop / ostinato 4 bar).' },
-        standar: { label:'Bundling Dasar (300rb)', price:300000, desc:'± 3 Menit. Melodi utama, 1 jenis notasi.' },
-        pro: { label:'Bundling Pro (1 Juta)', price:1000000, desc:'± 3 Menit. Full skor multi-instrumen/karawitan + file MIDI.' }
+const DEFAULT_SERVICE_CATALOG = {
+  tari: {
+    label: 'Musik Iringan Tari',
+    addonPrice: 250000,
+    packages: {
+      dasar: {
+        label: 'Paket Dasar',
+        price: 750000,
+        desc: 'Komposisi iringan tari berdasarkan 1 nuansa utama (Sakral, Ceria, Dramatis, Misterius, atau pilihan khusus). Maks. 3x revisi minor, output master WAV & MP3.'
+      },
+      standar: {
+        label: 'Paket Standar',
+        price: 1500000,
+        desc: 'Iringan tari dinamis terstruktur per adegan & perubahan tempo (Maks. durasi 07:00 menit). Sinkronisasi alur suasana & struktur gerak tari.'
+      },
+      pro: {
+        label: 'Paket Pro',
+        price: 2500000,
+        desc: 'Produksi presisi tinggi mengikuti rekaman video tari per bagian & BPM (Maks. durasi 07:00 menit). Unlimited revisi 1 bulan + stems instrumen.'
+      },
+      custom: {
+        label: 'Paket Custom',
+        price: 3500000,
+        desc: 'Durasi bebas (> 7 menit / sendratari), kolaborasi instrumen khusus, konsep dramatika multi-babak & spesifikasi teknis sesuai kesepakatan.'
       }
     }
   },
-  portfolioItems: [],
-  faqs: [
-    { q:'Bagaimana ketentuan revisi?', a:'Paket Dasar 3x revisi. Paket Pro UNLIMITED (1 bln).' }
-  ],
-  users: [
-    { email:'siti@sanggar.id', pass:'1234', name:'Siti Rahmawati', wa:'081254889900' }
-  ],
-  projects: []
-};
-
-let appState = {
-  ...structuredClone(DEFAULT_STATE),
-  currentPage:'home', currentClientUser: null, clientTab: 'projects', 
-  isAdminAuthenticated:false, selectedServiceLine:'tari', selectedPackage:'standar', 
-  customPrice: null, synopsisMode: 'manual'
-};
-
-try {
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if (saved) {
-    const p = JSON.parse(saved);
-    if (p.settings) appState.settings = { ...appState.settings, ...p.settings };
-    if (Array.isArray(p.users)) appState.users = p.users;
-    if (Array.isArray(p.projects)) appState.projects = p.projects;
+  digital: {
+    label: 'Musik Non-Tari',
+    addonPrice: 250000,
+    packages: {
+      dasar: {
+        label: 'Paket Dasar (Akustik / Demo)',
+        price: 650000,
+        desc: 'Aransemen minimalis (1–3 instrumen utama), durasi maks. 03:30, mixing bersih standar, maks. 2x revisi minor, output master WAV & MP3.'
+      },
+      standar: {
+        label: 'Paket Standar (Full Arrangement)',
+        price: 1350000,
+        desc: 'Aransemen penuh (4–7 instrumen), dinamika intro–verse–chorus–outro, mixing & mastering siap rilis platform digital.'
+      },
+      pro: {
+        label: 'Paket Pro (Scoring / Orkestral)',
+        price: 2300000,
+        desc: 'Scoring sinematik/brand/jingle kompleks, layer orkestra & sound design penuh, unlimited revisi 1 bulan + file Stems/Multitrack.'
+      },
+      custom: {
+        label: 'Paket Custom (Proyek Khusus)',
+        price: 3000000,
+        desc: 'Produksi multi-lagu/EP, mars/himne resmi instansi, scoring film berdurasi panjang, atau lisensi hak cipta penuh (buyout).'
+      }
+    }
+  },
+  transkripsi: {
+    label: 'Transkripsi Musik',
+    addonPrice: 250000,
+    packages: {
+      dasar: {
+        label: 'Paket Dasar (1 Jalur / Melodi)',
+        price: 250000,
+        desc: 'Transkripsi melodi utama (vokal atau 1 instrumen solo) beserta simbol akor dasar. Output partitur PDF rapi siap cetak.'
+      },
+      standar: {
+        label: 'Paket Standar (2–4 Instrumen)',
+        price: 550000,
+        desc: 'Transkripsi ensambel kecil / iringan piano 2 tangan / melodi + ritmis. Output PDF partitur + audio simulasi MIDI/MP3.'
+      },
+      pro: {
+        label: 'Paket Pro (Full Score / Orkestra)',
+        price: 1100000,
+        desc: 'Transkripsi lengkap multi-instrumen / band penuh / ansambel tradisi. Termasuk Full Score, Part per instrumen, PDF & MIDI.'
+      },
+      custom: {
+        label: 'Paket Custom (Arsip / Akademik)',
+        price: 1500000,
+        desc: 'Transkripsi repertoar tradisi kompleks, analisis etnomusikologi, durasi panjang, atau paket file sumber Sibelius/MuseScore/MusicXML.'
+      }
+    }
   }
-  const savedUser = localStorage.getItem('prangart_current_user');
-  if (savedUser) appState.currentClientUser = JSON.parse(savedUser);
-} catch(_) {}
+};
 
-function persistLocalState() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      settings: appState.settings, users: appState.users, projects: appState.projects
-    }));
-    if (appState.currentClientUser) localStorage.setItem('prangart_current_user', JSON.stringify(appState.currentClientUser));
-    else localStorage.removeItem('prangart_current_user');
-  } catch(_) {}
-}
-window.appState = appState;
+const TRACKER_MILESTONES = [
+  '1. Menunggu Verifikasi & Kontrak',
+  '2. Pembayaran DP 50%',
+  '3. Penyusunan Konsep & Aransemen Awal',
+  '4. Pengiriman Draf Pertama',
+  '5. Tahap Revisi & Penyempurnaan',
+  '6. Mixing & Mastering Final',
+  '7. Pelunasan & Penyerahan Master File'
+];
+
+const appState = {
+  currentPage: 'home',
+  selectedServiceLine: 'tari',
+  selectedPackage: 'dasar',
+  customPrice: null,
+  synopsisMode: 'manual',
+  currentClientUser: null,
+  isAdminUnlocked: false,
+  serviceCatalog: JSON.parse(JSON.stringify(DEFAULT_SERVICE_CATALOG)),
+  projects: [],
+  portfolioItems: []
+};
