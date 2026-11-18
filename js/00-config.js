@@ -6,22 +6,23 @@ const DEFAULT_SERVICE_CATALOG = {
       dasar: {
         label: 'Paket Dasar',
         price: 750000,
-        desc: 'Komposisi iringan tari berdasarkan 1 nuansa utama (Sakral, Ceria, Dramatis, Misterius, atau pilihan khusus). Maks. 3x revisi minor, output master WAV & MP3.'
+        desc: 'Komposisi iringan tari berdasarkan 1 nuansa (Sakral, Ceria, Dramatis, Misterius, atau pilihan khusus). Maks. 3x revisi minor.'
       },
       standar: {
         label: 'Paket Standar',
         price: 1500000,
-        desc: 'Iringan tari dinamis terstruktur per adegan & perubahan tempo (Maks. durasi 07:00 menit). Sinkronisasi alur suasana & struktur gerak tari.'
+        desc: 'Iringan tari dinamis terstruktur per adegan & perubahan tempo (Maks. durasi 07:00 menit). Sinkronisasi alur suasana & struktur gerak.'
       },
       pro: {
         label: 'Paket Pro',
         price: 2500000,
-        desc: 'Produksi presisi tinggi mengikuti rekaman video tari per bagian & BPM (Maks. durasi 07:00 menit). Unlimited revisi 1 bulan + stems instrumen.'
+        desc: 'Produksi presisi tinggi mengikuti rekaman video tari per bagian & BPM (Maks. durasi 07:00 menit). Unlimited revisi 1 bulan + stems.'
       },
       custom: {
         label: 'Paket Custom',
-        price: 3500000,
-        desc: 'Durasi bebas (> 7 menit / sendratari), kolaborasi instrumen khusus, konsep dramatika multi-babak & spesifikasi teknis sesuai kesepakatan.'
+        price: 0,
+        isCustom: true,
+        desc: 'Durasi bebas (> 7 menit / sendratari), kolaborasi instrumen khusus, konsep dramatika multi-babak & harga sesuai kesepakatan.'
       }
     }
   },
@@ -30,24 +31,25 @@ const DEFAULT_SERVICE_CATALOG = {
     addonPrice: 250000,
     packages: {
       dasar: {
-        label: 'Paket Dasar (Akustik / Demo)',
+        label: 'Paket Dasar',
         price: 650000,
-        desc: 'Aransemen minimalis (1–3 instrumen utama), durasi maks. 03:30, mixing bersih standar, maks. 2x revisi minor, output master WAV & MP3.'
+        desc: 'Aransemen minimalis (1–3 instrumen utama), durasi maks. 03:30, mixing bersih standar, maks. 2x revisi minor, output WAV & MP3.'
       },
       standar: {
-        label: 'Paket Standar (Full Arrangement)',
+        label: 'Paket Standar',
         price: 1350000,
         desc: 'Aransemen penuh (4–7 instrumen), dinamika intro–verse–chorus–outro, mixing & mastering siap rilis platform digital.'
       },
       pro: {
-        label: 'Paket Pro (Scoring / Orkestral)',
+        label: 'Paket Pro',
         price: 2300000,
         desc: 'Scoring sinematik/brand/jingle kompleks, layer orkestra & sound design penuh, unlimited revisi 1 bulan + file Stems/Multitrack.'
       },
       custom: {
-        label: 'Paket Custom (Proyek Khusus)',
-        price: 3000000,
-        desc: 'Produksi multi-lagu/EP, mars/himne resmi instansi, scoring film berdurasi panjang, atau lisensi hak cipta penuh (buyout).'
+        label: 'Paket Custom',
+        price: 0,
+        isCustom: true,
+        desc: 'Produksi multi-lagu/EP, mars/himne resmi instansi, scoring film berdurasi panjang, atau lisensi penuh dengan harga sesuai kesepakatan.'
       }
     }
   },
@@ -56,24 +58,25 @@ const DEFAULT_SERVICE_CATALOG = {
     addonPrice: 250000,
     packages: {
       dasar: {
-        label: 'Paket Dasar (1 Jalur / Melodi)',
+        label: 'Paket Dasar',
         price: 250000,
         desc: 'Transkripsi melodi utama (vokal atau 1 instrumen solo) beserta simbol akor dasar. Output partitur PDF rapi siap cetak.'
       },
       standar: {
-        label: 'Paket Standar (2–4 Instrumen)',
+        label: 'Paket Standar',
         price: 550000,
         desc: 'Transkripsi ensambel kecil / iringan piano 2 tangan / melodi + ritmis. Output PDF partitur + audio simulasi MIDI/MP3.'
       },
       pro: {
-        label: 'Paket Pro (Full Score / Orkestra)',
+        label: 'Paket Pro',
         price: 1100000,
         desc: 'Transkripsi lengkap multi-instrumen / band penuh / ansambel tradisi. Termasuk Full Score, Part per instrumen, PDF & MIDI.'
       },
       custom: {
-        label: 'Paket Custom (Arsip / Akademik)',
-        price: 1500000,
-        desc: 'Transkripsi repertoar tradisi kompleks, analisis etnomusikologi, durasi panjang, atau paket file sumber Sibelius/MuseScore/MusicXML.'
+        label: 'Paket Custom',
+        price: 0,
+        isCustom: true,
+        desc: 'Transkripsi repertoar tradisi kompleks, analisis etnomusikologi, durasi panjang, atau file sumber Sibelius/MuseScore dengan harga sesuai kesepakatan.'
       }
     }
   }
