@@ -40,7 +40,8 @@ function renderClientWorkspace() {
       <div class="border border-border/80 p-5 rounded-2xl mb-4 flex flex-col md:flex-row justify-between md:items-center gap-4 bg-panel">
         <div>
           <strong class="block text-lg text-textMain">${p.judul}</strong>
-          <span class="text-xs text-textMuted">${p.id}</span>
+          <span class="text-xs text-textMuted block">${p.id} • ${p.serviceLineLabel} (${p.packageName})${p.hasVocalAddon ? ' + Vokal/Player' : ''}</span>
+          <span class="text-[11px] text-primary font-semibold mt-1 inline-block">${p.productionStatus}</span>
         </div>
         <div class="text-right">
           <span class="text-primary font-bold block text-lg">${formatRupiah(p.totalPrice)}</span>
@@ -54,7 +55,7 @@ function renderClientWorkspace() {
   </div>`;
 }
 
-/* === FITUR LIHAT PEMBAYARAN (QRIS / BANK) === */
+/* === FITUR LIHAT PEMBAYARAN SESUAI INPUTAN ADMIN === */
 function openPaymentModal(projectId) {
   const p = appState.projects.find(x => x.id === projectId);
   if (!p) return;
@@ -62,34 +63,45 @@ function openPaymentModal(projectId) {
   const modal = document.getElementById('custom-modal');
   document.getElementById('custom-modal-title').textContent = 'Instruksi Pembayaran DP';
   
-  const methodsHTML = appState.settings.paymentMethods.map(m => {
-    const isQris = m.type === 'qris';
-    return `
-      <div class="border border-border/80 rounded-xl p-4 mb-3 bg-panel flex gap-4 items-center">
-        ${isQris ? `<img src="${m.number}" alt="QRIS" class="w-20 h-20 object-contain bg-white rounded-lg p-1" />` : `<div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center text-primary font-bold text-xs uppercase">${m.name.substring(0,4)}</div>`}
-        <div class="flex-1">
-          <strong class="block text-sm text-textMain">${m.name}</strong>
-          <span class="block text-xs text-textMuted mt-1">${isQris ? 'Scan QRIS di samping' : 'No. Rek: ' + m.number}</span>
-          <span class="block text-xs text-textMuted">a.n. ${m.holder}</span>
-        </div>
-      </div>
-    `;
-  }).join('');
+  const methods = Array.isArray(appState.settings?.paymentMethods) ? appState.settings.paymentMethods : [];
+  const methodsHTML = methods.length
+    ? methods.map(m => {
+        const isQris = m.type === 'qris';
+        return `
+          <div class="border border-border/80 rounded-xl p-4 mb-3 bg-panel flex gap-4 items-center">
+            ${isQris
+              ? `<img src="${m.number}" alt="QRIS ${m.name}" class="w-20 h-20 object-contain bg-white rounded-lg p-1 border border-border/50" />`
+              : `<div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center text-primary font-bold text-xs uppercase shrink-0">${String(m.name || 'BANK').substring(0, 4)}</div>`}
+            <div class="flex-1 min-w-0">
+              <strong class="block text-sm text-textMain">${m.name}</strong>
+              <span class="block text-xs text-textMuted mt-1 break-all">${isQris ? 'Scan QRIS di samping' : 'No. Rek / Tujuan: ' + m.number}</span>
+              <span class="block text-xs text-textMuted">a.n. ${m.holder}</span>
+            </div>
+          </div>
+        `;
+      }).join('')
+    : `<div class="p-4 rounded-xl bg-panel border border-border text-xs text-textMuted text-center">Metode pembayaran belum diatur oleh Admin. Silakan hubungi WhatsApp Admin untuk informasi rekening.</div>`;
 
   document.getElementById('custom-modal-body').innerHTML = `
     <div class="space-y-4 text-sm">
       <div class="bg-primary/5 p-4 rounded-xl border border-primary/20 text-center">
-        <span class="block text-xs text-textMuted">Total Tagihan DP (50%)</span>
+        <span class="block text-xs text-textMuted">Total Tagihan DP (50% dari ${formatRupiah(p.totalPrice)})</span>
         <strong class="text-2xl text-primary font-bold">${formatRupiah(p.dpAmount)}</strong>
+        ${p.hasVocalAddon ? `<span class="block text-[11px] text-textMuted mt-1">*Sudah termasuk Tambahan Vokal/Player (${formatRupiah(p.addonAmount || 250000)})</span>` : ''}
       </div>
-      <p class="text-textMuted text-xs">Silakan transfer sesuai nominal di atas ke salah satu rekening berikut:</p>
+      <p class="text-textMuted text-xs">Silakan transfer sesuai nominal DP di atas ke salah satu tujuan pembayaran resmi studio berikut:</p>
       <div class="max-h-60 overflow-y-auto pr-1">
         ${methodsHTML}
       </div>
-      <p class="text-xs text-red-500 font-semibold text-center mt-3">*Setelah transfer, harap konfirmasi ke WhatsApp Admin.</p>
-      <button onclick="openProducerWaModal('Konfirmasi DP Proyek ${p.id} - ${p.judul}')" class="btn-primary w-full py-3 rounded-xl font-bold mt-2">Konfirmasi ke WA</button>
+      <p class="text-xs text-red-500 font-semibold text-center mt-3">*Setelah transfer, harap konfirmasi bukti pembayaran ke WhatsApp Admin.</p>
+      <button onclick="openProducerWaModal('Konfirmasi DP Proyek ${p.id} - ${p.judul} sebesar ${formatRupiah(p.dpAmount)}')" class="btn-primary w-full py-3 rounded-xl font-bold mt-2">Konfirmasi ke WA</button>
     </div>
   `;
   
   modal.classList.remove('hidden'); modal.classList.add('flex');
+}
+
+function closeCustomModal() {
+  const modal = document.getElementById('custom-modal');
+  if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
 }
