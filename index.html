@@ -15,6 +15,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
   <script src="https://www.google.com/recaptcha/api.js?render=6LeDaSEuAAAAAIDdp1Ir_V-wkmOXE-e8imq9Alzj"></script>
   <script>window.__recaptchaSiteKey = '6LeDaSEuAAAAAIDdp1Ir_V-wkmOXE-e8imq9Alzj';</script>
+  
+  <!-- PENTING: Load Tailwind CSS via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = { darkMode: 'class', theme: { extend: {
@@ -23,6 +25,8 @@
       boxShadow: { glow:'0 0 25px -5px rgba(var(--primary), 0.5)', 'glow-hover':'0 0 35px -2px rgba(var(--primary), 0.6)', premium:'0 10px 40px -10px rgba(0,0,0,0.1)' }
     } } };
   </script>
+
+  <!-- PENTING: Load Custom CSS -->
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body class="min-h-screen flex flex-col bg-base text-textMain selection:bg-primary selection:text-white transition-colors duration-300 antialiased">
@@ -58,7 +62,7 @@
             <svg id="theme-icon-light" class="hidden w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path stroke-linecap="round" stroke-width="2" d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg>
             <svg id="theme-icon-auto" class="hidden w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="14" rx="2"/><path stroke-linecap="round" stroke-width="2" d="M8 22h8m-4-4v4"/></svg>
           </button>
-          <div id="theme-dropdown" class="hidden absolute right-0 mt-3 w-40 bg-surface border border-border rounded-2xl shadow-premium overflow-hidden z-50 animate-fade-in">
+          <div id="theme-dropdown" class="hidden absolute right-0 mt-3 w-40 bg-surface border border-border rounded-2xl shadow-premium overflow-hidden z-50">
             <button type="button" onclick="setTheme('light')" class="w-full text-left px-4 py-3 text-xs font-semibold text-textMain hover:bg-panel hover:text-primary transition">Mode Terang</button>
             <button type="button" onclick="setTheme('dark')" class="w-full text-left px-4 py-3 text-xs font-semibold text-textMain hover:bg-panel hover:text-primary transition">Mode Gelap</button>
             <button type="button" onclick="setTheme('auto')" class="w-full text-left px-4 py-3 text-xs font-semibold text-textMain hover:bg-panel hover:text-primary transition">Ikuti Perangkat</button>
@@ -76,7 +80,10 @@
       <div class="home-hero relative overflow-hidden bg-surface text-center">
         <h1 class="font-display font-bold text-textMain">Wujudkan <span>Musik Impian</span></h1>
         <p class="text-textMuted mx-auto">Konsultasikan konsep karya Anda terlebih dahulu.</p>
-        <div class="home-hero-actions flex justify-center"><button type="button" onclick="openProducerWaModal('Diskusi')" class="btn-primary font-bold">Diskusi WA</button><button type="button" onclick="navigateTo('client')" class="btn-outline font-bold">Masuk Klien</button></div>
+        <div class="home-hero-actions flex justify-center">
+          <button type="button" onclick="openProducerWaModal('Diskusi')" class="btn-primary font-bold">Diskusi WA</button>
+          <button type="button" onclick="navigateTo('client')" class="btn-outline font-bold">Masuk Klien</button>
+        </div>
       </div>
       <section class="home-services">
         <div class="home-section-wrap">
@@ -94,8 +101,18 @@
           <div class="portfolio-grid"></div>
         </div>
       </section>
-      <section class="home-testimonials"><div class="home-section-wrap"><header class="home-section-heading"><span class="home-kicker">Testimoni</span><h2>Proses yang jelas, hasil yang berkesan.</h2></header><div class="testimonial-grid"></div></div></section>
-      <section class="home-cta"><div class="home-cta-inner"><div><span class="home-kicker">Mulai proyek</span><h2>Siap membangun musik yang cocok dengan visi Anda?</h2></div><button type="button" onclick="openProducerWaModal('Diskusi Proyek')" class="btn-primary font-bold">Diskusi Proyek</button></div></section>
+      <section class="home-testimonials">
+        <div class="home-section-wrap">
+          <header class="home-section-heading"><span class="home-kicker">Testimoni</span><h2>Proses yang jelas, hasil yang berkesan.</h2></header>
+          <div class="testimonial-grid"></div>
+        </div>
+      </section>
+      <section class="home-cta">
+        <div class="home-cta-inner">
+          <div><span class="home-kicker">Mulai proyek</span><h2>Siap membangun musik yang cocok dengan visi Anda?</h2></div>
+          <button type="button" onclick="openProducerWaModal('Diskusi Proyek')" class="btn-primary font-bold">Diskusi Proyek</button>
+        </div>
+      </section>
     </section>
 
     <!-- PAGE: PORTOFOLIO -->
@@ -104,7 +121,6 @@
     <!-- PAGE: CLIENT -->
     <section id="page-client" class="page-section hidden page-dissolve bg-base">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-        <!-- Login Wall -->
         <div id="client-login-wall" class="max-w-md mx-auto bg-surface border border-border/80 rounded-[2rem] p-8 md:p-10 shadow-premium">
           <div class="text-center mb-8"><h2 class="text-3xl font-display font-bold">Ruang Klien</h2><p class="text-textMuted text-sm mt-2">Masuk untuk melihat proyek Anda.</p></div>
           <form onsubmit="handleClientPortalLogin(event)" class="space-y-4">
@@ -128,7 +144,6 @@
             </button>
           </form>
         </div>
-        <!-- Dashboard Workspace -->
         <div id="client-workspace-content" class="hidden space-y-6"></div>
       </div>
     </section>
@@ -139,7 +154,6 @@
         <div id="order-form-container">
           <form id="prangart-order-form" onsubmit="handleOrderFormSubmit(event)" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             <div class="lg:col-span-8 space-y-8">
-              <!-- Langkah 01 -->
               <div class="bg-surface border border-border/80 rounded-3xl p-6 sm:p-10 space-y-6 shadow-premium">
                 <div><span class="text-xs font-mono text-primary font-bold uppercase">Langkah 01</span><h2 class="text-2xl font-display font-bold mt-1">Pilih Layanan &amp; Harga</h2></div>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -151,7 +165,6 @@
                 <div><label class="block text-xs font-bold mb-2">Harga Kesepakatan (Rp)</label><input type="number" id="custom-price-input" oninput="handleCustomPrice(this.value)" placeholder="Contoh: 1500000" class="w-full bg-panel border border-border rounded-xl px-4 py-3" /></div>
               </div>
 
-              <!-- Langkah 02 -->
               <div class="bg-surface border border-border/80 rounded-3xl p-6 sm:p-10 space-y-6">
                 <div><span class="text-xs font-mono text-primary font-bold uppercase">Langkah 02</span><h2 class="text-2xl font-display font-bold mt-1">Informasi Karya</h2></div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -160,66 +173,23 @@
                   <div><label class="block text-xs font-bold mb-2">Jenis Karya *</label><input id="field-jenis-tari" required class="w-full bg-panel border rounded-xl px-4 py-3" /></div>
                   <div><label class="block text-xs font-bold mb-2">Durasi (MM:SS) *</label><input id="field-durasi" required placeholder="05:30" class="w-full bg-panel border rounded-xl px-4 py-3" /></div>
                 </div>
-
-                <!-- Bagian Sinopsis (Khusus Layanan Musik Tari) -->
-                <div id="synopsis-section-wrapper" class="space-y-4 pt-2">
-                  <div class="flex justify-between items-center">
+                <div>
+                  <div class="flex justify-between items-center mb-2">
                     <label class="text-xs font-bold">Sinopsis *</label>
                     <div class="flex bg-panel p-1 rounded-lg">
                       <button type="button" id="btn-mode-manual" onclick="setSynopsisMode('manual')" class="px-3 py-1 text-xs">Ketik Manual</button>
                       <button type="button" id="btn-mode-ai" onclick="setSynopsisMode('ai')" class="px-3 py-1 text-xs">Gunakan AI</button>
                     </div>
                   </div>
-
-                  <!-- Panel Isian Manual Bahan Prompt AI -->
-                  <div id="ai-action-wrapper" class="hidden bg-panel/60 border border-border rounded-2xl p-5 space-y-4">
-                    <p class="text-xs text-textMuted">Isi parameter detail garapan Anda di bawah ini, lalu klik tombol susun agar AI merangkainya menjadi sinopsis profesional:</p>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                      <div>
-                        <label class="block font-bold mb-1">Tipe &amp; Tema Tarian</label>
-                        <input type="text" id="ai-param-tema" placeholder="Cth: Tari Kreasi / Perjuangan" class="w-full bg-surface border border-border rounded-xl px-3 py-2.5" />
-                      </div>
-                      <div>
-                        <label class="block font-bold mb-1">Akar Etnis / Suku / Budaya</label>
-                        <input type="text" id="ai-param-etnis" placeholder="Cth: Suku Banjar / Kutai / Dayak" class="w-full bg-surface border border-border rounded-xl px-3 py-2.5" />
-                      </div>
-                      <div>
-                        <label class="block font-bold mb-1">Emosi &amp; Suasana</label>
-                        <input type="text" id="ai-param-emosi" placeholder="Cth: Tegas, sakral, berwibawa" class="w-full bg-surface border border-border rounded-xl px-3 py-2.5" />
-                      </div>
-                      <div>
-                        <label class="block font-bold mb-1">Gaya Musik (Garis Besar)</label>
-                        <input type="text" id="ai-param-musik" placeholder="Cth: Perkusi etnik dinamis &amp; akustik modern" class="w-full bg-surface border border-border rounded-xl px-3 py-2.5" />
-                      </div>
-                      <div class="sm:col-span-2">
-                        <label class="block font-bold mb-1">Ide Gagasan / Filosofi</label>
-                        <input type="text" id="ai-param-gagasan" placeholder="Cth: Keteguhan pendirian menghadapi arus zaman" class="w-full bg-surface border border-border rounded-xl px-3 py-2.5" />
-                      </div>
-                      <div class="sm:col-span-2">
-                        <label class="block font-bold mb-1">Alur / Struktur Gerak &amp; Musik</label>
-                        <input type="text" id="ai-param-alur" placeholder="Cth: Awal kontemplatif, klimaks bertenaga, penutup tenang" class="w-full bg-surface border border-border rounded-xl px-3 py-2.5" />
-                      </div>
-                      <div>
-                        <label class="block font-bold mb-1">Tata Busana &amp; Rias</label>
-                        <input type="text" id="ai-param-busana" placeholder="Cth: Adat modifikasi gelap-emas, rias tegas" class="w-full bg-surface border border-border rounded-xl px-3 py-2.5" />
-                      </div>
-                      <div>
-                        <label class="block font-bold mb-1">Properti Pendukung</label>
-                        <input type="text" id="ai-param-properti" placeholder="Cth: Tongkat etnik / selendang panjang" class="w-full bg-surface border border-border rounded-xl px-3 py-2.5" />
-                      </div>
-                    </div>
-                    <button type="button" id="btn-ai-synopsis" onclick="generateAISynopsis()" class="btn-primary w-full py-2.5 rounded-xl text-xs font-bold">✦ Susun Sinopsis Profesional dengan AI</button>
-                  </div>
-
-                  <textarea id="field-sinopsis" rows="5" required placeholder="Tulis sinopsis karya Anda secara manual di sini, atau pilih 'Gunakan AI' di atas untuk menyusunnya..." class="w-full bg-panel border rounded-xl px-4 py-3 text-sm"></textarea>
+                  <textarea id="field-sinopsis" rows="4" required class="w-full bg-panel border rounded-xl px-4 py-3"></textarea>
+                  <div id="ai-action-wrapper" class="hidden mt-2"><button type="button" id="btn-ai-synopsis" onclick="generateAISynopsis()" class="w-full py-2 rounded-lg">Generate Sinopsis AI</button></div>
                 </div>
               </div>
 
-              <!-- Langkah 03 -->
               <div class="bg-surface border border-border/80 rounded-3xl p-6 sm:p-10 space-y-6">
                 <div>
                   <span class="text-xs font-mono text-primary font-bold uppercase">Langkah 03</span>
-                  <h2 class="text-2xl font-display font-bold mt-1">Spesifikasi &amp; Referensi</h2>
+                  <h2 class="text-2xl font-display font-bold mt-1">Spesifikasi & Referensi</h2>
                 </div>
                 
                 <div id="dynamic-spec-fields" class="space-y-4"></div>
@@ -244,7 +214,7 @@
                 </label>
 
                 <div class="mt-8 pt-6 border-t border-border/60">
-                  <h3 class="text-lg font-bold text-textMain mb-4">Ketentuan &amp; Aturan Layanan</h3>
+                  <h3 class="text-lg font-bold text-textMain mb-4">Ketentuan & Aturan Layanan</h3>
                   <div class="text-[13px] text-textMuted space-y-3 leading-relaxed bg-panel p-5 rounded-2xl border border-border/50">
                     <p><strong class="text-textMain">1. Penyesuaian Custom:</strong> Permintaan di luar paket standar dapat dikonsultasikan terlebih dahulu sebelum kesepakatan harga dan pengerjaan.</p>
                     <p><strong class="text-textMain">2. Instrumen Tambahan:</strong> Penambahan 1–2 instrumen khusus (session player) dapat dikoordinasikan secara fleksibel.</p>
