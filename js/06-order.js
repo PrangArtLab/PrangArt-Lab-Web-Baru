@@ -56,6 +56,27 @@ function updateAIQuotaBanner() {
   banner.textContent = `Kuota Generate AI Hari Ini: ${q.count}/${AI_DAILY_LIMIT} terpakai (Sisa: ${remaining}x) • Status: ${cooldownText}`;
 }
 
+function parseDurationToSeconds(mmss) {
+  if (!mmss) return null;
+  const clean = String(mmss).trim();
+  const match = clean.match(/^(\d{1,3}):([0-5]\d)$/);
+  if (!match) return null;
+  return parseInt(match[1], 10) * 60 + parseInt(match[2], 10);
+}
+
+function validateTariDurationLimit() {
+  if (appState.selectedServiceLine !== 'tari') return true;
+  if (appState.selectedPackage !== 'standar' && appState.selectedPackage !== 'pro') return true;
+  const durInput = document.getElementById('field-durasi');
+  const warnEl = document.getElementById('durasi-limit-warning');
+  if (!durInput) return true;
+
+  const sec = parseDurationToSeconds(durInput.value);
+  const isOver = sec !== null && sec > 420; // Maksimal 7 menit (420 detik)
+  if (warnEl) warnEl.classList.toggle('hidden', !isOver);
+  return !isOver;
+}
+
 function openProductionAgreementModal() {
   const modal = document.getElementById('custom-modal');
   const titleEl = document.getElementById('custom-modal-title');
@@ -68,10 +89,10 @@ function openProductionAgreementModal() {
       <div class="p-4 rounded-xl bg-primary/5 border border-primary/20 text-textMain">
         <strong>Ketentuan Umum Perjanjian Kerja Sama Produksi Musik PrangArt Studios</strong>
       </div>
-      <p><strong class="text-textMain">Pasal 1 — Ruang Lingkup Pekerjaan:</strong> PrangArt Studios bertindak sebagai Pihak Pertama (Produser/Komposer) melaksanakan produksi karya musik sesuai layanan, paket, durasi, dan spesifikasi yang disepakati bersama Pihak Kedua (Klien).</p>
+      <p><strong class="text-textMain">Pasal 1 — Ruang Lingkup Pekerjaan:</strong> PrangArt Studios bertindak sebagai Pihak Pertama (Produser/Komposer) melaksanakan produksi karya musik (musik iringan tari maupun musik non-tari) sesuai layanan, paket, durasi, dan spesifikasi yang disepakati bersama Pihak Kedua (Klien).</p>
       <p><strong class="text-textMain">Pasal 2 — Biaya &amp; Skema Pembayaran:</strong> Pembayaran Uang Muka (DP) sebesar 50% dibayarkan sebelum proses produksi dimulai. Pelunasan sisa 50% dilakukan sebelum file master final (WAV/MP3 kualitas penuh) diserahkan kepada Klien.</p>
-      <p><strong class="text-textMain">Pasal 3 — Ketentuan Revisi:</strong> Revisi diberikan sesuai kuota paket yang dipilih (Paket Dasar maks. 3x revisi minor; Paket Standar sesuai kesepakatan; Paket Pro UNLIMITED revisi dalam batas waktu maksimal 1 bulan setelah draf pertama dikirim). Perubahan konsep total di luar kesepakatan awal dihitung sebagai pesanan baru/biaya tambahan.</p>
-      <p><strong class="text-textMain">Pasal 4 — Hak Cipta &amp; Kredit Karya:</strong> Hak moral tetap melekat pada Komposer/PrangArt Studios. Klien berhak menggunakan karya musik untuk kebutuhan pementasan, lomba, atau publikasi sesuai peruntukan dengan tetap mencantumkan kredit musik <em>"Music by PrangArt Studios"</em>.</p>
+      <p><strong class="text-textMain">Pasal 3 — Ketentuan Revisi:</strong> Revisi diberikan sesuai kuota paket yang dipilih (Paket Dasar maks. 2–3x revisi minor; Paket Standar sesuai kesepakatan struktur; Paket Pro UNLIMITED revisi dalam batas waktu maksimal 1 bulan setelah draf pertama dikirim; Paket Custom sesuai kontrak khusus). Perubahan konsep total di luar kesepakatan awal dihitung sebagai pesanan baru/biaya tambahan.</p>
+      <p><strong class="text-textMain">Pasal 4 — Hak Cipta &amp; Kredit Karya:</strong> Hak moral tetap melekat pada Komposer/PrangArt Studios. Klien berhak menggunakan karya musik untuk kebutuhan pementasan, lomba, rilis, atau publikasi sesuai peruntukan dengan tetap mencantumkan kredit musik <em>"Music by PrangArt Studios"</em>.</p>
       <p><strong class="text-textMain">Pasal 5 — Pembatalan &amp; Keterlambatan:</strong> Pembatalan sepihak oleh Klien menyebabkan DP tidak dapat dikembalikan (non-refundable). Apabila terjadi keterlambatan penyerahan dari jadwal yang disepakati tanpa konfirmasi dari PrangArt Studios, Klien berhak atas potongan 1–2% per hari dari sisa pelunasan (maksimal 10%).</p>
       <p class="text-[11px] italic text-textMain pt-2 border-t border-border/60">*Dokumen kontrak resmi lengkap dengan identitas pemesan akan diterbitkan setelah formulir ini dikirimkan.</p>
     </div>
@@ -113,11 +134,11 @@ function selectServiceLine(svcKey) {
   const inp = document.getElementById('custom-price-input');
   if(inp) inp.value = '';
   
-  document.querySelectorAll('.svc-tab-btn').forEach(b => b.className = 'svc-tab-btn p-4 rounded-2xl border border-border bg-panel text-textMuted text-left');
+  document.querySelectorAll('.svc-tab-btn').forEach(b => b.className = 'svc-tab-btn p-4 rounded-2xl border border-border bg-panel text-textMuted text-left transition');
   const active = document.getElementById(`svc-tab-${svcKey}`);
-  if(active) active.className = 'svc-tab-btn p-4 rounded-2xl border border-primary bg-primary/10 text-primary text-left shadow-glow';
+  if(active) active.className = 'svc-tab-btn p-4 rounded-2xl border border-primary bg-primary/10 text-primary text-left shadow-glow transition';
 
-  // Tampilkan kotak perjanjian produksi untuk Musik Tari & Non-Tari
+  // 1. Fitur Baca Perjanjian Produksi: wajib muncul di Musik Tari & Musik Non-Tari
   const contractBox = document.getElementById('contract-agreement-box');
   const contractCheck = document.getElementById('field-contract-agree');
   const requiresContract = (svcKey === 'tari' || svcKey === 'digital');
@@ -126,8 +147,47 @@ function selectServiceLine(svcKey) {
     contractCheck.required = requiresContract;
   }
 
+  // 2. Sinopsis: hanya untuk Musik Tari; Non-Tari & Transkripsi tanpa sinopsis
+  const synopsisWrap = document.getElementById('synopsis-section-wrapper');
+  const synopsisField = document.getElementById('field-sinopsis');
+  const step3Heading = document.getElementById('step3-heading');
+  const termsWrap = document.getElementById('terms-rules-wrapper');
+  const isTari = (svcKey === 'tari');
+
+  if (synopsisWrap && synopsisField) {
+    synopsisWrap.classList.toggle('hidden', !isTari);
+    synopsisField.required = isTari;
+    if (!isTari) synopsisField.value = '';
+  }
+  if (step3Heading) {
+    step3Heading.textContent = isTari ? 'Sinopsis Karya & Ketentuan' : 'Ketentuan & Aturan Layanan';
+  }
+  if (termsWrap) {
+    termsWrap.className = isTari ? 'pt-6 border-t border-border/60' : '';
+  }
+
+  // 3. Label Referensi Utama & Tambahan Vokal sesuai layanan
+  const videoLabel = document.getElementById('video-ref-label');
+  const addonWrap = document.getElementById('addon-vocal-wrapper');
+  if (videoLabel) {
+    if (svcKey === 'tari') {
+      videoLabel.textContent = 'Referensi Video Garapan Tari Umum (Opsional)';
+    } else if (svcKey === 'digital') {
+      videoLabel.textContent = 'Tautan / File Referensi Lagu atau Mood Musik (Opsional)';
+    } else {
+      videoLabel.textContent = 'Tautan / File Audio atau Video yang Akan Ditranskripsi *';
+    }
+  }
+  if (addonWrap) {
+    addonWrap.classList.toggle('hidden', svcKey === 'transkripsi');
+    if (svcKey === 'transkripsi') {
+      const cb = document.getElementById('field-addon-vocal');
+      if (cb) cb.checked = false;
+    }
+  }
+
   renderIdentityFields();
-  if (appState.synopsisMode === 'ai') renderAIDetailForm();
+  if (isTari && appState.synopsisMode === 'ai') renderAIDetailForm();
   renderPackageCards(); 
   renderDynamicSpecFields(); 
   recalculateLivePrice();
@@ -197,17 +257,24 @@ function renderIdentityFields() {
           <input id="field-budaya-daerah" required placeholder="Cth: Budaya Kutai / Dayak Kenyah / Melayu" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
         </div>
         <div class="sm:col-span-2">
-          <label class="block text-xs font-bold mb-2">Estimasi Durasi Tari (MM:SS) *</label>
-          <input id="field-durasi" required placeholder="Cth: 05:30" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
+          <label class="block text-xs font-bold mb-2">Estimasi Durasi Tari (MM:SS) * <span class="text-[11px] font-normal text-textMuted">(Paket Standar &amp; Pro maksimal 07:00 menit; di atas 7 menit wajib pilih Paket Custom)</span></label>
+          <input id="field-durasi" required oninput="validateTariDurationLimit()" placeholder="Cth: 05:30" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm font-mono" />
+          <p id="durasi-limit-warning" class="hidden text-xs text-red-500 font-semibold mt-1.5">
+            ⚠️ Untuk Paket Standar dan Pro Musik Tari, durasi maksimal adalah 07:00 menit. Jika durasi lebih dari 7 menit, silakan pilih <strong>Paket Custom</strong> di Langkah 01.
+          </p>
         </div>
       </div>
     `;
-  } else {
+  } else if (svc === 'digital') {
     container.innerHTML = `
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label class="block text-xs font-bold mb-2">Nama Lengkap Pemesan / Instansi *</label>
-          <input id="field-sanggar" required value="${user.name || ''}" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
+          <label class="block text-xs font-bold mb-2">Nama Lengkap Pemesan / Brand / Instansi *</label>
+          <input id="field-sanggar" required value="${user.name || ''}" placeholder="Cth: Nama Pribadi / Perusahaan / Komunitas" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold mb-2">Kota, Provinsi *</label>
+          <input id="field-kota-provinsi" required placeholder="Cth: Samarinda, Kalimantan Timur" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
         </div>
         <div>
           <label class="block text-xs font-bold mb-2">Nomor WhatsApp Aktif *</label>
@@ -215,15 +282,40 @@ function renderIdentityFields() {
         </div>
         <div>
           <label class="block text-xs font-bold mb-2">Email *</label>
-          <input type="email" id="field-email" required value="${user.email || ''}" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
+          <input type="email" id="field-email" required value="${user.email || ''}" placeholder="email@contoh.com" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
         </div>
         <div>
-          <label class="block text-xs font-bold mb-2">Judul Karya *</label>
-          <input id="field-judul" required class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
+          <label class="block text-xs font-bold mb-2">Judul Karya / Proyek Musik *</label>
+          <input id="field-judul" required placeholder="Cth: Mars Instansi / Lagu Tema / Scoring Video" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold mb-2">Estimasi Durasi Audio (MM:SS) *</label>
+          <input id="field-durasi" required placeholder="Cth: 03:45" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm font-mono" />
+        </div>
+      </div>
+    `;
+  } else {
+    container.innerHTML = `
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-bold mb-2">Nama Lengkap Pemesan / Institusi *</label>
+          <input id="field-sanggar" required value="${user.name || ''}" placeholder="Nama pemesan / peneliti / lembaga" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold mb-2">Nomor WhatsApp Aktif *</label>
+          <input type="tel" id="field-wa" required value="${user.wa || ''}" placeholder="081234567890" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold mb-2">Email *</label>
+          <input type="email" id="field-email" required value="${user.email || ''}" placeholder="email@contoh.com" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold mb-2">Judul Karya / Repertoar yang Ditranskripsi *</label>
+          <input id="field-judul" required placeholder="Judul lagu / gending / komposisi" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
         </div>
         <div class="sm:col-span-2">
-          <label class="block text-xs font-bold mb-2">Estimasi Durasi (MM:SS) *</label>
-          <input id="field-durasi" required placeholder="04:00" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
+          <label class="block text-xs font-bold mb-2">Durasi Audio/Video Sumber (MM:SS) *</label>
+          <input id="field-durasi" required placeholder="Cth: 04:20" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm font-mono" />
         </div>
       </div>
     `;
@@ -236,10 +328,14 @@ function renderPackageCards() {
   
   grid.innerHTML = Object.entries(svc.packages).map(([k, p]) => {
     const sel = appState.selectedPackage === k && !appState.customPrice;
-    return `<button type="button" onclick="selectPackageTier('${k}')" class="p-5 rounded-2xl border text-left flex flex-col justify-between h-full ${sel ? 'border-primary bg-primary/10' : 'border-border bg-surface'}">
+    const isCustomPkg = (k === 'custom');
+    return `<button type="button" onclick="selectPackageTier('${k}')" class="p-5 rounded-2xl border text-left flex flex-col justify-between h-full transition ${sel ? 'border-primary bg-primary/10 shadow-glow' : 'border-border bg-surface hover:border-primary/40'}">
       <div class="mb-3">
-        <span class="text-sm font-bold text-textMain block">${p.label}</span>
-        <span class="text-lg font-mono text-primary block mt-1">${formatRupiah(p.price)}</span>
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-sm font-bold text-textMain">${p.label}</span>
+          ${isCustomPkg ? `<span class="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-primary/15 text-primary font-bold">Fleksibel</span>` : ''}
+        </div>
+        <span class="text-lg font-mono text-primary block mt-1">${isCustomPkg ? 'Mulai ' + formatRupiah(p.price) : formatRupiah(p.price)}</span>
       </div>
       <span class="text-[11px] text-textMuted leading-relaxed">${p.desc}</span>
     </button>`;
@@ -253,13 +349,13 @@ function selectPackageTier(k) {
   if (inp) inp.value = ''; 
   renderPackageCards(); 
   renderDynamicSpecFields(); 
+  validateTariDurationLimit();
   recalculateLivePrice(); 
 }
 
 function handleCustomPrice(v) { 
   appState.customPrice = (v && Number(v) > 0) ? Number(v) : null; 
   renderPackageCards(); 
-  renderDynamicSpecFields(); 
   recalculateLivePrice(); 
 }
 
@@ -275,6 +371,28 @@ function toggleNuansaOtherInput(val) {
     inp.required = false;
     inp.value = '';
   }
+}
+
+/* === TAMBAH CEKLIS STRUKTUR / SUASANA BARU SECARA DINAMIS (PAKET STANDAR & CUSTOM) === */
+function addCustomStrukturCheckbox() {
+  const input = document.getElementById('spec-struktur-new-input');
+  const container = document.getElementById('struktur-checkbox-grid');
+  if (!input || !container) return;
+
+  const val = input.value.trim();
+  if (!val) {
+    return showToast('Info', 'Ketik nama suasana/struktur terlebih dahulu sebelum menekan tombol Tambah Ceklis.', 'warning');
+  }
+
+  const label = document.createElement('label');
+  label.className = 'flex items-center gap-2.5 p-3 rounded-xl bg-surface border border-primary/40 cursor-pointer hover:border-primary transition';
+  label.innerHTML = `
+    <input type="checkbox" name="spec-struktur-check" value="${val.replace(/"/g, '&quot;')}" checked class="w-4 h-4 accent-primary" />
+    <span class="text-xs font-semibold">${val}</span>
+  `;
+  container.appendChild(label);
+  input.value = '';
+  showToast('Ditambahkan', `"${val}" berhasil ditambahkan sebagai item ceklis baru.`);
 }
 
 /* === BARIS DINAMIS PAKET STANDAR (+ TAMBAH BAGIAN) === */
@@ -311,7 +429,7 @@ function addStandarSegmentRow(preset = {}) {
   list.appendChild(row);
 }
 
-/* === BARIS DINAMIS PAKET PRO (+ TAMBAH VIDEO / TEMPO) === */
+/* === BARIS DINAMIS PAKET PRO & CUSTOM (+ TAMBAH VIDEO / TEMPO) === */
 function addProSegmentRow(preset = {}) {
   const list = document.getElementById('pro-segments-list');
   if (!list) return;
@@ -362,15 +480,15 @@ function removeSegmentRow(btn, listId) {
   });
 }
 
-/* === LANGKAH 02: SPESIFIKASI SESUAI PAKET (DASAR / STANDAR / PRO) + OPSI SORAK === */
+/* === LANGKAH 02: SPESIFIKASI LENGKAP SESUAI LAYANAN & PAKET === */
 function renderDynamicSpecFields() {
   const c = document.getElementById('dynamic-spec-fields'); if(!c) return;
   const svc = appState.selectedServiceLine;
-  const pkg = appState.selectedPackage; // 'dasar' | 'standar' | 'pro'
+  const pkg = appState.selectedPackage; // 'dasar' | 'standar' | 'pro' | 'custom'
   
   const sorakOptionHTML = `
     <div class="p-5 bg-panel border border-border/60 rounded-2xl space-y-3">
-      <label class="block text-xs font-bold">Tambahan Sorak (Opsi untuk Semua Paket) *</label>
+      <label class="block text-xs font-bold">Tambahan Sorak (Khusus Musik Tari) *</label>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <label class="flex items-center gap-3 p-3.5 rounded-xl bg-surface border border-border cursor-pointer hover:border-primary transition">
           <input type="radio" name="spec-sorak" value="Tidak Perlu Sorak" checked class="w-4 h-4 accent-primary" />
@@ -389,7 +507,7 @@ function renderDynamicSpecFields() {
       c.innerHTML = `
         <div class="space-y-5">
           <div class="p-5 bg-panel border border-border/60 rounded-2xl space-y-4">
-            <span class="text-[11px] font-mono uppercase text-primary font-bold block">Spesifikasi Paket Dasar</span>
+            <span class="text-[11px] font-mono uppercase text-primary font-bold block">Spesifikasi Musik Tari — Paket Dasar</span>
             <div>
               <label class="block text-xs font-bold mb-2">Nuansa Musik yang Diinginkan *</label>
               <select id="spec-nuansa-dasar" required onchange="toggleNuansaOtherInput(this.value)" class="w-full bg-surface border border-border rounded-xl px-4 py-3 text-sm">
@@ -404,6 +522,10 @@ function renderDynamicSpecFields() {
               <label class="block text-xs font-bold mb-2">Sebutkan Nuansa Musik Lainnya *</label>
               <input id="spec-nuansa-other" class="w-full bg-surface border border-border rounded-xl px-4 py-3 text-sm" placeholder="Cth: Syahdu, Megah, Melankolis..." />
             </div>
+            <div>
+              <label class="block text-xs font-bold mb-2">Instrumen Dominan yang Diharapkan (Opsional)</label>
+              <input id="spec-instrumen-tari" class="w-full bg-surface border border-border rounded-xl px-4 py-3 text-sm" placeholder="Cth: Gendang, Gong, Gambus, Piul, Suling..." />
+            </div>
           </div>
           ${sorakOptionHTML}
         </div>
@@ -412,12 +534,15 @@ function renderDynamicSpecFields() {
       c.innerHTML = `
         <div class="space-y-5">
           <div class="p-5 bg-panel border border-border/60 rounded-2xl space-y-5">
-            <span class="text-[11px] font-mono uppercase text-primary font-bold block">Spesifikasi Paket Standar</span>
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="text-[11px] font-mono uppercase text-primary font-bold">Spesifikasi Musik Tari — Paket Standar</span>
+              <span class="text-[11px] font-mono text-amber-600 dark:text-amber-400 font-semibold">Maks. Durasi: 07:00 Menit</span>
+            </div>
 
-            <!-- STRUKTUR TARI MULTI-PILIH + TAMBAH MANUAL -->
+            <!-- STRUKTUR TARI / SUASANA MULTI-PILIH + TAMBAH CEKLIS BARU -->
             <div class="space-y-3">
-              <label class="block text-xs font-bold">Struktur Tari (Bisa pilih lebih dari 1 dan tambah manual) *</label>
-              <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+              <label class="block text-xs font-bold">Struktur Tari / Suasana (Bisa pilih lebih dari 1 dan tambah opsi ceklis baru) *</label>
+              <div id="struktur-checkbox-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                 ${['Opening', 'Orientasi Suasana Cerita', 'Bagian Tengah', 'Klimaks', 'Penutup'].map(st => `
                   <label class="flex items-center gap-2.5 p-3 rounded-xl bg-surface border border-border cursor-pointer hover:border-primary transition">
                     <input type="checkbox" name="spec-struktur-check" value="${st}" class="w-4 h-4 accent-primary" />
@@ -425,9 +550,11 @@ function renderDynamicSpecFields() {
                   </label>
                 `).join('')}
               </div>
-              <div>
-                <label class="block text-[11px] text-textMuted mb-1">Pilihan Struktur Lainnya (Manual, pisahkan dengan koma jika lebih dari satu):</label>
-                <input id="spec-struktur-manual" class="w-full bg-surface border border-border rounded-xl px-4 py-2.5 text-sm" placeholder="Cth: Transisi Adat, Epilog, Dialog Gerak..." />
+              <div class="flex flex-col sm:flex-row gap-2 pt-1">
+                <input id="spec-struktur-new-input" class="flex-1 bg-surface border border-border rounded-xl px-4 py-2.5 text-sm" placeholder="Lainnya: ketik nama suasana/struktur lalu klik + Tambah Ceklis..." />
+                <button type="button" onclick="addCustomStrukturCheckbox()" class="px-4 py-2.5 rounded-xl bg-primary/15 text-primary border border-primary/30 text-xs font-bold hover:bg-primary hover:text-white transition shrink-0">
+                  + Tambah Ceklis
+                </button>
               </div>
             </div>
 
@@ -436,7 +563,7 @@ function renderDynamicSpecFields() {
               <div class="flex flex-wrap items-center justify-between gap-2">
                 <div>
                   <label class="block text-xs font-bold">Urutan Nuansa Musik Berdasarkan Struktur Tari *</label>
-                  <p class="text-[11px] text-textMuted">Sertakan perkiraan waktu adegan (dari – sampai), tempo, dan tautan referensi per bagian jika ada.</p>
+                  <p class="text-[11px] text-textMuted">Sertakan perkiraan waktu adegan (dari – sampai), tempo, dan tautan referensi per bagian.</p>
                 </div>
                 <button type="button" onclick="addStandarSegmentRow()" class="px-3.5 py-2 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary/90 transition shadow-sm">
                   + Tambah Bagian
@@ -444,7 +571,7 @@ function renderDynamicSpecFields() {
               </div>
 
               <div class="p-3 rounded-xl bg-surface/70 border border-border/60 text-[11px] font-mono text-textMuted">
-                <strong class="text-textMain font-sans">Contoh pengisian:</strong> 00:00–00:30 → Opening (tempo lambat) | 00:30–01:10 → Orientasi Suasana Cerita (tempo sedang) | 01:50–02:30 → Klimaks (tempo cepat)
+                <strong class="text-textMain font-sans">Contoh:</strong> 00:00–00:30 → Opening (tempo lambat) | 00:30–01:10 → Orientasi Suasana Cerita (tempo sedang) | 01:50–02:30 → Klimaks (tempo cepat)
               </div>
 
               <div id="standar-segments-list" class="space-y-3"></div>
@@ -454,12 +581,14 @@ function renderDynamicSpecFields() {
         </div>
       `;
       addStandarSegmentRow({ durasi: '00:00 – 00:30', struktur: 'Opening' });
-    } else {
-      // PAKET PRO
+    } else if (pkg === 'pro') {
       c.innerHTML = `
         <div class="space-y-5">
           <div class="p-5 bg-panel border border-border/60 rounded-2xl space-y-5">
-            <span class="text-[11px] font-mono uppercase text-primary font-bold block">Spesifikasi Paket Pro</span>
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="text-[11px] font-mono uppercase text-primary font-bold">Spesifikasi Musik Tari — Paket Pro</span>
+              <span class="text-[11px] font-mono text-amber-600 dark:text-amber-400 font-semibold">Maks. Durasi: 07:00 Menit</span>
+            </div>
 
             <div>
               <label class="block text-xs font-bold mb-2">Keterangan Awal Masuknya Musik &amp; Tari *</label>
@@ -494,135 +623,333 @@ function renderDynamicSpecFields() {
         </div>
       `;
       addProSegmentRow({ label: 'Video 1 / Tempo 1' });
+    } else {
+      // PAKET CUSTOM MUSIK TARI (LENGKAP & FLEKSIBEL > 7 MENIT)
+      c.innerHTML = `
+        <div class="space-y-5">
+          <div class="p-5 bg-panel border border-primary/40 rounded-2xl space-y-5">
+            <div>
+              <span class="text-[11px] font-mono uppercase text-primary font-bold block">Spesifikasi Musik Tari — Paket Custom Lengkap</span>
+              <p class="text-xs text-textMuted mt-1">Untuk garapan durasi bebas (&gt; 7 menit), sendratari, kolaborasi instrumen khusus, atau struktur dramatik multi-babak.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold mb-2">Skala &amp; Format Garapan *</label>
+                <select id="spec-custom-scale" required class="w-full bg-surface border border-border rounded-xl px-4 py-3 text-sm">
+                  <option value="Tari Tunggal / Duet / Trio">Tari Tunggal / Duet / Trio</option>
+                  <option value="Tari Kelompok / Massal">Tari Kelompok / Massal</option>
+                  <option value="Sendratari / Teater Tari">Sendratari / Teater Tari</option>
+                  <option value="Musik Parade / Karnaval Budaya">Musik Parade / Karnaval Budaya</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold mb-2">Kebutuhan Instrumen Khusus *</label>
+                <input id="spec-custom-instruments" required class="w-full bg-surface border border-border rounded-xl px-4 py-3 text-sm" placeholder="Cth: Full Gambus Kutai + Perkusi Dayak + String Orkestra" />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold mb-2">Keterangan Awal Masuknya Musik &amp; Tari *</label>
+              <input id="spec-pro-intro-mode" required class="w-full bg-surface border border-border rounded-xl px-4 py-3 text-sm" placeholder="Cth: Narasi pembuka 15 detik, kode gong 2x lalu penari masuk..." />
+            </div>
+
+            <div class="space-y-3 pt-3 border-t border-border/60">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <label class="block text-xs font-bold">Rincian Adegan, Durasi, Tempo (BPM) &amp; Link Video per Babak *</label>
+                  <p class="text-[11px] text-textMuted">Susun rincian tiap babak/adegan tanpa batasan 7 menit.</p>
+                </div>
+                <button type="button" onclick="addProSegmentRow()" class="px-3.5 py-2 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary/90 transition shadow-sm">
+                  + Tambah Babak / Bagian
+                </button>
+              </div>
+              <div id="pro-segments-list" class="space-y-3"></div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold mb-2">Kebutuhan Output File &amp; Teknis Tambahan *</label>
+              <input id="spec-custom-deliverables" required class="w-full bg-surface border border-border rounded-xl px-4 py-3 text-sm" placeholder="Cth: Master WAV + MP3 + Stems per instrumen + Click track" />
+            </div>
+          </div>
+          ${sorakOptionHTML}
+        </div>
+      `;
+      addProSegmentRow({ label: 'Babak 1 / Pembuka' });
     }
   } else if (svc === 'digital') {
+    // LAYANAN MUSIK NON-TARI (LENGKAP & TERPISAH, TANPA SORAK, TANPA SINOPSIS)
+    const isCustom = (pkg === 'custom');
     c.innerHTML = `
-      <div class="space-y-4">
-        <div><label class="block text-xs font-bold mb-2">Tema Lagu / Karya *</label><input id="spec-tema" required class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" placeholder="Cth: Perpisahan"/></div>
-        <div><label class="block text-xs font-bold mb-2">Gaya Musik / Genre *</label><input id="spec-gaya" required class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" placeholder="Cth: Pop Akustik"/></div>
-        <div><label class="block text-xs font-bold mb-2">Nuansa / Mood *</label><input id="spec-nuansa" required class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" placeholder="Cth: Melankolis"/></div>
-        ${sorakOptionHTML}
+      <div class="p-5 bg-panel border border-border/60 rounded-2xl space-y-5">
+        <span class="text-[11px] font-mono uppercase text-primary font-bold block">Spesifikasi Detail Musik Non-Tari (${appState.serviceCatalog.digital.packages[pkg].label})</span>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold mb-2">Jenis Kebutuhan Produksi *</label>
+            <select id="nontari-jenis" required class="w-full bg-surface border border-border rounded-xl px-4 py-3 text-sm">
+              <option value="Aransemen Lagu Orisinal">Aransemen Lagu Orisinal</option>
+              <option value="Aransemen Ulang / Cover / Remix">Aransemen Ulang / Cover / Remix</option>
+              <option value="Scoring Film / Video / Konten">Scoring Film / Video / Konten</option>
+              <option value="Jingle Brand / Iklan">Jingle Brand / Iklan</option>
+              <option value="Mars / Himne Instansi">Mars / Himne Instansi</option>
+              <option value="Backsound Podcast / Game">Backsound Podcast / Game</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold mb-2">Genre / Gaya Musik *</label>
+            <input id="nontari-genre" required class="w-full bg-surface border border-border rounded-xl px-4 py-3 text-sm" placeholder="Cth: Pop Akustik, Sinematik Orkestra, Folk Etnik, Lo-Fi..." />
+          </div>
+          <div>
+            <label class="block text-xs font-bold mb-2">Nuansa / Mood Utama *</label>
+            <input id="nontari-nuansa" required class="w-full bg-surface border border-border rounded-xl px-4 py-3 text-sm" placeholder="Cth: Hangat, Megah, Melankolis, Semangat..." />
+          </div>
+          <div>
+            <label class="block text-xs font-bold mb-2">Perkiraan Tempo (BPM) &amp; Nada Dasar (Jika ada)</label>
+            <input id="nontari-tempo-key" class="w-full bg-surface border border-border rounded-xl px-4 py-3 text-sm" placeholder="Cth: 95 BPM, Nada Dasar C Mayor / Bebas" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold mb-2">Susunan Instrumen yang Diinginkan *</label>
+          <input id="nontari-instrumen" required class="w-full bg-surface border border-border rounded-xl px-4 py-3 text-sm" placeholder="Cth: Piano, Gitar Akustik, Bass, Drum, String Section, Suling..." />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold mb-2">Struktur Lagu / Alur Dinamika Musik *</label>
+          <textarea id="nontari-struktur" rows="3" required class="w-full bg-surface border border-border rounded-xl px-4 py-3 text-sm" placeholder="Cth: Intro (00:00–00:20) lembut → Verse 1 → Chorus megah → Bridge → Outro fade out..."></textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold mb-2">Lirik Lagu / Naskah Voice Over (Kosongkan jika instrumental)</label>
+          <textarea id="nontari-lirik" rows="3" class="w-full bg-surface border border-border rounded-xl px-4 py-3 text-sm" placeholder="Tempelkan lirik lagu atau naskah narasi di sini jika ada..."></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold mb-2">Target Penggunaan / Platform Rilis *</label>
+            <input id="nontari-platform" required class="w-full bg-surface border border-border rounded-xl px-4 py-3 text-sm" placeholder="Cth: Spotify/YouTube, Film Pendek, Acara Resmi Instansi" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold mb-2">Format File Output yang Dibutuhkan *</label>
+            <select id="nontari-output" required class="w-full bg-surface border border-border rounded-xl px-4 py-3 text-sm">
+              <option value="Master WAV (24-bit) + MP3 (320kbps)">Master WAV (24-bit) + MP3 (320kbps)</option>
+              <option value="Master WAV + MP3 + Minus One / Karaoke">Master WAV + MP3 + Minus One / Karaoke</option>
+              <option value="Full Package + Stems / Multitrack Terpisah">Full Package + Stems / Multitrack Terpisah</option>
+            </select>
+          </div>
+        </div>
+
+        ${isCustom ? `
+          <div class="p-4 rounded-xl bg-surface border border-primary/40 space-y-3">
+            <span class="text-xs font-bold text-primary block">Detail Lengkap Paket Custom Non-Tari</span>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-bold mb-1.5">Jumlah Trek / Lagu yang Diproduksi *</label>
+                <input id="nontari-custom-count" required class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Cth: 1 Lagu Utama + 3 Versi Durasi (15s, 30s, 60s)" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold mb-1.5">Kebutuhan Lisensi / Hak Pakai Komersial *</label>
+                <select id="nontari-custom-license" required class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm">
+                  <option value="Lisensi Standar (Kredit PrangArt Studios)">Lisensi Standar (Kredit PrangArt Studios)</option>
+                  <option value="Lisensi Komersial / Iklan Nasional">Lisensi Komersial / Iklan Nasional</option>
+                  <option value="Full Buyout / Hak Cipta Eksklusif Klien">Full Buyout / Hak Cipta Eksklusif Klien</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5">Rincian Spesifikasi Kustom &amp; Catatan Teknis Produksi *</label>
+              <textarea id="nontari-custom-detail" rows="3" required class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Jelaskan kebutuhan khusus seperti rekaman live instrumen tertentu, target loudness (LUFS), atau sinkronisasi timecode video..."></textarea>
+            </div>
+          </div>
+        ` : ''}
       </div>
     `;
   } else {
+    // LAYANAN TRANSKRIPSI MUSIK (LENGKAP & TERPISAH, TANPA SORAK, TANPA SINOPSIS)
+    const isCustom = (pkg === 'custom');
     c.innerHTML = `
-      <div class="space-y-4">
-        <div><label class="block text-xs font-bold mb-2">Instrumen yang Ditranskripsi *</label><input id="spec-instrumen" required class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" placeholder="Cth: Vokal Solo, Piano"/></div>
-        <div><label class="block text-xs font-bold mb-2">Format Notasi *</label>
-          <select id="spec-format" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm">
-            <option value="Not Angka">Not Angka</option>
-            <option value="Not Balok">Not Balok</option>
-            <option value="Keduanya">Keduanya</option>
-          </select>
+      <div class="p-5 bg-panel border border-border/60 rounded-2xl space-y-5">
+        <span class="text-[11px] font-mono uppercase text-primary font-bold block">Spesifikasi Detail Transkripsi Musik (${appState.serviceCatalog.transkripsi.packages[pkg].label})</span>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold mb-2">Jenis Transkripsi *</label>
+            <select id="trans-jenis" required class="w-full bg-surface border border-border rounded-xl px-4 py-3 text-sm">
+              <option value="Melodi Utama + Simbol Akor">Melodi Utama + Simbol Akor</option>
+              <option value="Vokal + Iringan Piano/Gitar">Vokal + Iringan Piano/Gitar</option>
+              <option value="Instrumen Solo (Piano / Biola / Gitar / Suling)">Instrumen Solo (Piano / Biola / Gitar / Suling)</option>
+              <option value="Ensambel / Full Band / Orkestra">Ensambel / Full Band / Orkestra</option>
+              <option value="Musik Tradisional / Etnomusikologi">Musik Tradisional / Etnomusikologi</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold mb-2">Format Notasi yang Diminta *</label>
+            <select id="trans-format-notasi" required class="w-full bg-surface border border-border rounded-xl px-4 py-3 text-sm">
+              <option value="Not Balok (Staff Notation)">Not Balok (Staff Notation)</option>
+              <option value="Not Angka">Not Angka</option>
+              <option value="Not Balok + Not Angka (Gabungan)">Not Balok + Not Angka (Gabungan)</option>
+              <option value="Not Balok + Tablatur (TAB)">Not Balok + Tablatur (TAB)</option>
+            </select>
+          </div>
         </div>
-        ${sorakOptionHTML}
+
+        <div>
+          <label class="block text-xs font-bold mb-2">Daftar Instrumen yang Harus Ditranskripsi *</label>
+          <input id="trans-instrumen" required class="w-full bg-surface border border-border rounded-xl px-4 py-3 text-sm" placeholder="Cth: Vokal Soprano, Piul, Gambus, Kendang, Bass..." />
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold mb-2">Format File Hasil yang Dibutuhkan *</label>
+            <select id="trans-file-output" required class="w-full bg-surface border border-border rounded-xl px-4 py-3 text-sm">
+              <option value="PDF Siap Cetak">PDF Siap Cetak</option>
+              <option value="PDF + Audio Simulasi MIDI / MP3">PDF + Audio Simulasi MIDI / MP3</option>
+              <option value="PDF + MIDI + File Proyek (Sibelius / MuseScore / MusicXML)">PDF + MIDI + File Proyek (Sibelius / MuseScore / MusicXML)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold mb-2">Bagian Audio yang Ditranskripsi *</label>
+            <input id="trans-bagian-waktu" required value="Full dari awal hingga akhir (00:00 – Ending)" class="w-full bg-surface border border-border rounded-xl px-4 py-3 text-sm" placeholder="Cth: Full lagu atau menit 01:15 – 03:40 saja" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold mb-2">Nada Dasar &amp; Birama (Jika sudah diketahui)</label>
+            <input id="trans-nada-birama" class="w-full bg-surface border border-border rounded-xl px-4 py-3 text-sm" placeholder="Cth: G Mayor, 4/4 (Kosongkan jika ingin dianalisis studio)" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold mb-2">Tujuan Penggunaan Partitur *</label>
+            <input id="trans-tujuan" required class="w-full bg-surface border border-border rounded-xl px-4 py-3 text-sm" placeholder="Cth: Skripsi/Tesis, Lomba Paduan Suara, Hak Cipta, Dokumentasi" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold mb-2">Catatan Teknis Khusus (Opsional)</label>
+          <textarea id="trans-catatan" rows="2" class="w-full bg-surface border border-border rounded-xl px-4 py-3 text-sm" placeholder="Cth: Tolong sertakan lirik di bawah notasi vokal, atau pisahkan partitur per alat musik..."></textarea>
+        </div>
+
+        ${isCustom ? `
+          <div class="p-4 rounded-xl bg-surface border border-primary/40 space-y-3">
+            <span class="text-xs font-bold text-primary block">Detail Lengkap Paket Custom Transkripsi</span>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-bold mb-1.5">Jumlah Repertoar / Karya *</label>
+                <input id="trans-custom-count" required class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Cth: 3 Gending Tradisi / 1 Bundel Partitur" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold mb-1.5">Standar Penulisan / Analisis *</label>
+                <select id="trans-custom-standard" required class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm">
+                  <option value="Partitur Pertunjukan / Orkestrasi">Partitur Pertunjukan / Orkestrasi</option>
+                  <option value="Transkripsi Deskriptif Etnomusikologi (Skripsi/Tesis)">Transkripsi Deskriptif Etnomusikologi (Skripsi/Tesis)</option>
+                  <option value="Transkripsi Preskriptif / Bahan Ajar">Transkripsi Preskriptif / Bahan Ajar</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5">Rincian Kebutuhan Transkripsi Khusus / Sistem Laras Tradisi *</label>
+              <textarea id="trans-custom-detail" rows="3" required class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Jelaskan detail khusus seperti pola tabuhan perkusi, simbol teknik bermain instrumen tradisional, atau pemisahan buku partitur..."></textarea>
+            </div>
+          </div>
+        ` : ''}
       </div>
     `;
   }
 }
 
-/* === FORMULIR DETAIL AI (HANYA MUNCUL KETIKA PILIH OPSI GENERATE AI DI LANGKAH 03) === */
+/* === FORMULIR DETAIL AI (HANYA MUNCUL KETIKA PILIH OPSI GENERATE AI DI LANGKAH 03 MUSIK TARI) === */
 function renderAIDetailForm() {
   const container = document.getElementById('ai-detail-form-container');
   if (!container) return;
-  const svc = appState.selectedServiceLine;
 
-  if (svc === 'tari') {
-    container.innerHTML = `
-      <div class="space-y-5">
-        <div class="border-b border-border/60 pb-2">
-          <h3 class="text-sm font-bold text-primary uppercase">Formulir Data Karya Tari (Bahan Penyusunan Sinopsis AI)</h3>
-          <p class="text-[11px] text-textMuted mt-1">Judul karya, koreografer, asal daerah, dan jenis tari otomatis diambil dari isian Langkah 02. Lengkapi detail penciptaan &amp; garapan di bawah ini.</p>
-        </div>
-
-        <!-- B. KONSEP PENCIPTAAN -->
-        <div class="p-4 bg-surface border border-border/80 rounded-xl space-y-3">
-          <h4 class="text-xs font-bold text-primary uppercase">B. Konsep Penciptaan</h4>
-          <div>
-            <label class="block text-xs font-bold mb-1.5">5. Tema karya:</label>
-            <input id="ai-tema" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Pokok persoalan atau gagasan utama" />
-          </div>
-          <div>
-            <label class="block text-xs font-bold mb-1.5">6. Apa yang melatarbelakangi penciptaan karya ini?</label>
-            <textarea id="ai-latar" rows="2" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Fenomena, tradisi, budaya, atau pengalaman..."></textarea>
-          </div>
-          <div>
-            <label class="block text-xs font-bold mb-1.5">7. Dari mana sumber inspirasi karya ini berasal?</label>
-            <textarea id="ai-inspirasi" rows="2" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Sumber inspirasi karya..."></textarea>
-          </div>
-          <div>
-            <label class="block text-xs font-bold mb-1.5">8. Apa gagasan utama yang ingin diangkat melalui tarian ini?</label>
-            <textarea id="ai-gagasan" rows="2" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Gagasan utama..."></textarea>
-          </div>
-        </div>
-
-        <!-- C. KONSEP GARAPAN -->
-        <div class="p-4 bg-surface border border-border/80 rounded-xl space-y-3">
-          <h4 class="text-xs font-bold text-primary uppercase">C. Konsep Garapan</h4>
-          <div>
-            <label class="block text-xs font-bold mb-1.5">9. Apa yang digambarkan atau diceritakan dalam tarian ini?</label>
-            <textarea id="ai-gambaran" rows="2" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Substansi atau cerita yang ditampilkan..."></textarea>
-          </div>
-          <div>
-            <label class="block text-xs font-bold mb-1.5">10. Bagaimana perkembangan penyajian tari dari awal, tengah, hingga akhir?</label>
-            <textarea id="ai-perkembangan" rows="2" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Alur dari awal, tengah, hingga akhir..."></textarea>
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label class="block text-xs font-bold mb-1.5">11. Bagaimana karakter gerakan dalam tarian ini?</label>
-              <input id="ai-karakter" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Lembut, tegas, dinamis, energik, lincah..." />
-            </div>
-            <div>
-              <label class="block text-xs font-bold mb-1.5">12. Sumber gerakan tari (tradisi, masyarakat, alam, eksplorasi)?</label>
-              <input id="ai-sumber-gerak" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Jelaskan sumber gerak..." />
-            </div>
-            <div>
-              <label class="block text-xs font-bold mb-1.5">13. Musik pengiring (gambaran musik yang digunakan):</label>
-              <input id="ai-musik" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Tradisional, modern, perpaduan, instrumental..." />
-            </div>
-            <div>
-              <label class="block text-xs font-bold mb-1.5">14. Alat musik/instrumen (nama alat musik atau bunyinya):</label>
-              <input id="ai-instrumen" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Gendang, gong, gambus, piul, suling, rebana..." />
-            </div>
-          </div>
-          <div>
-            <label class="block text-xs font-bold mb-1.5">15. Kostum dan tata rias seperti apa yang digunakan?</label>
-            <input id="ai-kostum" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Terinspirasi pakaian adat, masyarakat, karakter..." />
-          </div>
-        </div>
-
-        <!-- D. MAKNA DAN PESAN KARYA -->
-        <div class="p-4 bg-surface border border-border/80 rounded-xl space-y-3">
-          <h4 class="text-xs font-bold text-primary uppercase">D. Makna dan Pesan Karya</h4>
-          <div>
-            <label class="block text-xs font-bold mb-1.5">16. Apakah terdapat makna, filosofi, atau nilai tertentu?</label>
-            <textarea id="ai-makna" rows="2" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Nilai atau filosofi karya..."></textarea>
-          </div>
-          <div>
-            <label class="block text-xs font-bold mb-1.5">17. Apa pesan yang ingin disampaikan kepada penonton?</label>
-            <textarea id="ai-pesan" rows="2" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Pesan untuk penonton..."></textarea>
-          </div>
-        </div>
-
-        <!-- CATATAN PENGISIAN -->
-        <div class="p-4 bg-surface/60 border border-border/60 rounded-xl text-[11px] text-textMuted space-y-1">
-          <strong class="text-textMain block uppercase mb-1">Catatan Pengisian:</strong>
-          <p>• Gunakan bahasa sederhana sesuai pemahaman masing-masing koreografer.</p>
-          <p>• Tidak harus menggunakan istilah teknis seni tari maupun musik.</p>
-          <p>• Untuk pertanyaan yang tidak diketahui atau tidak relevan, boleh dikosongkan.</p>
-          <p>• Tidak perlu membuat jawaban panjang. Cukup jelaskan informasi sesuai konsep karya.</p>
-          <p>• Pastikan informasi yang diberikan sesuai dengan karya yang benar-benar diciptakan.</p>
-        </div>
+  container.innerHTML = `
+    <div class="space-y-5">
+      <div class="border-b border-border/60 pb-2">
+        <h3 class="text-sm font-bold text-primary uppercase">Formulir Data Karya Tari (Bahan Penyusunan Sinopsis AI)</h3>
+        <p class="text-[11px] text-textMuted mt-1">Judul karya, koreografer, asal daerah, dan jenis tari otomatis diambil dari isian Langkah 02. Lengkapi detail penciptaan &amp; garapan di bawah ini.</p>
       </div>
-    `;
-  } else {
-    container.innerHTML = `
+
+      <!-- B. KONSEP PENCIPTAAN -->
       <div class="p-4 bg-surface border border-border/80 rounded-xl space-y-3">
-        <label class="block text-xs font-bold">Ceritakan Gambaran / Latar Belakang Karya Anda untuk Disusun AI</label>
-        <textarea id="ai-general-notes" rows="3" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Tuliskan poin-poin utama mengenai karya ini..."></textarea>
+        <h4 class="text-xs font-bold text-primary uppercase">B. Konsep Penciptaan</h4>
+        <div>
+          <label class="block text-xs font-bold mb-1.5">5. Tema karya:</label>
+          <input id="ai-tema" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Pokok persoalan atau gagasan utama" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold mb-1.5">6. Apa yang melatarbelakangi penciptaan karya ini?</label>
+          <textarea id="ai-latar" rows="2" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Fenomena, tradisi, budaya, atau pengalaman..."></textarea>
+        </div>
+        <div>
+          <label class="block text-xs font-bold mb-1.5">7. Dari mana sumber inspirasi karya ini berasal?</label>
+          <textarea id="ai-inspirasi" rows="2" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Sumber inspirasi karya..."></textarea>
+        </div>
+        <div>
+          <label class="block text-xs font-bold mb-1.5">8. Apa gagasan utama yang ingin diangkat melalui tarian ini?</label>
+          <textarea id="ai-gagasan" rows="2" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Gagasan utama..."></textarea>
+        </div>
       </div>
-    `;
-  }
+
+      <!-- C. KONSEP GARAPAN -->
+      <div class="p-4 bg-surface border border-border/80 rounded-xl space-y-3">
+        <h4 class="text-xs font-bold text-primary uppercase">C. Konsep Garapan</h4>
+        <div>
+          <label class="block text-xs font-bold mb-1.5">9. Apa yang digambarkan atau diceritakan dalam tarian ini?</label>
+          <textarea id="ai-gambaran" rows="2" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Substansi atau cerita yang ditampilkan..."></textarea>
+        </div>
+        <div>
+          <label class="block text-xs font-bold mb-1.5">10. Bagaimana perkembangan penyajian tari dari awal, tengah, hingga akhir?</label>
+          <textarea id="ai-perkembangan" rows="2" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Alur dari awal, tengah, hingga akhir..."></textarea>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold mb-1.5">11. Bagaimana karakter gerakan dalam tarian ini?</label>
+            <input id="ai-karakter" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Lembut, tegas, dinamis, energik, lincah..." />
+          </div>
+          <div>
+            <label class="block text-xs font-bold mb-1.5">12. Sumber gerakan tari (tradisi, masyarakat, alam, eksplorasi)?</label>
+            <input id="ai-sumber-gerak" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Jelaskan sumber gerak..." />
+          </div>
+          <div>
+            <label class="block text-xs font-bold mb-1.5">13. Musik pengiring (gambaran musik yang digunakan):</label>
+            <input id="ai-musik" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Tradisional, modern, perpaduan, instrumental..." />
+          </div>
+          <div>
+            <label class="block text-xs font-bold mb-1.5">14. Alat musik/instrumen (nama alat musik atau bunyinya):</label>
+            <input id="ai-instrumen" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Gendang, gong, gambus, piul, suling, rebana..." />
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold mb-1.5">15. Kostum dan tata rias seperti apa yang digunakan?</label>
+          <input id="ai-kostum" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Terinspirasi pakaian adat, masyarakat, karakter..." />
+        </div>
+      </div>
+
+      <!-- D. MAKNA DAN PESAN KARYA -->
+      <div class="p-4 bg-surface border border-border/80 rounded-xl space-y-3">
+        <h4 class="text-xs font-bold text-primary uppercase">D. Makna dan Pesan Karya</h4>
+        <div>
+          <label class="block text-xs font-bold mb-1.5">16. Apakah terdapat makna, filosofi, atau nilai tertentu?</label>
+          <textarea id="ai-makna" rows="2" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Nilai atau filosofi karya..."></textarea>
+        </div>
+        <div>
+          <label class="block text-xs font-bold mb-1.5">17. Apa pesan yang ingin disampaikan kepada penonton?</label>
+          <textarea id="ai-pesan" rows="2" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Pesan untuk penonton..."></textarea>
+        </div>
+      </div>
+
+      <!-- CATATAN PENGISIAN -->
+      <div class="p-4 bg-surface/60 border border-border/60 rounded-xl text-[11px] text-textMuted space-y-1">
+        <strong class="text-textMain block uppercase mb-1">Catatan Pengisian:</strong>
+        <p>• Gunakan bahasa sederhana sesuai pemahaman masing-masing koreografer.</p>
+        <p>• Tidak harus menggunakan istilah teknis seni tari maupun musik.</p>
+        <p>• Untuk pertanyaan yang tidak diketahui atau tidak relevan, boleh dikosongkan.</p>
+        <p>• Tidak perlu membuat jawaban panjang. Cukup jelaskan informasi sesuai konsep karya.</p>
+        <p>• Pastikan informasi yang diberikan sesuai dengan karya yang benar-benar diciptakan.</p>
+      </div>
+    </div>
+  `;
 }
 
 function recalculateLivePrice() {
@@ -630,12 +957,12 @@ function recalculateLivePrice() {
   const pkg = svc.packages[appState.selectedPackage];
   const base = appState.customPrice || pkg.price;
   const addonPrice = Number(svc.addonPrice || 250000);
-  const isAddonChecked = Boolean(document.getElementById('field-addon-vocal')?.checked);
+  const isAddonChecked = (appState.selectedServiceLine !== 'transkripsi') && Boolean(document.getElementById('field-addon-vocal')?.checked);
   const addon = isAddonChecked ? addonPrice : 0;
   
   if(document.getElementById('calc-service-name')) {
     document.getElementById('calc-service-name').textContent = svc.label;
-    document.getElementById('calc-pkg-name').textContent = appState.customPrice ? 'Harga Kesepakatan' : pkg.label;
+    document.getElementById('calc-pkg-name').textContent = appState.customPrice ? `${pkg.label} (Kesepakatan)` : pkg.label;
     document.getElementById('calc-pkg-price').textContent = formatRupiah(base);
     document.getElementById('calc-total-price').textContent = formatRupiah(base + addon);
     
@@ -693,11 +1020,8 @@ async function generateAISynopsis() {
   loadingNote?.classList.remove('hidden');
 
   try {
-    let promptText = "";
     const valOrEmpty = (id) => document.getElementById(id)?.value.trim() || '(Belum tersedia / dikosongkan)';
-
-    if (appState.selectedServiceLine === 'tari') {
-      promptText = `PROMPT PENULISAN SINOPSIS KARYA TARI
+    const promptText = `PROMPT PENULISAN SINOPSIS KARYA TARI
 
 Bertindaklah sebagai seorang penulis, pengkaji seni tari, dan dramaturg yang memahami koreografi, etnokoreologi, serta penulisan karya seni pertunjukan.
 
@@ -756,9 +1080,6 @@ C. KONSEP GARAPAN
 D. MAKNA DAN PESAN KARYA
 16. Makna, filosofi, atau nilai tertentu: ${valOrEmpty('ai-makna')}
 17. Pesan untuk penonton: ${valOrEmpty('ai-pesan')}`;
-    } else {
-      promptText = `Susun sinopsis/deskripsi karya profesional (120-200 kata) dalam bahasa Indonesia untuk karya "${judul}" berdasarkan catatan berikut: ${valOrEmpty('ai-general-notes')}. Berikan hanya teks sinopsisnya saja.`;
-    }
 
     let finalGeneratedText = '';
     if (window.firebaseAI) {
@@ -825,10 +1146,16 @@ async function handleOrderFormSubmit(e) {
   e.preventDefault();
   if (!appState.currentClientUser) return navigateTo('client');
 
+  // Validasi batas durasi maksimal 7 menit pada Paket Standar & Pro Musik Tari
+  if (!validateTariDurationLimit()) {
+    document.getElementById('field-durasi')?.focus();
+    return showToast('Durasi Melebihi Batas', 'Paket Standar & Pro Musik Tari maksimal 07:00 menit. Silakan pilih Paket Custom untuk durasi lebih dari 7 menit.', 'error');
+  }
+
   const svc = appState.serviceCatalog[appState.selectedServiceLine];
   const pkg = svc.packages[appState.selectedPackage];
   const basePrice = appState.customPrice || pkg.price;
-  const hasVocalAddon = Boolean(document.getElementById('field-addon-vocal')?.checked);
+  const hasVocalAddon = (appState.selectedServiceLine !== 'transkripsi') && Boolean(document.getElementById('field-addon-vocal')?.checked);
   const addonAmount = hasVocalAddon ? Number(svc.addonPrice || 250000) : 0;
   const total = basePrice + addonAmount;
   
@@ -843,12 +1170,13 @@ async function handleOrderFormSubmit(e) {
     specs.push({ key: 'Persetujuan Kontrak PrangArt Studios', val: 'Disetujui Klien' });
   }
 
-  const sorakChoice = document.querySelector('input[name="spec-sorak"]:checked')?.value || 'Tidak Perlu Sorak';
   const sanggarName = document.getElementById('field-sanggar')?.value.trim() || appState.currentClientUser.name;
   const waNumber = document.getElementById('field-wa')?.value.trim() || '';
   const contactEmail = document.getElementById('field-email')?.value.trim() || appState.currentClientUser.email;
+  let sorakChoice = null;
 
   if (appState.selectedServiceLine === 'tari') {
+    sorakChoice = document.querySelector('input[name="spec-sorak"]:checked')?.value || 'Tidak Perlu Sorak';
     specs.push({ key: 'Sanggar / Komunitas / Instansi / Individu', val: sanggarName });
     pushIfVal('Kota, Provinsi', 'field-kota-provinsi');
     specs.push({ key: 'Nomor WhatsApp Aktif', val: waNumber });
@@ -861,12 +1189,11 @@ async function handleOrderFormSubmit(e) {
       const nuansaSel = document.getElementById('spec-nuansa-dasar')?.value;
       const nuansaFinal = nuansaSel === 'Other' ? document.getElementById('spec-nuansa-other')?.value.trim() : nuansaSel;
       if (nuansaFinal) specs.push({ key: 'Nuansa Musik', val: nuansaFinal });
+      pushIfVal('Instrumen Dominan', 'spec-instrumen-tari');
     } else if (appState.selectedPackage === 'standar') {
       const checkedStruktur = Array.from(document.querySelectorAll('input[name="spec-struktur-check"]:checked')).map(el => el.value);
-      const manualStruktur = document.getElementById('spec-struktur-manual')?.value.trim();
-      if (manualStruktur) checkedStruktur.push(manualStruktur);
       if (checkedStruktur.length) {
-        specs.push({ key: 'Struktur Tari Dipilih', val: checkedStruktur.join(', ') });
+        specs.push({ key: 'Struktur Tari / Suasana Dipilih', val: checkedStruktur.join(', ') });
       }
 
       const segItems = Array.from(document.querySelectorAll('#standar-segments-list .standar-segment-item')).map((row, idx) => {
@@ -879,7 +1206,7 @@ async function handleOrderFormSubmit(e) {
       if (segItems.length) {
         specs.push({ key: 'Rincian Urutan Nuansa & Durasi (Standar)', val: segItems.join(' | ') });
       }
-    } else {
+    } else if (appState.selectedPackage === 'pro') {
       pushIfVal('Awal Masuk Musik & Tari', 'spec-pro-intro-mode');
       const proItems = Array.from(document.querySelectorAll('#pro-segments-list .pro-segment-item')).map((row) => {
         const lbl = row.querySelector('.pro-label')?.value.trim() || 'Bagian';
@@ -892,31 +1219,68 @@ async function handleOrderFormSubmit(e) {
       if (proItems.length) {
         specs.push({ key: 'Rincian Video GDrive, Tempo & Nuansa (Pro)', val: proItems.join(' | ') });
       }
+    } else {
+      // Custom Musik Tari
+      pushIfVal('Skala & Format Garapan', 'spec-custom-scale');
+      pushIfVal('Kebutuhan Instrumen Khusus', 'spec-custom-instruments');
+      pushIfVal('Awal Masuk Musik & Tari', 'spec-pro-intro-mode');
+      const proItems = Array.from(document.querySelectorAll('#pro-segments-list .pro-segment-item')).map((row) => {
+        const lbl = row.querySelector('.pro-label')?.value.trim() || 'Babak';
+        const bpm = row.querySelector('.pro-bpm')?.value.trim() || '-';
+        const dur = row.querySelector('.pro-durasi')?.value.trim() || '-';
+        const lnk = row.querySelector('.pro-link')?.value.trim();
+        const dsc = row.querySelector('.pro-desc')?.value.trim() || '-';
+        return `${lbl} (${bpm}, ${dur}): ${dsc}${lnk ? ` [GDrive: ${lnk}]` : ''}`;
+      });
+      if (proItems.length) {
+        specs.push({ key: 'Rincian Babak & Durasi (Custom)', val: proItems.join(' | ') });
+      }
+      pushIfVal('Output File & Teknis Tambahan', 'spec-custom-deliverables');
     }
+
+    specs.push({ key: 'Tambahan Sorak', val: sorakChoice });
   } else if (appState.selectedServiceLine === 'digital') {
-    specs.push({ key: 'Pemesan / Instansi', val: sanggarName });
+    specs.push({ key: 'Pemesan / Brand / Instansi', val: sanggarName });
+    pushIfVal('Kota, Provinsi', 'field-kota-provinsi');
     specs.push({ key: 'Nomor WhatsApp Aktif', val: waNumber });
     specs.push({ key: 'Email', val: contactEmail });
-    pushIfVal('Tema', 'spec-tema');
-    pushIfVal('Genre', 'spec-gaya');
-    pushIfVal('Nuansa', 'spec-nuansa');
+    pushIfVal('Jenis Kebutuhan Produksi', 'nontari-jenis');
+    pushIfVal('Genre / Gaya Musik', 'nontari-genre');
+    pushIfVal('Nuansa / Mood Utama', 'nontari-nuansa');
+    pushIfVal('Tempo (BPM) & Nada Dasar', 'nontari-tempo-key');
+    pushIfVal('Susunan Instrumen', 'nontari-instrumen');
+    pushIfVal('Struktur Lagu / Alur Dinamika', 'nontari-struktur');
+    pushIfVal('Lirik / Naskah Voice Over', 'nontari-lirik');
+    pushIfVal('Target Penggunaan / Platform', 'nontari-platform');
+    pushIfVal('Format File Output', 'nontari-output');
+    pushIfVal('Jumlah Trek / Lagu (Custom)', 'nontari-custom-count');
+    pushIfVal('Lisensi / Hak Pakai (Custom)', 'nontari-custom-license');
+    pushIfVal('Detail Khusus Paket Custom', 'nontari-custom-detail');
   } else {
-    specs.push({ key: 'Pemesan / Instansi', val: sanggarName });
+    specs.push({ key: 'Pemesan / Institusi', val: sanggarName });
     specs.push({ key: 'Nomor WhatsApp Aktif', val: waNumber });
     specs.push({ key: 'Email', val: contactEmail });
-    pushIfVal('Instrumen', 'spec-instrumen');
-    pushIfVal('Format Notasi', 'spec-format');
+    pushIfVal('Jenis Transkripsi', 'trans-jenis');
+    pushIfVal('Format Notasi', 'trans-format-notasi');
+    pushIfVal('Instrumen Ditranskripsi', 'trans-instrumen');
+    pushIfVal('Format File Hasil', 'trans-file-output');
+    pushIfVal('Bagian Audio Ditranskripsi', 'trans-bagian-waktu');
+    pushIfVal('Nada Dasar & Birama', 'trans-nada-birama');
+    pushIfVal('Tujuan Penggunaan Partitur', 'trans-tujuan');
+    pushIfVal('Catatan Teknis Khusus', 'trans-catatan');
+    pushIfVal('Jumlah Repertoar (Custom)', 'trans-custom-count');
+    pushIfVal('Standar Penulisan / Analisis (Custom)', 'trans-custom-standard');
+    pushIfVal('Detail Khusus Paket Custom', 'trans-custom-detail');
   }
 
-  specs.push({ key: 'Opsi Sorak', val: sorakChoice });
   if (hasVocalAddon) {
-    specs.push({ key: 'Tambahan Vokal / Player', val: `+ ${formatRupiah(addonAmount)}` });
+    specs.push({ key: 'Tambahan Vokal / Session Player', val: `+ ${formatRupiah(addonAmount)}` });
   }
 
   const videoLink = document.getElementById('field-video-link')?.value || '';
   const videoFileInput = document.getElementById('field-video-file');
   const videoFileName = videoFileInput?.files[0] ? videoFileInput.files[0].name : '';
-  const sinopsis = document.getElementById('field-sinopsis')?.value || '';
+  const sinopsis = (appState.selectedServiceLine === 'tari') ? (document.getElementById('field-sinopsis')?.value || '') : '';
 
   const newP = { 
     id: `PAL-${Date.now()}`, 
@@ -928,7 +1292,7 @@ async function handleOrderFormSubmit(e) {
     durasi: document.getElementById('field-durasi').value,
     serviceLine: appState.selectedServiceLine, 
     serviceLineLabel: svc.label, 
-    packageName: appState.customPrice ? 'Kustom' : pkg.label, 
+    packageName: appState.customPrice ? `${pkg.label} (Kustom)` : pkg.label, 
     contractAgreed: requiresContract,
     hasVocalAddon: hasVocalAddon,
     addonAmount: addonAmount,
@@ -951,8 +1315,10 @@ Object.assign(window, {
   openProductionAgreementModal,
   toggleJenisTariOther,
   toggleNuansaOtherInput,
+  addCustomStrukturCheckbox,
   addStandarSegmentRow,
   addProSegmentRow,
   removeSegmentRow,
+  validateTariDurationLimit,
   copyAIResultToClipboard
 });
