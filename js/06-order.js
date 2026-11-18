@@ -55,7 +55,7 @@ function renderPackageCards() {
 function selectPackageTier(k) { appState.selectedPackage = k; appState.customPrice = null; document.getElementById('custom-price-input').value = ''; renderPackageCards(); renderDynamicSpecFields(); recalculateLivePrice(); }
 function handleCustomPrice(v) { appState.customPrice = (v && Number(v) > 0) ? Number(v) : null; renderPackageCards(); renderDynamicSpecFields(); recalculateLivePrice(); }
 
-/* === INJEKSI FORM PANJANG KE DALAM HTML === */
+/* === FORM DINAMIS — TARI mengikuti FORMULIR DATA KARYA TARI (17 pertanyaan) === */
 function renderDynamicSpecFields() {
   const c = document.getElementById('dynamic-spec-fields'); if(!c) return;
   const svc = appState.selectedServiceLine;
@@ -63,12 +63,22 @@ function renderDynamicSpecFields() {
   if (svc === 'tari') {
     c.innerHTML = `
       <div class="space-y-6">
+
         <!-- A. IDENTITAS KARYA -->
         <div class="p-5 bg-panel border border-border/60 rounded-2xl space-y-4">
           <h4 class="text-sm font-bold text-primary mb-2">A. Identitas Karya</h4>
+          <p class="text-[11px] text-textMuted italic -mt-2 mb-2">
+            No. 1 (Judul) &amp; No. 4 (Jenis Karya) diisi di bagian <strong>Informasi Karya</strong> di atas.
+          </p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div><label class="block text-xs font-bold mb-2">Nama Koreografer / Penata Tari *</label><input id="spec-koreografer" required class="w-full bg-surface border rounded-xl px-4 py-2 text-sm" placeholder="Nama lengkap"/></div>
-            <div><label class="block text-xs font-bold mb-2">Asal Daerah / Komunitas</label><input id="spec-asal" class="w-full bg-surface border rounded-xl px-4 py-2 text-sm" placeholder="Cth: Surakarta / Sanggar X"/></div>
+            <div>
+              <label class="block text-xs font-bold mb-2">2. Nama Koreografer / Penata Tari *</label>
+              <input id="spec-koreografer" required class="w-full bg-surface border rounded-xl px-4 py-2 text-sm" placeholder="Nama lengkap"/>
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-2">3. Asal Daerah / Komunitas (jika ada)</label>
+              <input id="spec-asal" class="w-full bg-surface border rounded-xl px-4 py-2 text-sm" placeholder="Cth: Surakarta / Sanggar X"/>
+            </div>
           </div>
         </div>
 
@@ -76,10 +86,22 @@ function renderDynamicSpecFields() {
         <div class="p-5 bg-panel border border-border/60 rounded-2xl space-y-4">
           <h4 class="text-sm font-bold text-primary mb-2">B. Konsep Penciptaan</h4>
           <div class="space-y-4">
-            <div><label class="block text-xs font-bold mb-2">Tema Karya *</label><input id="spec-tema" required class="w-full bg-surface border rounded-xl px-4 py-2 text-sm" placeholder="Cth: Pelestarian Alam"/></div>
-            <div><label class="block text-xs font-bold mb-2">Latar Belakang Penciptaan</label><textarea id="spec-latar" rows="2" class="w-full bg-surface border rounded-xl px-4 py-2 text-sm" placeholder="Apa yang melatarbelakangi karya ini?"></textarea></div>
-            <div><label class="block text-xs font-bold mb-2">Sumber Inspirasi</label><textarea id="spec-inspirasi" rows="2" class="w-full bg-surface border rounded-xl px-4 py-2 text-sm" placeholder="Dari mana inspirasi ini berasal?"></textarea></div>
-            <div><label class="block text-xs font-bold mb-2">Gagasan Utama</label><textarea id="spec-gagasan" rows="2" class="w-full bg-surface border rounded-xl px-4 py-2 text-sm" placeholder="Apa gagasan utama yang ingin diangkat?"></textarea></div>
+            <div>
+              <label class="block text-xs font-bold mb-2">5. Tema Karya *</label>
+              <input id="spec-tema" required class="w-full bg-surface border rounded-xl px-4 py-2 text-sm" placeholder="Pokok persoalan / gagasan utama"/>
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-2">6. Apa yang melatarbelakangi penciptaan karya ini?</label>
+              <textarea id="spec-latar" rows="2" class="w-full bg-surface border rounded-xl px-4 py-2 text-sm" placeholder="Fenomena, tradisi, budaya, atau pengalaman yang melandasi"></textarea>
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-2">7. Dari mana sumber inspirasi karya ini berasal?</label>
+              <textarea id="spec-inspirasi" rows="2" class="w-full bg-surface border rounded-xl px-4 py-2 text-sm" placeholder="Sumber inspirasi karya"></textarea>
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-2">8. Apa gagasan utama yang ingin diangkat melalui tarian ini?</label>
+              <textarea id="spec-gagasan" rows="2" class="w-full bg-surface border rounded-xl px-4 py-2 text-sm" placeholder="Gagasan utama karya"></textarea>
+            </div>
           </div>
         </div>
 
@@ -87,25 +109,55 @@ function renderDynamicSpecFields() {
         <div class="p-5 bg-panel border border-border/60 rounded-2xl space-y-4">
           <h4 class="text-sm font-bold text-primary mb-2">C. Konsep Garapan</h4>
           <div class="space-y-4">
-            <div><label class="block text-xs font-bold mb-2">Gambaran Isi Karya *</label><textarea id="spec-gambaran" required rows="2" class="w-full bg-surface border rounded-xl px-4 py-2 text-sm" placeholder="Apa yang digambarkan atau diceritakan dalam tarian ini?"></textarea></div>
-            <div><label class="block text-xs font-bold mb-2">Perkembangan Penyajian</label><textarea id="spec-perkembangan" rows="2" class="w-full bg-surface border rounded-xl px-4 py-2 text-sm" placeholder="Bagaimana alur dari awal, tengah, hingga akhir?"></textarea></div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div><label class="block text-xs font-bold mb-2">Karakter Gerakan</label><input id="spec-karakter" class="w-full bg-surface border rounded-xl px-4 py-2 text-sm" placeholder="Cth: Lembut, Tegas"/></div>
-              <div><label class="block text-xs font-bold mb-2">Sumber Gerak</label><input id="spec-sumber-gerak" class="w-full bg-surface border rounded-xl px-4 py-2 text-sm" placeholder="Cth: Tradisi, Alam"/></div>
-              <div><label class="block text-xs font-bold mb-2">Musik Pengiring</label><input id="spec-musik" class="w-full bg-surface border rounded-xl px-4 py-2 text-sm" placeholder="Cth: Tradisional Modern"/></div>
-              <div><label class="block text-xs font-bold mb-2">Instrumen / Alat Musik</label><input id="spec-instrumen" class="w-full bg-surface border rounded-xl px-4 py-2 text-sm" placeholder="Cth: Gendang, Gong"/></div>
+            <div>
+              <label class="block text-xs font-bold mb-2">9. Apa yang digambarkan atau diceritakan dalam tarian ini? *</label>
+              <textarea id="spec-gambaran" required rows="2" class="w-full bg-surface border rounded-xl px-4 py-2 text-sm" placeholder="Substansi / alur / suasana yang digambarkan"></textarea>
             </div>
-            <div><label class="block text-xs font-bold mb-2">Kostum & Tata Rias</label><input id="spec-kostum" class="w-full bg-surface border rounded-xl px-4 py-2 text-sm" placeholder="Cth: Pakaian Adat Jawa"/></div>
+            <div>
+              <label class="block text-xs font-bold mb-2">10. Bagaimana perkembangan penyajian tari dari awal, tengah, hingga akhir?</label>
+              <textarea id="spec-perkembangan" rows="2" class="w-full bg-surface border rounded-xl px-4 py-2 text-sm" placeholder="Alur dramatik dari awal hingga akhir"></textarea>
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-2">11. Bagaimana karakter gerakan dalam tarian ini?</label>
+              <input id="spec-karakter" class="w-full bg-surface border rounded-xl px-4 py-2 text-sm" placeholder="Cth: lembut, tegas, dinamis, energik, lincah, atau perpaduan"/>
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-2">12. Apakah gerakan tari bersumber dari gerak tradisi, aktivitas masyarakat, alam, kehidupan sehari-hari, atau hasil eksplorasi sendiri? Jelaskan.</label>
+              <textarea id="spec-sumber-gerak" rows="2" class="w-full bg-surface border rounded-xl px-4 py-2 text-sm" placeholder="Sumber gerak dan penjelasannya"></textarea>
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-2">13. Musik pengiring: Bagaimana gambaran musik yang digunakan dalam tarian ini?</label>
+              <input id="spec-musik" class="w-full bg-surface border rounded-xl px-4 py-2 text-sm" placeholder="Cth: tradisional, modern, perpaduan, atau instrumental"/>
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-2">14. Alat musik/instrumen: Apakah ada alat musik yang digunakan atau terdengar dalam pengiring tari? Sebutkan jika mengetahui namanya.</label>
+              <input id="spec-instrumen" class="w-full bg-surface border rounded-xl px-4 py-2 text-sm" placeholder="Cth: gendang, gong, gambus, biola, suling, rebana, gitar, piano, atau lainnya"/>
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-2">15. Kostum dan tata rias seperti apa yang digunakan?</label>
+              <input id="spec-kostum" class="w-full bg-surface border rounded-xl px-4 py-2 text-sm" placeholder="Cth: terinspirasi pakaian adat, kehidupan masyarakat, karakter tertentu, atau konsep lainnya"/>
+            </div>
           </div>
         </div>
 
-        <!-- D. MAKNA & PESAN -->
+        <!-- D. MAKNA DAN PESAN KARYA -->
         <div class="p-5 bg-panel border border-border/60 rounded-2xl space-y-4">
-          <h4 class="text-sm font-bold text-primary mb-2">D. Makna dan Pesan</h4>
+          <h4 class="text-sm font-bold text-primary mb-2">D. Makna dan Pesan Karya</h4>
           <div class="space-y-4">
-            <div><label class="block text-xs font-bold mb-2">Makna / Filosofi</label><textarea id="spec-makna" rows="2" class="w-full bg-surface border rounded-xl px-4 py-2 text-sm" placeholder="Nilai atau filosofi yang ingin disampaikan..."></textarea></div>
-            <div><label class="block text-xs font-bold mb-2">Pesan untuk Penonton</label><textarea id="spec-pesan" rows="2" class="w-full bg-surface border rounded-xl px-4 py-2 text-sm" placeholder="Pesan moral / refleksi..."></textarea></div>
+            <div>
+              <label class="block text-xs font-bold mb-2">16. Apakah terdapat makna, filosofi, atau nilai tertentu yang ingin disampaikan melalui karya ini?</label>
+              <textarea id="spec-makna" rows="2" class="w-full bg-surface border rounded-xl px-4 py-2 text-sm" placeholder="Makna / filosofi / nilai"></textarea>
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-2">17. Apa pesan yang ingin disampaikan kepada penonton?</label>
+              <textarea id="spec-pesan" rows="2" class="w-full bg-surface border rounded-xl px-4 py-2 text-sm" placeholder="Pesan untuk penonton"></textarea>
+            </div>
           </div>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-primary/5 border border-primary/20 text-[11px] text-textMuted leading-relaxed">
+          <strong class="text-textMain block mb-1">Catatan Pengisian:</strong>
+          Gunakan bahasa sederhana sesuai pemahaman. Tidak harus menggunakan istilah teknis. Untuk pertanyaan yang tidak diketahui atau tidak relevan, boleh dikosongkan.
         </div>
       </div>
     `;
@@ -149,77 +201,125 @@ function recalculateLivePrice() {
   }
 }
 
-/* === GENERATE PROMPT AI DENGAN DATA DARI HTML LAMA === */
+/* === KUMPULKAN DATA FORMULIR TARI (17 PERTANYAAN) === */
+function collectTariFormData() {
+  const get = (id) => (document.getElementById(id)?.value || '').trim();
+  return {
+    judul:        get('field-judul'),
+    koreografer:  get('spec-koreografer'),
+    asal:         get('spec-asal'),
+    jenis:        get('field-jenis-tari'),
+    tema:         get('spec-tema'),
+    latar:        get('spec-latar'),
+    inspirasi:    get('spec-inspirasi'),
+    gagasan:      get('spec-gagasan'),
+    gambaran:     get('spec-gambaran'),
+    perkembangan: get('spec-perkembangan'),
+    karakter:     get('spec-karakter'),
+    sumberGerak:  get('spec-sumber-gerak'),
+    musik:        get('spec-musik'),
+    instrumen:    get('spec-instrumen'),
+    kostum:       get('spec-kostum'),
+    makna:        get('spec-makna'),
+    pesan:        get('spec-pesan')
+  };
+}
+
+/* === BANGUN PROMPT SINOPSIS KARYA TARI (template lengkap dari user) === */
+function buildTariSynopsisPrompt(data) {
+  const f = (v) => v && v.length ? v : '(belum diisi)';
+
+  return `PROMPT PENULISAN SINOPSIS KARYA TARI
+
+Bertindaklah sebagai seorang penulis, pengkaji seni tari, dan dramaturg yang memahami koreografi, etnokoreologi, serta penulisan karya seni pertunjukan.
+
+Buatlah sinopsis karya tari berdasarkan informasi dan konsep yang saya berikan. Susun tulisan secara profesional, sistematis, komunikatif, dan memiliki kedalaman artistik tanpa menggunakan bahasa yang berlebihan atau terlalu puitis.
+
+Sinopsis harus mencakup unsur-unsur berikut:
+
+1. Identitas Karya: Judul tari dan nama koreografer.
+2. Tema Karya: Pokok persoalan atau gagasan utama yang diangkat.
+3. Latar Belakang Penciptaan: Sumber inspirasi, fenomena, tradisi, budaya, atau pengalaman yang melandasi penciptaan karya.
+4. Ide dan Konsep Garapan: Gagasan artistik serta pendekatan penciptaan yang digunakan.
+5. Gambaran Isi Karya: Penjelasan mengenai substansi, alur, suasana, dan perkembangan dramatik atau artistik tarian dari awal hingga akhir.
+6. Konsep Gerak: Sumber gerak, karakteristik gerak, serta pengembangan atau eksplorasi gerak yang digunakan.
+7. Konsep Musik: Karakter musik pengiring, instrumen, pola musikal, dan hubungannya dengan gerak tari.
+8. Kostum dan Tata Rias: Gambaran visual busana dan tata rias serta relevansinya dengan konsep karya.
+9. Makna dan Pesan Karya: Nilai, filosofi, refleksi, atau pesan yang ingin disampaikan kepada penonton.
+
+Ketentuan Penulisan:
+
+- Gunakan bahasa Indonesia yang baik dan benar.
+- Gunakan gaya penulisan profesional untuk kebutuhan proposal, festival, pertunjukan, dan katalog karya tari.
+- Susun dalam bentuk narasi yang utuh dan mengalir, bukan sekadar daftar poin.
+- Hindari pengulangan gagasan, kalimat klise, dan ungkapan puitis yang tidak diperlukan.
+- Pastikan setiap informasi saling berkaitan dan membentuk identitas karya yang jelas.
+- Jangan mengarang informasi, filosofi, simbol, sejarah, atau makna yang tidak diberikan.
+- Apabila terdapat informasi yang belum tersedia, jangan membuat asumsi. Tandai bagian tersebut sebagai informasi yang perlu dilengkapi.
+- Bedakan secara jelas antara sumber inspirasi, konsep artistik, dan makna karya.
+- Jangan memaksakan seluruh unsur masuk apabila tidak relevan dengan karya.
+
+Hasil Akhir:
+Buat satu sinopsis tari yang utuh, padat, informatif, memiliki karakter artistik, dan mampu memberikan pemahaman kepada pembaca mengenai latar belakang, gagasan, bentuk penyajian, serta substansi karya tari.
+
+Panjang sinopsis disesuaikan dengan kebutuhan, dengan rekomendasi sekitar 150–250 kata.
+
+---
+
+FORMULIR DATA KARYA TARI
+Bahan penyusunan sinopsis karya tari
+
+A. IDENTITAS KARYA
+
+1. Judul karya tari: ${f(data.judul)}
+2. Nama koreografer/penata tari: ${f(data.koreografer)}
+3. Asal daerah/komunitas (jika ada): ${f(data.asal)}
+4. Jenis karya (Tari tradisi / Tari kreasi / Tari kontemporer): ${f(data.jenis)}
+
+B. KONSEP PENCIPTAAN
+
+5. Tema karya: ${f(data.tema)}
+6. Apa yang melatarbelakangi penciptaan karya ini?: ${f(data.latar)}
+7. Dari mana sumber inspirasi karya ini berasal?: ${f(data.inspirasi)}
+8. Apa gagasan utama yang ingin diangkat melalui tarian ini?: ${f(data.gagasan)}
+
+C. KONSEP GARAPAN
+
+9. Apa yang digambarkan atau diceritakan dalam tarian ini?: ${f(data.gambaran)}
+10. Bagaimana perkembangan penyajian tari dari awal, tengah, hingga akhir?: ${f(data.perkembangan)}
+11. Bagaimana karakter gerakan dalam tarian ini?: ${f(data.karakter)}
+12. Apakah gerakan tari bersumber dari gerak tradisi, aktivitas masyarakat, alam, kehidupan sehari-hari, atau hasil eksplorasi sendiri? Jelaskan: ${f(data.sumberGerak)}
+13. Musik pengiring: ${f(data.musik)}
+14. Alat musik/instrumen: ${f(data.instrumen)}
+15. Kostum dan tata rias: ${f(data.kostum)}
+
+D. MAKNA DAN PESAN KARYA
+
+16. Makna, filosofi, atau nilai tertentu yang ingin disampaikan: ${f(data.makna)}
+17. Pesan yang ingin disampaikan kepada penonton: ${f(data.pesan)}`;
+}
+
+/* === GENERATE SINOPSIS AI === */
 async function generateAISynopsis() {
   const judul = document.getElementById('field-judul').value;
-  const jenis = document.getElementById('field-jenis-tari').value;
-  
   if (!judul) return showToast('Info', 'Isi Judul Karya dulu.', 'warning');
   
   const btn = document.getElementById('btn-ai-synopsis'); 
   btn.innerHTML = 'Menyusun...'; 
   btn.disabled = true;
 
+  let promptText = '';
+
   try {
-    let promptText = "";
-    
     if (appState.selectedServiceLine === 'tari') {
-       const data = {
-          koreografer: document.getElementById('spec-koreografer')?.value || '',
-          asal: document.getElementById('spec-asal')?.value || '',
-          tema: document.getElementById('spec-tema')?.value || '',
-          latar: document.getElementById('spec-latar')?.value || '',
-          inspirasi: document.getElementById('spec-inspirasi')?.value || '',
-          gagasan: document.getElementById('spec-gagasan')?.value || '',
-          gambaran: document.getElementById('spec-gambaran')?.value || '',
-          perkembangan: document.getElementById('spec-perkembangan')?.value || '',
-          karakter: document.getElementById('spec-karakter')?.value || '',
-          sumber_gerak: document.getElementById('spec-sumber-gerak')?.value || '',
-          musik: document.getElementById('spec-musik')?.value || '',
-          instrumen: document.getElementById('spec-instrumen')?.value || '',
-          kostum: document.getElementById('spec-kostum')?.value || '',
-          makna: document.getElementById('spec-makna')?.value || '',
-          pesan: document.getElementById('spec-pesan')?.value || ''
-       };
-
-       promptText = `
-Anda adalah seorang penulis, pengkaji seni tari, dan dramaturg yang memahami koreografi, etnokoreologi, serta penulisan karya seni pertunjukan.
-Buatlah sinopsis karya tari berdasarkan data yang saya berikan di bawah ini.
-Susun tulisan secara profesional, sistematis, komunikatif, dan memiliki kedalaman artistik tanpa menggunakan bahasa yang berlebihan atau terlalu puitis.
-
-Data Karya:
-1. Identitas Karya: 
-   - Judul: ${judul}
-   - Koreografer: ${data.koreografer}
-   - Asal Daerah/Komunitas: ${data.asal}
-   - Jenis Karya: ${jenis}
-2. Tema Karya: ${data.tema}
-3. Latar Belakang Penciptaan: ${data.latar}
-4. Ide dan Konsep Garapan (Sumber Inspirasi): ${data.inspirasi}
-5. Gagasan Utama: ${data.gagasan}
-6. Gambaran Isi Karya: ${data.gambaran}
-7. Perkembangan Penyajian: ${data.perkembangan}
-8. Konsep Gerak: Karakter (${data.karakter}), Sumber Gerak (${data.sumber_gerak})
-9. Konsep Musik: ${data.musik} (Instrumen: ${data.instrumen})
-10. Kostum dan Tata Rias: ${data.kostum}
-11. Makna dan Filosofi: ${data.makna}
-12. Pesan Karya: ${data.pesan}
-
-Ketentuan Penulisan:
-- Gunakan bahasa Indonesia yang baik dan benar.
-- Gunakan gaya penulisan profesional untuk proposal, festival, pertunjukan, dan katalog karya tari.
-- Susun dalam bentuk narasi yang utuh dan mengalir (bukan daftar poin).
-- Hindari pengulangan gagasan, kalimat klise, dan ungkapan puitis yang tidak perlu.
-- Jangan mengarang informasi, filosofi, simbol, sejarah, atau makna yang tidak diberikan. Apabila ada bagian yang kosong, jangan buat asumsi.
-- Panjang sinopsis sekitar 150-250 kata.
-
-Hasil Akhir:
-Berikan HANYA teks sinopsisnya saja tanpa kalimat pengantar (seperti "Berikut adalah sinopsis...").
-       `;
+      const data = collectTariFormData();
+      promptText = buildTariSynopsisPrompt(data);
     } else if (appState.selectedServiceLine === 'digital') {
-       promptText = `Buat sinopsis singkat dan profesional untuk lagu "${judul}" dengan genre ${document.getElementById('spec-gaya')?.value || 'bebas'}, tema ${document.getElementById('spec-tema')?.value || 'kehidupan'}, dan nuansa ${document.getElementById('spec-nuansa')?.value || 'emosional'}.`;
+      const get = (id) => (document.getElementById(id)?.value || '').trim();
+      promptText = `Buat sinopsis singkat dan profesional untuk lagu "${judul}" dengan genre ${get('spec-gaya') || 'bebas'}, tema ${get('spec-tema') || 'kehidupan'}, dan nuansa ${get('spec-nuansa') || 'emosional'}.`;
     } else {
-       promptText = `Buatkan catatan transkripsi profesional untuk karya "${judul}" yang ditranskripsi untuk instrumen ${document.getElementById('spec-instrumen')?.value || 'musik'} dengan format ${document.getElementById('spec-format')?.value || 'notasi'}.`;
+      const get = (id) => (document.getElementById(id)?.value || '').trim();
+      promptText = `Buatkan catatan transkripsi profesional untuk karya "${judul}" yang ditranskripsi untuk instrumen ${get('spec-instrumen') || 'musik'} dengan format ${get('spec-format') || 'notasi'}.`;
     }
 
     if (!window.firebaseAI) throw new Error('Firebase AI tidak siap');
@@ -236,8 +336,12 @@ Berikan HANYA teks sinopsisnya saja tanpa kalimat pengantar (seperti "Berikut ad
     showToast('Mode Offline', 'Menggunakan draf offline. Silakan edit manual.', 'warning');
     
     if (appState.selectedServiceLine === 'tari') {
-      const tema = document.getElementById('spec-tema')?.value || 'kehidupan';
-      document.getElementById('field-sinopsis').value = `Karya tari berjudul "${judul}" ini merupakan sebuah interpretasi dari tema ${tema}. Melalui gerak yang dinamis dan penuh penghayatan, karya ini berusaha menyampaikan pesan estetis kepada penonton.\n\n*(Catatan: Sinopsis ini di-generate secara offline karena sistem AI sedang sibuk. Silakan edit bagian ini secara manual untuk melengkapinya).*`;
+      const d = collectTariFormData();
+      document.getElementById('field-sinopsis').value =
+        `Karya tari berjudul "${judul || '(judul belum diisi)'}" karya ${d.koreografer || '(koreografer belum diisi)'} ini mengangkat tema ${d.tema || '(tema belum diisi)'}. ` +
+        (d.gambaran ? `Karya ini menggambarkan ${d.gambaran}. ` : '') +
+        (d.pesan ? `Pesan yang ingin disampaikan adalah ${d.pesan}.` : '') +
+        `\n\n*(Mode Offline — silakan lengkapi/edit manual. Prompt lengkap telah disiapkan berdasarkan FORMULIR DATA KARYA TARI.)*`;
     } else {
       document.getElementById('field-sinopsis').value = `Karya "${judul}" yang memukau dengan pendekatan musikal yang unik.\n\n*(Mode Offline)*`;
     }
@@ -257,14 +361,30 @@ async function handleOrderFormSubmit(e) {
   const specs = [];
   
   if (appState.selectedServiceLine === 'tari') {
-    specs.push({ key: 'Koreografer', val: document.getElementById('spec-koreografer')?.value });
-    specs.push({ key: 'Tema', val: document.getElementById('spec-tema')?.value });
-    specs.push({ key: 'Jenis Karya', val: document.getElementById('field-jenis-tari')?.value });
+    const d = collectTariFormData();
+    specs.push({ key: 'Koreografer', val: d.koreografer });
+    specs.push({ key: 'Asal/ Komunitas', val: d.asal });
+    specs.push({ key: 'Jenis Karya', val: d.jenis });
+    specs.push({ key: 'Tema', val: d.tema });
+    specs.push({ key: 'Latar Belakang', val: d.latar });
+    specs.push({ key: 'Sumber Inspirasi', val: d.inspirasi });
+    specs.push({ key: 'Gagasan Utama', val: d.gagasan });
+    specs.push({ key: 'Gambaran Isi', val: d.gambaran });
+    specs.push({ key: 'Perkembangan', val: d.perkembangan });
+    specs.push({ key: 'Karakter Gerak', val: d.karakter });
+    specs.push({ key: 'Sumber Gerak', val: d.sumberGerak });
+    specs.push({ key: 'Musik Pengiring', val: d.musik });
+    specs.push({ key: 'Instrumen', val: d.instrumen });
+    specs.push({ key: 'Kostum & Tata Rias', val: d.kostum });
+    specs.push({ key: 'Makna/Filosofi', val: d.makna });
+    specs.push({ key: 'Pesan', val: d.pesan });
   } else if (appState.selectedServiceLine === 'digital') {
     specs.push({ key: 'Tema', val: document.getElementById('spec-tema')?.value });
     specs.push({ key: 'Genre', val: document.getElementById('spec-gaya')?.value });
+    specs.push({ key: 'Nuansa', val: document.getElementById('spec-nuansa')?.value });
   } else {
     specs.push({ key: 'Instrumen', val: document.getElementById('spec-instrumen')?.value });
+    specs.push({ key: 'Format', val: document.getElementById('spec-format')?.value });
   }
 
   const videoLink = document.getElementById('field-video-link')?.value || '';
