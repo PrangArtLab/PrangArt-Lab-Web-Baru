@@ -1,391 +1,958 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PrangArt Lab — Music Production Studio</title>
-  <script>
-    (() => {
-      const theme = localStorage.getItem('prangart_theme') || 'auto';
-      if (theme === 'dark' || (theme === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.classList.add('dark');
-    })();
-  </script>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
-  <script src="https://www.google.com/recaptcha/api.js?render=6LeDaSEuAAAAAIDdp1Ir_V-wkmOXE-e8imq9Alzj"></script>
-  <script>window.__recaptchaSiteKey = '6LeDaSEuAAAAAIDdp1Ir_V-wkmOXE-e8imq9Alzj';</script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = { darkMode: 'class', theme: { extend: {
-      colors: { base:'rgb(var(--base) / <alpha-value>)', surface:'rgb(var(--surface) / <alpha-value>)', panel:'rgb(var(--panel) / <alpha-value>)', primary:'rgb(var(--primary) / <alpha-value>)', accent:'rgb(var(--accent) / <alpha-value>)', textMain:'rgb(var(--text-main) / <alpha-value>)', textMuted:'rgb(var(--text-muted) / <alpha-value>)', border:'rgb(var(--border) / <alpha-value>)' },
-      fontFamily: { sans:['"Plus Jakarta Sans"','sans-serif'], display:['"Space Grotesk"','sans-serif'], mono:['"JetBrains Mono"','monospace'] },
-      boxShadow: { glow:'0 0 25px -5px rgba(var(--primary), 0.5)', 'glow-hover':'0 0 35px -2px rgba(var(--primary), 0.6)', premium:'0 10px 40px -10px rgba(0,0,0,0.1)' }
-    } } };
-  </script>
-  <link rel="stylesheet" href="css/styles.css" />
-</head>
-<body class="min-h-screen flex flex-col bg-base text-textMain selection:bg-primary selection:text-white transition-colors duration-300 antialiased">
-  <div id="toast-container" class="fixed top-4 right-4 z-[90] flex flex-col gap-2.5 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+const AI_QUOTA_STORAGE_KEY = 'prangart_ai_synopsis_quota_v1';
+const AI_DAILY_LIMIT = 2;
+const AI_COOLDOWN_MS = 10 * 60 * 1000; // 10 menit
+
+function getTodayDateString() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+}
+
+function getUserAIQuotaState() {
+  const email = appState.currentClientUser?.email || 'guest';
+  const today = getTodayDateString();
+  try {
+    const raw = JSON.parse(localStorage.getItem(AI_QUOTA_STORAGE_KEY) || '{}');
+    const record = raw[email];
+    if (!record || record.date !== today) {
+      return { date: today, count: 0, lastTimestamp: 0 };
+    }
+    return {
+      date: today,
+      count: Number(record.count || 0),
+      lastTimestamp: Number(record.lastTimestamp || 0)
+    };
+  } catch (_) {
+    return { date: today, count: 0, lastTimestamp: 0 };
+  }
+}
+
+function saveUserAIQuotaState(state) {
+  const email = appState.currentClientUser?.email || 'guest';
+  try {
+    const raw = JSON.parse(localStorage.getItem(AI_QUOTA_STORAGE_KEY) || '{}');
+    raw[email] = state;
+    localStorage.setItem(AI_QUOTA_STORAGE_KEY, JSON.stringify(raw));
+  } catch (_) {}
+}
+
+function updateAIQuotaBanner() {
+  const banner = document.getElementById('ai-quota-status-banner');
+  if (!banner) return;
+  const q = getUserAIQuotaState();
+  const remaining = Math.max(0, AI_DAILY_LIMIT - q.count);
+  const now = Date.now();
+  const elapsed = now - q.lastTimestamp;
+
+  let cooldownText = 'Siap digunakan sekarang';
+  if (remaining === 0) {
+    cooldownText = 'Kuota harian habis (reset besok)';
+  } else if (q.lastTimestamp > 0 && elapsed < AI_COOLDOWN_MS) {
+    const waitSec = Math.ceil((AI_COOLDOWN_MS - elapsed) / 1000);
+    const min = Math.floor(waitSec / 60);
+    const sec = waitSec % 60;
+    cooldownText = `Jeda aktif — tunggu ${min} menit ${sec} detik lagi`;
+  }
+
+  banner.textContent = `Kuota Generate AI Hari Ini: ${q.count}/${AI_DAILY_LIMIT} terpakai (Sisa: ${remaining}x) • Status: ${cooldownText}`;
+}
+
+function openProductionAgreementModal() {
+  const modal = document.getElementById('custom-modal');
+  const titleEl = document.getElementById('custom-modal-title');
+  const bodyEl = document.getElementById('custom-modal-body');
+  if (!modal || !titleEl || !bodyEl) return;
+
+  titleEl.textContent = 'Perjanjian Produksi Musik — PrangArt Studios';
+  bodyEl.innerHTML = `
+    <div class="space-y-4 text-xs sm:text-[13px] text-textMuted max-h-[65vh] overflow-y-auto pr-2 leading-relaxed">
+      <div class="p-4 rounded-xl bg-primary/5 border border-primary/20 text-textMain">
+        <strong>Ketentuan Umum Perjanjian Kerja Sama Produksi Musik PrangArt Studios</strong>
+      </div>
+      <p><strong class="text-textMain">Pasal 1 — Ruang Lingkup Pekerjaan:</strong> PrangArt Studios bertindak sebagai Pihak Pertama (Produser/Komposer) melaksanakan produksi karya musik sesuai layanan, paket, durasi, dan spesifikasi yang disepakati bersama Pihak Kedua (Klien).</p>
+      <p><strong class="text-textMain">Pasal 2 — Biaya &amp; Skema Pembayaran:</strong> Pembayaran Uang Muka (DP) sebesar 50% dibayarkan sebelum proses produksi dimulai. Pelunasan sisa 50% dilakukan sebelum file master final (WAV/MP3 kualitas penuh) diserahkan kepada Klien.</p>
+      <p><strong class="text-textMain">Pasal 3 — Ketentuan Revisi:</strong> Revisi diberikan sesuai kuota paket yang dipilih (Paket Dasar maks. 3x revisi minor; Paket Standar sesuai kesepakatan; Paket Pro UNLIMITED revisi dalam batas waktu maksimal 1 bulan setelah draf pertama dikirim). Perubahan konsep total di luar kesepakatan awal dihitung sebagai pesanan baru/biaya tambahan.</p>
+      <p><strong class="text-textMain">Pasal 4 — Hak Cipta &amp; Kredit Karya:</strong> Hak moral tetap melekat pada Komposer/PrangArt Studios. Klien berhak menggunakan karya musik untuk kebutuhan pementasan, lomba, atau publikasi sesuai peruntukan dengan tetap mencantumkan kredit musik <em>"Music by PrangArt Studios"</em>.</p>
+      <p><strong class="text-textMain">Pasal 5 — Pembatalan &amp; Keterlambatan:</strong> Pembatalan sepihak oleh Klien menyebabkan DP tidak dapat dikembalikan (non-refundable). Apabila terjadi keterlambatan penyerahan dari jadwal yang disepakati tanpa konfirmasi dari PrangArt Studios, Klien berhak atas potongan 1–2% per hari dari sisa pelunasan (maksimal 10%).</p>
+      <p class="text-[11px] italic text-textMain pt-2 border-t border-border/60">*Dokumen kontrak resmi lengkap dengan identitas pemesan akan diterbitkan setelah formulir ini dikirimkan.</p>
+    </div>
+    <div class="mt-5 flex justify-end">
+      <button type="button" onclick="closeCustomModal()" class="btn-primary px-6 py-2.5 rounded-xl text-xs font-bold">Saya Mengerti</button>
+    </div>
+  `;
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+}
+
+function refreshOrderPageUI() {
+  selectServiceLine(appState.selectedServiceLine);
+}
+
+function setSynopsisMode(mode) {
+  appState.synopsisMode = mode;
+  const btnManual = document.getElementById('btn-mode-manual');
+  const btnAi = document.getElementById('btn-mode-ai');
+  const aiWrap = document.getElementById('ai-action-wrapper');
+  if(!btnManual || !btnAi || !aiWrap) return;
+
+  if (mode === 'manual') {
+    btnManual.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-surface text-textMain shadow-sm transition';
+    btnAi.className = 'px-3 py-1.5 rounded-lg text-xs font-bold text-textMuted hover:text-textMain transition';
+    aiWrap.classList.add('hidden');
+  } else {
+    btnAi.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-primary text-white shadow-sm transition';
+    btnManual.className = 'px-3 py-1.5 rounded-lg text-xs font-bold text-textMuted hover:text-textMain transition';
+    renderAIDetailForm();
+    updateAIQuotaBanner();
+    aiWrap.classList.remove('hidden');
+  }
+}
+
+function selectServiceLine(svcKey) {
+  appState.selectedServiceLine = svcKey; 
+  appState.customPrice = null;
+  const inp = document.getElementById('custom-price-input');
+  if(inp) inp.value = '';
   
-  <header class="sticky top-0 z-50 glass-panel border-b border-border/50 transition-all duration-300">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
-      <button type="button" onclick="navigateTo('home')" class="flex items-center gap-4 text-left group shrink-0">
-        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-primary to-accent p-[2px] shadow-glow group-hover:scale-105 transition-all duration-300">
-          <div class="w-full h-full rounded-xl bg-white flex items-center justify-center overflow-hidden p-1">
-            <img src="https://iili.io/o9B6HXa.md.png" alt="PrangArt Lab" class="w-full h-full object-contain" />
+  document.querySelectorAll('.svc-tab-btn').forEach(b => b.className = 'svc-tab-btn p-4 rounded-2xl border border-border bg-panel text-textMuted text-left');
+  const active = document.getElementById(`svc-tab-${svcKey}`);
+  if(active) active.className = 'svc-tab-btn p-4 rounded-2xl border border-primary bg-primary/10 text-primary text-left shadow-glow';
+
+  // Tampilkan kotak perjanjian produksi untuk Musik Tari & Non-Tari
+  const contractBox = document.getElementById('contract-agreement-box');
+  const contractCheck = document.getElementById('field-contract-agree');
+  const requiresContract = (svcKey === 'tari' || svcKey === 'digital');
+  if (contractBox && contractCheck) {
+    contractBox.classList.toggle('hidden', !requiresContract);
+    contractCheck.required = requiresContract;
+  }
+
+  renderIdentityFields();
+  if (appState.synopsisMode === 'ai') renderAIDetailForm();
+  renderPackageCards(); 
+  renderDynamicSpecFields(); 
+  recalculateLivePrice();
+}
+
+function toggleJenisTariOther(val) {
+  const wrap = document.getElementById('jenis-tari-other-wrap');
+  const inp = document.getElementById('field-jenis-tari-other');
+  if (!wrap || !inp) return;
+  if (val === 'Lain-lain') {
+    wrap.classList.remove('hidden');
+    inp.required = true;
+  } else {
+    wrap.classList.add('hidden');
+    inp.required = false;
+    inp.value = '';
+  }
+}
+
+/* === IDENTITAS PEMESAN & DATA DASAR KARYA === */
+function renderIdentityFields() {
+  const container = document.getElementById('identity-fields-container');
+  if (!container) return;
+  const svc = appState.selectedServiceLine;
+  const user = appState.currentClientUser || {};
+
+  if (svc === 'tari') {
+    container.innerHTML = `
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-bold mb-2">Nama Sanggar / Komunitas / Instansi / Individu *</label>
+          <input id="field-sanggar" required value="${user.name || ''}" placeholder="Cth: Sanggar Seni Budaya / Nama Individu" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold mb-2">Kota, Provinsi *</label>
+          <input id="field-kota-provinsi" required placeholder="Cth: Samarinda, Kalimantan Timur" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold mb-2">Nomor WhatsApp Aktif *</label>
+          <input type="tel" id="field-wa" required value="${user.wa || ''}" placeholder="Cth: 081234567890" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold mb-2">Email *</label>
+          <input type="email" id="field-email" required value="${user.email || ''}" placeholder="email@contoh.com" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold mb-2">Nama Lengkap Koreografer *</label>
+          <input id="field-koreografer" required placeholder="Nama lengkap penata tari" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold mb-2">Judul Tari / Nama Karya *</label>
+          <input id="field-judul" required placeholder="Judul karya tari" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold mb-2">Jenis Tari *</label>
+          <select id="field-jenis-tari" required onchange="toggleJenisTariOther(this.value)" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm">
+            <option value="Tari tradisional">Tari tradisional</option>
+            <option value="Tari kreasi">Tari kreasi</option>
+            <option value="Lain-lain">Lain-lain (Isi manual)</option>
+          </select>
+          <div id="jenis-tari-other-wrap" class="hidden mt-2">
+            <input id="field-jenis-tari-other" placeholder="Tuliskan jenis tari Anda..." class="w-full bg-panel border border-border rounded-xl px-4 py-2.5 text-sm" />
           </div>
         </div>
-        <div class="hidden sm:block">
-          <span class="font-display font-bold text-xl tracking-tight text-textMain block leading-none">PrangArt <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">Lab</span></span>
-          <span class="text-[10px] font-mono uppercase tracking-widest text-textMuted block mt-1">Production Studio</span>
+        <div>
+          <label class="block text-xs font-bold mb-2">Latar Belakang Budaya / Daerah Tari *</label>
+          <input id="field-budaya-daerah" required placeholder="Cth: Budaya Kutai / Dayak Kenyah / Melayu" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
         </div>
-      </button>
-
-      <nav class="hidden md:flex items-center gap-1 bg-panel border border-border/80 rounded-2xl p-1.5 shadow-sm">
-        <button type="button" id="nav-home" onclick="navigateTo('home')" class="nav-pill px-5 py-2 rounded-xl text-sm font-semibold transition-all">Beranda</button>
-        <button type="button" id="nav-portfolio" onclick="navigateTo('portfolio')" class="nav-pill px-5 py-2 rounded-xl text-sm font-semibold transition-all">Portofolio</button>
-        <button type="button" id="nav-client" onclick="navigateTo('client')" class="nav-pill px-5 py-2 rounded-xl text-sm font-semibold transition-all">Ruang Klien</button>
-        <button type="button" id="nav-admin" onclick="navigateTo('admin')" class="nav-pill px-5 py-2 rounded-xl text-sm font-semibold transition-all">Admin</button>
-      </nav>
-
-      <div class="flex items-center gap-3 shrink-0">
-        <div class="relative">
-          <button type="button" onclick="toggleThemeDropdown()" aria-label="Pilih tema" class="p-2.5 rounded-xl bg-panel border border-border/80 hover:border-primary/50 text-textMain transition-all shadow-sm flex items-center justify-center">
-            <svg id="theme-icon-dark" class="hidden w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
-            <svg id="theme-icon-light" class="hidden w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path stroke-linecap="round" stroke-width="2" d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg>
-            <svg id="theme-icon-auto" class="hidden w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="14" rx="2"/><path stroke-linecap="round" stroke-width="2" d="M8 22h8m-4-4v4"/></svg>
-          </button>
-          <div id="theme-dropdown" class="hidden absolute right-0 mt-3 w-40 bg-surface border border-border rounded-2xl shadow-premium overflow-hidden z-50">
-            <button type="button" onclick="setTheme('light')" class="w-full text-left px-4 py-3 text-xs font-semibold text-textMain hover:bg-panel hover:text-primary transition">Mode Terang</button>
-            <button type="button" onclick="setTheme('dark')" class="w-full text-left px-4 py-3 text-xs font-semibold text-textMain hover:bg-panel hover:text-primary transition">Mode Gelap</button>
-            <button type="button" onclick="setTheme('auto')" class="w-full text-left px-4 py-3 text-xs font-semibold text-textMain hover:bg-panel hover:text-primary transition">Ikuti Perangkat</button>
-          </div>
+        <div class="sm:col-span-2">
+          <label class="block text-xs font-bold mb-2">Estimasi Durasi Tari (MM:SS) *</label>
+          <input id="field-durasi" required placeholder="Cth: 05:30" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
         </div>
-        <div id="header-auth-status"></div>
+      </div>
+    `;
+  } else {
+    container.innerHTML = `
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-bold mb-2">Nama Lengkap Pemesan / Instansi *</label>
+          <input id="field-sanggar" required value="${user.name || ''}" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold mb-2">Nomor WhatsApp Aktif *</label>
+          <input type="tel" id="field-wa" required value="${user.wa || ''}" placeholder="081234567890" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold mb-2">Email *</label>
+          <input type="email" id="field-email" required value="${user.email || ''}" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold mb-2">Judul Karya *</label>
+          <input id="field-judul" required class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
+        </div>
+        <div class="sm:col-span-2">
+          <label class="block text-xs font-bold mb-2">Estimasi Durasi (MM:SS) *</label>
+          <input id="field-durasi" required placeholder="04:00" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
+        </div>
+      </div>
+    `;
+  }
+}
+
+function renderPackageCards() {
+  const grid = document.getElementById('package-cards-grid'); if(!grid) return;
+  const svc = appState.serviceCatalog[appState.selectedServiceLine];
+  
+  grid.innerHTML = Object.entries(svc.packages).map(([k, p]) => {
+    const sel = appState.selectedPackage === k && !appState.customPrice;
+    return `<button type="button" onclick="selectPackageTier('${k}')" class="p-5 rounded-2xl border text-left flex flex-col justify-between h-full ${sel ? 'border-primary bg-primary/10' : 'border-border bg-surface'}">
+      <div class="mb-3">
+        <span class="text-sm font-bold text-textMain block">${p.label}</span>
+        <span class="text-lg font-mono text-primary block mt-1">${formatRupiah(p.price)}</span>
+      </div>
+      <span class="text-[11px] text-textMuted leading-relaxed">${p.desc}</span>
+    </button>`;
+  }).join('');
+}
+
+function selectPackageTier(k) { 
+  appState.selectedPackage = k; 
+  appState.customPrice = null; 
+  const inp = document.getElementById('custom-price-input');
+  if (inp) inp.value = ''; 
+  renderPackageCards(); 
+  renderDynamicSpecFields(); 
+  recalculateLivePrice(); 
+}
+
+function handleCustomPrice(v) { 
+  appState.customPrice = (v && Number(v) > 0) ? Number(v) : null; 
+  renderPackageCards(); 
+  renderDynamicSpecFields(); 
+  recalculateLivePrice(); 
+}
+
+function toggleNuansaOtherInput(val) {
+  const wrap = document.getElementById('nuansa-other-wrapper');
+  const inp = document.getElementById('spec-nuansa-other');
+  if (!wrap || !inp) return;
+  if (val === 'Other') {
+    wrap.classList.remove('hidden');
+    inp.required = true;
+  } else {
+    wrap.classList.add('hidden');
+    inp.required = false;
+    inp.value = '';
+  }
+}
+
+/* === BARIS DINAMIS PAKET STANDAR (+ TAMBAH BAGIAN) === */
+function addStandarSegmentRow(preset = {}) {
+  const list = document.getElementById('standar-segments-list');
+  if (!list) return;
+  const idx = list.children.length + 1;
+  const row = document.createElement('div');
+  row.className = 'standar-segment-item p-4 rounded-xl bg-surface border border-border/80 space-y-3';
+  row.innerHTML = `
+    <div class="flex items-center justify-between">
+      <span class="text-xs font-mono font-bold text-primary segment-title">Bagian #${idx}</span>
+      ${idx > 1 ? `<button type="button" onclick="removeSegmentRow(this, 'standar-segments-list')" class="text-xs text-red-500 hover:underline font-semibold">Hapus</button>` : ''}
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div>
+        <label class="block text-[11px] font-bold mb-1">Perkiraan Durasi (Dari – Sampai) *</label>
+        <input type="text" required class="seg-durasi w-full bg-panel border border-border rounded-lg px-3 py-2 text-xs font-mono" placeholder="Cth: 00:00 – 00:30" value="${preset.durasi || ''}" />
+      </div>
+      <div>
+        <label class="block text-[11px] font-bold mb-1">Struktur / Nama Adegan *</label>
+        <input type="text" required class="seg-struktur w-full bg-panel border border-border rounded-lg px-3 py-2 text-xs" placeholder="Cth: Opening / Klimaks" value="${preset.struktur || ''}" />
+      </div>
+      <div>
+        <label class="block text-[11px] font-bold mb-1">Nuansa Musik &amp; Tempo *</label>
+        <input type="text" required class="seg-nuansa w-full bg-panel border border-border rounded-lg px-3 py-2 text-xs" placeholder="Cth: Misterius, tempo lambat" value="${preset.nuansa || ''}" />
+      </div>
+      <div>
+        <label class="block text-[11px] font-bold mb-1">Tautan / Link Referensi Bagian Ini (Opsional)</label>
+        <input type="url" class="seg-link w-full bg-panel border border-border rounded-lg px-3 py-2 text-xs" placeholder="https://drive.google.com/..." value="${preset.link || ''}" />
       </div>
     </div>
-  </header>
+  `;
+  list.appendChild(row);
+}
 
-  <main class="flex-1 relative">
-    <section id="page-home" class="page-section page-dissolve">
-      <div class="home-hero relative overflow-hidden bg-surface text-center">
-        <h1 class="font-display font-bold text-textMain">Wujudkan <span>Musik Impian</span></h1>
-        <p class="text-textMuted mx-auto">Konsultasikan konsep karya Anda terlebih dahulu.</p>
-        <div class="home-hero-actions flex justify-center">
-          <button type="button" onclick="openProducerWaModal('Diskusi')" class="btn-primary font-bold">Diskusi WA</button>
-          <button type="button" onclick="navigateTo('client')" class="btn-outline font-bold">Masuk Klien</button>
-        </div>
+/* === BARIS DINAMIS PAKET PRO (+ TAMBAH VIDEO / TEMPO) === */
+function addProSegmentRow(preset = {}) {
+  const list = document.getElementById('pro-segments-list');
+  if (!list) return;
+  const idx = list.children.length + 1;
+  const row = document.createElement('div');
+  row.className = 'pro-segment-item p-4 rounded-xl bg-surface border border-border/80 space-y-3';
+  row.innerHTML = `
+    <div class="flex items-center justify-between">
+      <span class="text-xs font-mono font-bold text-primary segment-title">Video / Tempo #${idx}</span>
+      ${idx > 1 ? `<button type="button" onclick="removeSegmentRow(this, 'pro-segments-list')" class="text-xs text-red-500 hover:underline font-semibold">Hapus</button>` : ''}
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div>
+        <label class="block text-[11px] font-bold mb-1">Label Video / Bagian *</label>
+        <input type="text" required class="pro-label w-full bg-panel border border-border rounded-lg px-3 py-2 text-xs" placeholder="Cth: Video 1 / Tempo 1" value="${preset.label || ''}" />
       </div>
-      <section class="home-services">
-        <div class="home-section-wrap">
-          <header class="home-section-heading"><span class="home-kicker">Layanan utama</span><h2>Musik yang siap menyatu dengan cerita Anda.</h2></header>
-          <div class="home-service-grid">
-            <article class="home-service-card card-tari"><span class="service-tag">Musik Tari</span><h3>Komposisi untuk pertunjukan</h3><p>Skor atau aransemen yang disesuaikan dengan tempo, karakter, dan momen penampilan.</p></article>
-            <article class="home-service-card card-digital"><span class="service-tag">Aransemen</span><h3>Audio untuk video, brand, dan konten digital</h3><p>Musik yang fleksibel untuk mendukung presentasi maupun promosi digital.</p></article>
-            <article class="home-service-card card-transkripsi"><span class="service-tag">Transkripsi</span><h3>Ubah karya audio menjadi struktur musik yang jelas</h3><p>Format tertulis untuk dokumentasi, analisis, maupun kebutuhan produksi.</p></article>
-          </div>
-        </div>
-      </section>
-      <section class="home-portfolio">
-        <div class="home-section-wrap">
-          <header class="home-section-heading"><span class="home-kicker">Portofolio</span><h2>Hasil kerja yang terasa hidup dan berkarakter.</h2></header>
-          <div class="portfolio-grid"></div>
-        </div>
-      </section>
-      <section class="home-testimonials">
-        <div class="home-section-wrap">
-          <header class="home-section-heading"><span class="home-kicker">Testimoni</span><h2>Proses yang jelas, hasil yang berkesan.</h2></header>
-          <div class="testimonial-grid"></div>
-        </div>
-      </section>
-      <section class="home-cta">
-        <div class="home-cta-inner">
-          <div><span class="home-kicker">Mulai proyek</span><h2>Siap membangun musik yang cocok dengan visi Anda?</h2></div>
-          <button type="button" onclick="openProducerWaModal('Diskusi Proyek')" class="btn-primary font-bold">Diskusi Proyek</button>
-        </div>
-      </section>
-    </section>
+      <div>
+        <label class="block text-[11px] font-bold mb-1">Tempo (BPM) *</label>
+        <input type="text" required class="pro-bpm w-full bg-panel border border-border rounded-lg px-3 py-2 text-xs font-mono" placeholder="Cth: 120 BPM" value="${preset.bpm || ''}" />
+      </div>
+      <div>
+        <label class="block text-[11px] font-bold mb-1">Durasi (Dari – Sampai) *</label>
+        <input type="text" required class="pro-durasi w-full bg-panel border border-border rounded-lg px-3 py-2 text-xs font-mono" placeholder="Cth: 00:00 – 01:10" value="${preset.durasi || ''}" />
+      </div>
+    </div>
+    <div>
+      <label class="block text-[11px] font-bold mb-1">Tautan Video Google Drive Bagian Ini (Jika diperlukan)</label>
+      <input type="url" class="pro-link w-full bg-panel border border-border rounded-lg px-3 py-2 text-xs" placeholder="https://drive.google.com/..." value="${preset.link || ''}" />
+    </div>
+    <div>
+      <label class="block text-[11px] font-bold mb-1">Urutan Nuansa Musik &amp; Keterangan Masuknya Tari *</label>
+      <textarea rows="2" required class="pro-desc w-full bg-panel border border-border rounded-lg px-3 py-2 text-xs" placeholder="Cth: 00:00–00:30 Nuansa misterius lambat; 00:30–01:10 Mulai energik perkusi masuk...">${preset.desc || ''}</textarea>
+    </div>
+  `;
+  list.appendChild(row);
+}
 
-    <section id="page-portfolio" class="page-section hidden bg-base"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16"><span class="home-kicker">Portofolio</span><h1 class="text-4xl font-display font-bold mt-3">Karya pilihan</h1><div id="portfolio-grid" class="grid md:grid-cols-3 gap-5 mt-8"></div></div></section>
+function removeSegmentRow(btn, listId) {
+  const item = btn.closest('.standar-segment-item, .pro-segment-item');
+  if (item) item.remove();
+  const list = document.getElementById(listId);
+  if (!list) return;
+  Array.from(list.children).forEach((el, i) => {
+    const title = el.querySelector('.segment-title');
+    if (title) {
+      title.textContent = listId === 'pro-segments-list' ? `Video / Tempo #${i + 1}` : `Bagian #${i + 1}`;
+    }
+  });
+}
 
-    <section id="page-client" class="page-section hidden page-dissolve bg-base">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-        <div id="client-login-wall" class="max-w-md mx-auto bg-surface border border-border/80 rounded-[2rem] p-8 md:p-10 shadow-premium">
-          <div class="text-center mb-8"><h2 class="text-3xl font-display font-bold">Ruang Klien</h2><p class="text-textMuted text-sm mt-2">Masuk untuk melihat proyek Anda.</p></div>
-          <form onsubmit="handleClientPortalLogin(event)" class="space-y-4">
-            <div><label class="block text-xs font-bold mb-2">Email</label><input type="email" id="portal-login-email" required class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3.5 text-sm" /></div>
+/* === LANGKAH 02: SPESIFIKASI SESUAI PAKET (DASAR / STANDAR / PRO) + OPSI SORAK === */
+function renderDynamicSpecFields() {
+  const c = document.getElementById('dynamic-spec-fields'); if(!c) return;
+  const svc = appState.selectedServiceLine;
+  const pkg = appState.selectedPackage; // 'dasar' | 'standar' | 'pro'
+  
+  const sorakOptionHTML = `
+    <div class="p-5 bg-panel border border-border/60 rounded-2xl space-y-3">
+      <label class="block text-xs font-bold">Tambahan Sorak (Opsi untuk Semua Paket) *</label>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <label class="flex items-center gap-3 p-3.5 rounded-xl bg-surface border border-border cursor-pointer hover:border-primary transition">
+          <input type="radio" name="spec-sorak" value="Tidak Perlu Sorak" checked class="w-4 h-4 accent-primary" />
+          <span class="text-xs font-semibold">Tidak Perlu Sorak</span>
+        </label>
+        <label class="flex items-center gap-3 p-3.5 rounded-xl bg-surface border border-border cursor-pointer hover:border-primary transition">
+          <input type="radio" name="spec-sorak" value="Ya, Tambahkan Sorak" class="w-4 h-4 accent-primary" />
+          <span class="text-xs font-semibold">Ya, Tambahkan Sorak</span>
+        </label>
+      </div>
+    </div>
+  `;
+
+  if (svc === 'tari') {
+    if (pkg === 'dasar') {
+      c.innerHTML = `
+        <div class="space-y-5">
+          <div class="p-5 bg-panel border border-border/60 rounded-2xl space-y-4">
+            <span class="text-[11px] font-mono uppercase text-primary font-bold block">Spesifikasi Paket Dasar</span>
             <div>
-              <label class="block text-xs font-bold mb-2">Kata Sandi</label>
-              <div class="relative">
-                <input type="password" id="portal-login-pass" required class="w-full bg-panel border border-border/80 rounded-xl px-4 py-3.5 text-sm pr-12" />
-                <button type="button" onclick="togglePasswordVisibility('portal-login-pass', 'login-eye-show', 'login-eye-hide')" class="absolute inset-y-0 right-0 pr-4 flex items-center text-textMuted hover:text-primary transition">
-                  <svg id="login-eye-show" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                  <svg id="login-eye-hide" class="hidden w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
+              <label class="block text-xs font-bold mb-2">Nuansa Musik yang Diinginkan *</label>
+              <select id="spec-nuansa-dasar" required onchange="toggleNuansaOtherInput(this.value)" class="w-full bg-surface border border-border rounded-xl px-4 py-3 text-sm">
+                <option value="Sakral / Ritual">Sakral / Ritual</option>
+                <option value="Ceria / Enerjik">Ceria / Enerjik</option>
+                <option value="Dramatis">Dramatis</option>
+                <option value="Misterius">Misterius</option>
+                <option value="Other">Other (Tulis sendiri)</option>
+              </select>
+            </div>
+            <div id="nuansa-other-wrapper" class="hidden">
+              <label class="block text-xs font-bold mb-2">Sebutkan Nuansa Musik Lainnya *</label>
+              <input id="spec-nuansa-other" class="w-full bg-surface border border-border rounded-xl px-4 py-3 text-sm" placeholder="Cth: Syahdu, Megah, Melankolis..." />
+            </div>
+          </div>
+          ${sorakOptionHTML}
+        </div>
+      `;
+    } else if (pkg === 'standar') {
+      c.innerHTML = `
+        <div class="space-y-5">
+          <div class="p-5 bg-panel border border-border/60 rounded-2xl space-y-5">
+            <span class="text-[11px] font-mono uppercase text-primary font-bold block">Spesifikasi Paket Standar</span>
+
+            <!-- STRUKTUR TARI MULTI-PILIH + TAMBAH MANUAL -->
+            <div class="space-y-3">
+              <label class="block text-xs font-bold">Struktur Tari (Bisa pilih lebih dari 1 dan tambah manual) *</label>
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                ${['Opening', 'Orientasi Suasana Cerita', 'Bagian Tengah', 'Klimaks', 'Penutup'].map(st => `
+                  <label class="flex items-center gap-2.5 p-3 rounded-xl bg-surface border border-border cursor-pointer hover:border-primary transition">
+                    <input type="checkbox" name="spec-struktur-check" value="${st}" class="w-4 h-4 accent-primary" />
+                    <span class="text-xs font-semibold">${st}</span>
+                  </label>
+                `).join('')}
+              </div>
+              <div>
+                <label class="block text-[11px] text-textMuted mb-1">Pilihan Struktur Lainnya (Manual, pisahkan dengan koma jika lebih dari satu):</label>
+                <input id="spec-struktur-manual" class="w-full bg-surface border border-border rounded-xl px-4 py-2.5 text-sm" placeholder="Cth: Transisi Adat, Epilog, Dialog Gerak..." />
+              </div>
+            </div>
+
+            <!-- URUTAN NUANSA MUSIK PER BAGIAN + LINK & DURASI -->
+            <div class="space-y-3 pt-3 border-t border-border/60">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <label class="block text-xs font-bold">Urutan Nuansa Musik Berdasarkan Struktur Tari *</label>
+                  <p class="text-[11px] text-textMuted">Sertakan perkiraan waktu adegan (dari – sampai), tempo, dan tautan referensi per bagian jika ada.</p>
+                </div>
+                <button type="button" onclick="addStandarSegmentRow()" class="px-3.5 py-2 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary/90 transition shadow-sm">
+                  + Tambah Bagian
                 </button>
               </div>
+
+              <div class="p-3 rounded-xl bg-surface/70 border border-border/60 text-[11px] font-mono text-textMuted">
+                <strong class="text-textMain font-sans">Contoh pengisian:</strong> 00:00–00:30 → Opening (tempo lambat) | 00:30–01:10 → Orientasi Suasana Cerita (tempo sedang) | 01:50–02:30 → Klimaks (tempo cepat)
+              </div>
+
+              <div id="standar-segments-list" class="space-y-3"></div>
             </div>
-            <div class="flex justify-between items-center text-xs"><button type="button" onclick="openClientAuthModal('register')" class="text-primary font-bold hover:underline">Daftar Akun</button><button type="button" onclick="handleForgotPassword(document.getElementById('portal-login-email').value)" class="text-textMuted hover:text-primary">Lupa Sandi?</button></div>
-            <button type="submit" class="btn-primary w-full py-4 rounded-xl text-sm font-bold">Masuk →</button>
-            <div class="relative flex py-2 items-center"><div class="flex-grow border-t border-border/60"></div><span class="mx-4 text-textMuted text-xs">atau</span><div class="flex-grow border-t border-border/60"></div></div>
-            <button type="button" onclick="handleGoogleLogin()" class="w-full py-3.5 rounded-xl bg-white text-gray-800 border border-gray-300 font-bold text-sm hover:bg-gray-50 transition flex items-center justify-center gap-2">
-              <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-              Masuk dengan Google
-            </button>
-          </form>
+          </div>
+          ${sorakOptionHTML}
         </div>
-        <div id="client-workspace-content" class="hidden space-y-6"></div>
-      </div>
-    </section>
+      `;
+      addStandarSegmentRow({ durasi: '00:00 – 00:30', struktur: 'Opening' });
+    } else {
+      // PAKET PRO
+      c.innerHTML = `
+        <div class="space-y-5">
+          <div class="p-5 bg-panel border border-border/60 rounded-2xl space-y-5">
+            <span class="text-[11px] font-mono uppercase text-primary font-bold block">Spesifikasi Paket Pro</span>
 
-    <section id="page-order" class="page-section hidden page-dissolve bg-base">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pb-32">
-        <div id="order-form-container">
-          <form id="prangart-order-form" onsubmit="handleOrderFormSubmit(event)" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            <div class="lg:col-span-8 space-y-8">
-              <!-- LANGKAH 01: PILIH LAYANAN & PAKET -->
-              <div class="bg-surface border border-border/80 rounded-3xl p-6 sm:p-10 space-y-6 shadow-premium">
-                <div><span class="text-xs font-mono text-primary font-bold uppercase">Langkah 01</span><h2 class="text-2xl font-display font-bold mt-1">Pilih Layanan &amp; Paket</h2></div>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <button type="button" id="svc-tab-tari" onclick="selectServiceLine('tari')" class="svc-tab-btn p-4 rounded-2xl border text-left"><span class="text-sm font-bold">Musik Tari</span></button>
-                  <button type="button" id="svc-tab-digital" onclick="selectServiceLine('digital')" class="svc-tab-btn p-4 rounded-2xl border text-left"><span class="text-sm font-bold">Musik Non-Tari</span></button>
-                  <button type="button" id="svc-tab-transkripsi" onclick="selectServiceLine('transkripsi')" class="svc-tab-btn p-4 rounded-2xl border text-left"><span class="text-sm font-bold">Transkripsi</span></button>
-                </div>
-                <div id="package-cards-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2"></div>
-                <div><label class="block text-xs font-bold mb-2">Harga Kesepakatan (Rp) <span class="text-textMuted font-normal">(Opsional jika ada harga khusus)</span></label><input type="number" id="custom-price-input" oninput="handleCustomPrice(this.value)" placeholder="Contoh: 1500000" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" /></div>
-              </div>
-
-              <!-- LANGKAH 02: PERJANJIAN PRODUKSI, IDENTITAS & SPESIFIKASI PAKET -->
-              <div class="bg-surface border border-border/80 rounded-3xl p-6 sm:p-10 space-y-6">
-                <div>
-                  <span class="text-xs font-mono text-primary font-bold uppercase">Langkah 02</span>
-                  <h2 class="text-2xl font-display font-bold mt-1">Identitas Pemesan &amp; Spesifikasi Paket</h2>
-                </div>
-
-                <!-- PERJANJIAN PRODUKSI MUSIK (WAJIB DI MUSIK TARI & NON-TARI) -->
-                <div id="contract-agreement-box" class="p-5 sm:p-6 rounded-2xl bg-primary/5 border border-primary/25 space-y-4">
-                  <div class="space-y-2 text-xs sm:text-[13px] text-textMain leading-relaxed">
-                    <p>Sebelum mengisi formulir ini, mohon membaca terlebih dahulu ketentuan <strong>Perjanjian Produksi Musik PrangArt Studios</strong> pada tautan yang tersedia.</p>
-                    <div>
-                      <button type="button" onclick="openProductionAgreementModal()" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary/90 transition shadow-sm">
-                        📄 Klik untuk membaca Perjanjian Produksi Musik
-                      </button>
-                    </div>
-                    <p class="text-textMuted">Dokumen perjanjian resmi yang telah disesuaikan dengan data pemesanan Anda akan dikirimkan setelah formulir ini selesai diisi.</p>
-                  </div>
-                  <div class="pt-3 border-t border-primary/20 space-y-2">
-                    <label class="block text-xs font-bold text-textMain">Apakah Anda menyetujui bahwa proses produksi musik akan mengikuti kontrak kerja sama resmi dari PrangArt Studios? *</label>
-                    <label class="flex items-start gap-3 p-3.5 rounded-xl bg-surface border border-border cursor-pointer hover:border-primary transition">
-                      <input type="checkbox" id="field-contract-agree" required class="w-4 h-4 mt-0.5 accent-primary" />
-                      <span class="text-xs font-semibold text-textMain">Ya, saya telah membaca dan menyetujui bahwa proses produksi musik mengikuti kontrak kerja sama resmi dari PrangArt Studios.</span>
-                    </label>
-                  </div>
-                </div>
-
-                <!-- IDENTITAS & DATA KARYA DINAMIS (TARI / NON-TARI / TRANSKRIPSI) -->
-                <div id="identity-fields-container" class="space-y-5"></div>
-
-                <!-- SPESIFIKASI KHUSUS PAKET (DASAR / STANDAR / PRO) + OPSI SORAK -->
-                <div id="dynamic-spec-fields" class="pt-4 border-t border-border/60 space-y-5"></div>
-
-                <div class="pt-6 border-t border-border/60">
-                  <label class="block text-xs font-bold mb-3">Referensi Video Garapan Umum (Opsional)</label>
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <input type="url" id="field-video-link" placeholder="Link Video (YouTube / GDrive)" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
-                    <div class="relative group">
-                      <input type="file" id="field-video-file" accept="video/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onchange="document.getElementById('video-file-name').textContent = this.files[0] ? this.files[0].name : 'Pilih File Video...'" />
-                      <div class="w-full bg-panel border border-border border-dashed rounded-xl px-4 py-3 text-sm flex justify-between items-center group-hover:border-primary transition">
-                        <span id="video-file-name" class="text-textMuted truncate">Pilih File Video...</span>
-                        <svg class="w-5 h-5 text-textMuted group-hover:text-primary transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <label class="flex items-center justify-between p-5 rounded-2xl bg-panel border cursor-pointer mt-4">
-                  <span class="text-sm font-bold">Tambahan Vokal / Player <small class="block text-textMuted">+ Rp250.000</small></span>
-                  <input type="checkbox" id="field-addon-vocal" onchange="recalculateLivePrice()" class="w-5 h-5" />
-                </label>
-              </div>
-
-              <!-- LANGKAH 03: SINOPSIS KARYA & FORMULIR AI -->
-              <div class="bg-surface border border-border/80 rounded-3xl p-6 sm:p-10 space-y-6">
-                <div>
-                  <span class="text-xs font-mono text-primary font-bold uppercase">Langkah 03</span>
-                  <h2 class="text-2xl font-display font-bold mt-1">Sinopsis Karya &amp; Ketentuan</h2>
-                </div>
-
-                <div>
-                  <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
-                    <label class="text-xs font-bold">Sinopsis Karya *</label>
-                    <div class="flex bg-panel p-1 rounded-xl border border-border/60">
-                      <button type="button" id="btn-mode-manual" onclick="setSynopsisMode('manual')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-surface text-textMain shadow-sm">Ketik Manual</button>
-                      <button type="button" id="btn-mode-ai" onclick="setSynopsisMode('ai')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-textMuted">Bantu Susun dengan AI</button>
-                    </div>
-                  </div>
-
-                  <!-- PANEL FORMULIR DETAIL AI (HANYA MUNCUL JIKA PILIH OPSI AI) -->
-                  <div id="ai-action-wrapper" class="hidden mb-5 p-5 sm:p-6 rounded-2xl bg-panel/70 border border-primary/30 space-y-5">
-                    <div class="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs space-y-1.5">
-                      <strong class="text-amber-600 dark:text-amber-400 block">⚠️ Perhatian &amp; Ketentuan Penggunaan AI:</strong>
-                      <p class="text-textMain">• Bagaimanapun juga hasil ini disusun oleh <strong>AI (Kecerdasan Buatan)</strong>, sehingga <strong>wajib Anda tinjau dan periksa kembali</strong> kesesuaiannya sebelum dimasukkan ke dalam kolom Sinopsis.</p>
-                      <p class="text-textMain">• Batas penggunaan: Maksimal <strong>2 kali generate per akun per hari</strong> dengan <strong>waktu jeda 10 menit</strong> antar-generate.</p>
-                      <p class="text-textMain">• Setelah hasil muncul, silakan klik tombol <strong>Salin Hasil</strong> lalu tempelkan (paste) ke dalam kotak Sinopsis di bawah.</p>
-                    </div>
-
-                    <div id="ai-quota-status-banner" class="text-xs font-mono text-primary font-semibold bg-primary/10 px-4 py-2.5 rounded-xl border border-primary/20"></div>
-
-                    <!-- FORMULIR DETAIL DATA KARYA (17 PERTANYAAN A-D) -->
-                    <div id="ai-detail-form-container"></div>
-
-                    <div class="space-y-3">
-                      <button type="button" id="btn-ai-synopsis" onclick="generateAISynopsis()" class="btn-primary w-full py-3.5 rounded-xl text-sm font-bold shadow-glow">
-                        ✦ Generate Sinopsis AI
-                      </button>
-                      <p id="ai-loading-note" class="hidden text-center text-xs font-semibold text-primary animate-pulse">
-                        ⏳ Mohon tunggu 2–5 menit untuk memproses generate sinopsisnya...
-                      </p>
-                    </div>
-
-                    <!-- KOTAK HASIL GENERATE AI UNTUK DISALIN -->
-                    <div id="ai-result-box" class="hidden space-y-2 pt-3 border-t border-border/60">
-                      <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">✓ Hasil Generate AI (Silakan tinjau &amp; salin ke kolom Sinopsis):</span>
-                        <button type="button" onclick="copyAIResultToClipboard()" class="px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-bold hover:bg-primary/90 transition">
-                          Salin Hasil
-                        </button>
-                      </div>
-                      <textarea id="ai-generated-preview" rows="6" readonly class="w-full bg-surface border border-primary/40 rounded-xl px-4 py-3 text-sm leading-relaxed text-textMain"></textarea>
-                    </div>
-                  </div>
-
-                  <label class="block text-xs font-bold mb-2 text-textMuted">Kolom Sinopsis Final (Tempel / ketik sinopsis akhir di sini) *</label>
-                  <textarea id="field-sinopsis" rows="6" required placeholder="Ketik sinopsis karya Anda secara manual di sini, atau tempelkan (paste) hasil sinopsis dari AI setelah Anda tinjau..." class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm leading-relaxed"></textarea>
-                </div>
-
-                <div class="pt-6 border-t border-border/60">
-                  <h3 class="text-lg font-bold text-textMain mb-4">Ketentuan &amp; Aturan Layanan</h3>
-                  <div class="text-[13px] text-textMuted space-y-3 leading-relaxed bg-panel p-5 rounded-2xl border border-border/50">
-                    <p><strong class="text-textMain">1. Penyesuaian Custom:</strong> Permintaan di luar paket standar dapat dikonsultasikan terlebih dahulu sebelum kesepakatan harga dan pengerjaan.</p>
-                    <p><strong class="text-textMain">2. Instrumen Tambahan:</strong> Penambahan 1–2 instrumen khusus (session player) dapat dikoordinasikan secara fleksibel.</p>
-                    <p><strong class="text-textMain">3. Ketentuan Revisi:</strong> Paket Dasar 3x revisi. Paket Pro UNLIMITED (maks 1 bulan). Revisi ekstra Rp250.000 per sesi.</p>
-                    <p><strong class="text-textMain">4. Respon Klien:</strong> Tanpa konfirmasi klien selama &gt;14 hari, proyek diarsipkan. Pembatalan sepihak membuat DP non-refundable.</p>
-                    <p><strong class="text-textMain">5. Keterlambatan Jasa:</strong> Keterlambatan tanpa konfirmasi dikenakan potongan 1-2% per hari dari sisa pelunasan (maks 10%).</p>
-                    <p><strong class="text-textMain">6. Prosedur:</strong> Proyek diawali dengan konsultasi WA sebelum kesepakatan harga final.</p>
-                  </div>
-                </div>
-              </div>
-
-              <div class="bg-surface border border-border/80 rounded-3xl p-6">
-                <button type="submit" class="btn-primary w-full py-4 rounded-xl font-bold">Kirim Pengajuan →</button>
-              </div>
+            <div>
+              <label class="block text-xs font-bold mb-2">Keterangan Awal Masuknya Musik &amp; Tari *</label>
+              <select id="spec-pro-intro-mode" required class="w-full bg-surface border border-border rounded-xl px-4 py-3 text-sm">
+                <option value="Diawali musik pembuka terlebih dahulu, kemudian penari masuk">Diawali musik pembuka terlebih dahulu, kemudian penari masuk</option>
+                <option value="Hanya diberi kode/isyarat musik, lalu penari langsung masuk ke gerakan">Hanya diberi kode/isyarat musik, lalu penari langsung masuk ke gerakan</option>
+                <option value="Musik dan gerakan tari masuk bersamaan sejak detik pertama">Musik dan gerakan tari masuk bersamaan sejak detik pertama</option>
+              </select>
             </div>
 
-            <aside class="lg:col-span-4 lg:sticky lg:top-28">
-              <div class="bg-surface border border-border/80 rounded-3xl p-8 shadow-premium space-y-5">
-                <span class="text-xs font-mono uppercase text-primary font-bold block border-b pb-3">Ringkasan Biaya</span>
-                <div class="space-y-3 text-sm">
-                  <div class="flex justify-between"><span>Layanan</span><span id="calc-service-name"></span></div>
-                  <div class="flex justify-between"><span id="calc-pkg-name"></span><span id="calc-pkg-price"></span></div>
-                  <div class="flex justify-between"><span id="calc-addon-label">Tambahan Vokal</span><span id="calc-addon-price"></span></div>
+            <div class="space-y-3 pt-3 border-t border-border/60">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <label class="block text-xs font-bold">Rincian Video Google Drive, Tempo (BPM), Durasi &amp; Nuansa per Bagian *</label>
+                  <p class="text-[11px] text-textMuted">Tambahkan baris untuk setiap video/tempo (Video 1/Tempo 1, Video 2/Tempo 2, dst. sampai ending).</p>
                 </div>
-                <div class="border-t pt-4 flex justify-between"><span>Total</span><span id="calc-total-price" class="text-2xl font-bold text-primary"></span></div>
+                <button type="button" onclick="addProSegmentRow()" class="px-3.5 py-2 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary/90 transition shadow-sm">
+                  + Tambah Bagian / Tempo
+                </button>
               </div>
-            </aside>
-          </form>
-        </div>
-      </div>
-    </section>
 
-    <section id="page-admin" class="page-section hidden page-dissolve bg-base">
-      <div class="max-w-7xl mx-auto px-4 py-16">
-        <div id="admin-pin-gate" class="max-w-md mx-auto bg-surface border border-border rounded-3xl p-8">
-          <h2 class="text-2xl font-bold mb-5 text-center">Panel Admin</h2>
-          <form onsubmit="verifyAdminPin(event)" class="space-y-4">
-            <input id="admin-pin-input" type="password" required placeholder="PIN Admin" class="w-full bg-panel border rounded-xl p-3 text-center text-lg tracking-widest"/>
-            <button class="btn-primary w-full py-3 rounded-xl font-bold">Masuk</button>
-          </form>
-          <div class="mt-4 text-center">
-            <button type="button" onclick="resetAdminPin()" class="text-xs text-textMuted hover:text-red-500 transition">Lupa PIN Admin?</button>
+              <div class="p-3 rounded-xl bg-surface/70 border border-border/60 text-[11px] font-mono text-textMuted space-y-0.5">
+                <strong class="text-textMain font-sans block">Contoh per video / per tempo:</strong>
+                <div>• Video 1 / tempo 1 — 120 BPM — 00:00–00:30: Nuansa misterius, tempo lambat; 00:30–01:10: Mulai energik, ritme perkusi muncul</div>
+                <div>• Video 2 / tempo 2 — 100 BPM — 00:00–01:55: Dramatis dan tegang; 01:50–02:30: Pelan dan megah</div>
+              </div>
+
+              <div id="pro-segments-list" class="space-y-3"></div>
+            </div>
+          </div>
+          ${sorakOptionHTML}
+        </div>
+      `;
+      addProSegmentRow({ label: 'Video 1 / Tempo 1' });
+    }
+  } else if (svc === 'digital') {
+    c.innerHTML = `
+      <div class="space-y-4">
+        <div><label class="block text-xs font-bold mb-2">Tema Lagu / Karya *</label><input id="spec-tema" required class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" placeholder="Cth: Perpisahan"/></div>
+        <div><label class="block text-xs font-bold mb-2">Gaya Musik / Genre *</label><input id="spec-gaya" required class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" placeholder="Cth: Pop Akustik"/></div>
+        <div><label class="block text-xs font-bold mb-2">Nuansa / Mood *</label><input id="spec-nuansa" required class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" placeholder="Cth: Melankolis"/></div>
+        ${sorakOptionHTML}
+      </div>
+    `;
+  } else {
+    c.innerHTML = `
+      <div class="space-y-4">
+        <div><label class="block text-xs font-bold mb-2">Instrumen yang Ditranskripsi *</label><input id="spec-instrumen" required class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" placeholder="Cth: Vokal Solo, Piano"/></div>
+        <div><label class="block text-xs font-bold mb-2">Format Notasi *</label>
+          <select id="spec-format" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm">
+            <option value="Not Angka">Not Angka</option>
+            <option value="Not Balok">Not Balok</option>
+            <option value="Keduanya">Keduanya</option>
+          </select>
+        </div>
+        ${sorakOptionHTML}
+      </div>
+    `;
+  }
+}
+
+/* === FORMULIR DETAIL AI (HANYA MUNCUL KETIKA PILIH OPSI GENERATE AI DI LANGKAH 03) === */
+function renderAIDetailForm() {
+  const container = document.getElementById('ai-detail-form-container');
+  if (!container) return;
+  const svc = appState.selectedServiceLine;
+
+  if (svc === 'tari') {
+    container.innerHTML = `
+      <div class="space-y-5">
+        <div class="border-b border-border/60 pb-2">
+          <h3 class="text-sm font-bold text-primary uppercase">Formulir Data Karya Tari (Bahan Penyusunan Sinopsis AI)</h3>
+          <p class="text-[11px] text-textMuted mt-1">Judul karya, koreografer, asal daerah, dan jenis tari otomatis diambil dari isian Langkah 02. Lengkapi detail penciptaan &amp; garapan di bawah ini.</p>
+        </div>
+
+        <!-- B. KONSEP PENCIPTAAN -->
+        <div class="p-4 bg-surface border border-border/80 rounded-xl space-y-3">
+          <h4 class="text-xs font-bold text-primary uppercase">B. Konsep Penciptaan</h4>
+          <div>
+            <label class="block text-xs font-bold mb-1.5">5. Tema karya:</label>
+            <input id="ai-tema" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Pokok persoalan atau gagasan utama" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold mb-1.5">6. Apa yang melatarbelakangi penciptaan karya ini?</label>
+            <textarea id="ai-latar" rows="2" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Fenomena, tradisi, budaya, atau pengalaman..."></textarea>
+          </div>
+          <div>
+            <label class="block text-xs font-bold mb-1.5">7. Dari mana sumber inspirasi karya ini berasal?</label>
+            <textarea id="ai-inspirasi" rows="2" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Sumber inspirasi karya..."></textarea>
+          </div>
+          <div>
+            <label class="block text-xs font-bold mb-1.5">8. Apa gagasan utama yang ingin diangkat melalui tarian ini?</label>
+            <textarea id="ai-gagasan" rows="2" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Gagasan utama..."></textarea>
           </div>
         </div>
-        <div id="admin-workspace-content" class="hidden"></div>
-      </div>
-    </section>
-  </main>
 
-  <div id="client-auth-modal" class="fixed inset-0 bg-black/70 backdrop-blur-md z-[72] hidden items-center justify-center p-4">
-    <div class="bg-surface border border-border rounded-3xl max-w-md w-full p-8 shadow-2xl">
-      <div class="flex items-center justify-between border-b pb-4 mb-5">
-        <h2 class="text-xl font-bold">Daftar Akun</h2>
-        <button type="button" onclick="closeClientAuthModal()" aria-label="Tutup" class="text-textMuted hover:text-red-500 text-2xl leading-none">&times;</button>
-      </div>
-      <form id="form-client-register" onsubmit="handleQuickClientRegister(event)" class="space-y-4">
-        <input type="text" id="reg-name" required placeholder="Nama Lengkap" class="w-full bg-panel border rounded-xl px-4 py-3"/>
-        <input type="email" id="reg-email" required placeholder="Email" class="w-full bg-panel border rounded-xl px-4 py-3"/>
-        <input type="tel" id="reg-wa" required placeholder="No. WhatsApp" class="w-full bg-panel border rounded-xl px-4 py-3"/>
-        <div>
-          <div class="relative">
-            <input type="password" id="reg-pass" required placeholder="Kata Sandi (Min. 8 huruf & angka)" class="w-full bg-panel border rounded-xl px-4 py-3 pr-12"/>
-            <button type="button" onclick="togglePasswordVisibility('reg-pass', 'reg-eye-show', 'reg-eye-hide')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-textMuted hover:text-primary">
-              <svg id="reg-eye-show" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-              <svg id="reg-eye-hide" class="hidden w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
-            </button>
+        <!-- C. KONSEP GARAPAN -->
+        <div class="p-4 bg-surface border border-border/80 rounded-xl space-y-3">
+          <h4 class="text-xs font-bold text-primary uppercase">C. Konsep Garapan</h4>
+          <div>
+            <label class="block text-xs font-bold mb-1.5">9. Apa yang digambarkan atau diceritakan dalam tarian ini?</label>
+            <textarea id="ai-gambaran" rows="2" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Substansi atau cerita yang ditampilkan..."></textarea>
+          </div>
+          <div>
+            <label class="block text-xs font-bold mb-1.5">10. Bagaimana perkembangan penyajian tari dari awal, tengah, hingga akhir?</label>
+            <textarea id="ai-perkembangan" rows="2" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Alur dari awal, tengah, hingga akhir..."></textarea>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold mb-1.5">11. Bagaimana karakter gerakan dalam tarian ini?</label>
+              <input id="ai-karakter" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Lembut, tegas, dinamis, energik, lincah..." />
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5">12. Sumber gerakan tari (tradisi, masyarakat, alam, eksplorasi)?</label>
+              <input id="ai-sumber-gerak" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Jelaskan sumber gerak..." />
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5">13. Musik pengiring (gambaran musik yang digunakan):</label>
+              <input id="ai-musik" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Tradisional, modern, perpaduan, instrumental..." />
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5">14. Alat musik/instrumen (nama alat musik atau bunyinya):</label>
+              <input id="ai-instrumen" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Gendang, gong, gambus, piul, suling, rebana..." />
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold mb-1.5">15. Kostum dan tata rias seperti apa yang digunakan?</label>
+            <input id="ai-kostum" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Terinspirasi pakaian adat, masyarakat, karakter..." />
           </div>
         </div>
-        <button type="submit" class="btn-primary w-full py-3 rounded-xl font-bold">Daftar Manual &rarr;</button>
-        <div class="relative flex py-2 items-center">
-          <div class="flex-grow border-t border-border/60"></div>
-          <span class="mx-4 text-textMuted text-xs font-semibold">atau</span>
-          <div class="flex-grow border-t border-border/60"></div>
+
+        <!-- D. MAKNA DAN PESAN KARYA -->
+        <div class="p-4 bg-surface border border-border/80 rounded-xl space-y-3">
+          <h4 class="text-xs font-bold text-primary uppercase">D. Makna dan Pesan Karya</h4>
+          <div>
+            <label class="block text-xs font-bold mb-1.5">16. Apakah terdapat makna, filosofi, atau nilai tertentu?</label>
+            <textarea id="ai-makna" rows="2" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Nilai atau filosofi karya..."></textarea>
+          </div>
+          <div>
+            <label class="block text-xs font-bold mb-1.5">17. Apa pesan yang ingin disampaikan kepada penonton?</label>
+            <textarea id="ai-pesan" rows="2" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Pesan untuk penonton..."></textarea>
+          </div>
         </div>
-        <button type="button" onclick="handleGoogleLogin()" class="w-full py-3.5 rounded-xl bg-white text-gray-800 border border-gray-300 font-bold text-sm hover:bg-gray-50 transition flex items-center justify-center gap-2">
-          <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-          Daftar dengan Google
-        </button>
-      </form>
-    </div>
-  </div>
 
-  <div id="wa-producer-modal" class="fixed inset-0 bg-black/70 z-[72] hidden items-center justify-center p-4">
-    <div class="bg-surface border border-border rounded-3xl max-w-lg w-full p-7">
-      <div class="flex justify-between items-center mb-5">
-        <h2 class="text-xl font-bold">Diskusi dengan PrangArt Lab</h2>
-        <button type="button" onclick="closeProducerWaModal()" aria-label="Tutup">×</button>
+        <!-- CATATAN PENGISIAN -->
+        <div class="p-4 bg-surface/60 border border-border/60 rounded-xl text-[11px] text-textMuted space-y-1">
+          <strong class="text-textMain block uppercase mb-1">Catatan Pengisian:</strong>
+          <p>• Gunakan bahasa sederhana sesuai pemahaman masing-masing koreografer.</p>
+          <p>• Tidak harus menggunakan istilah teknis seni tari maupun musik.</p>
+          <p>• Untuk pertanyaan yang tidak diketahui atau tidak relevan, boleh dikosongkan.</p>
+          <p>• Tidak perlu membuat jawaban panjang. Cukup jelaskan informasi sesuai konsep karya.</p>
+          <p>• Pastikan informasi yang diberikan sesuai dengan karya yang benar-benar diciptakan.</p>
+        </div>
       </div>
-      <label class="block text-sm font-bold mb-2" for="wa-comp-name">Nama</label>
-      <input id="wa-comp-name" class="w-full bg-panel border rounded-xl p-3 mb-4"/>
-      <label class="block text-sm font-bold mb-2" for="wa-comp-intent">Pesan</label>
-      <textarea id="wa-comp-intent" oninput="updateWaComposerPreview()" class="w-full bg-panel border rounded-xl p-3 mb-4"></textarea>
-      <pre id="wa-comp-preview" class="whitespace-pre-wrap bg-panel rounded-xl p-4 text-sm"></pre>
-      <div class="flex gap-3 mt-5">
-        <button type="button" onclick="closeProducerWaModal()" class="btn-outline px-5 py-3 rounded-xl">Batal</button>
-        <button type="button" onclick="submitProducerWaMessage()" class="btn-primary px-5 py-3 rounded-xl font-bold">Kirim WhatsApp</button>
+    `;
+  } else {
+    container.innerHTML = `
+      <div class="p-4 bg-surface border border-border/80 rounded-xl space-y-3">
+        <label class="block text-xs font-bold">Ceritakan Gambaran / Latar Belakang Karya Anda untuk Disusun AI</label>
+        <textarea id="ai-general-notes" rows="3" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Tuliskan poin-poin utama mengenai karya ini..."></textarea>
       </div>
-    </div>
-  </div>
+    `;
+  }
+}
 
-  <div id="custom-modal" class="fixed inset-0 bg-black/85 z-[65] hidden items-center justify-center p-4">
-    <div class="bg-surface border border-border rounded-2xl max-w-2xl w-full p-6">
-      <div class="flex justify-between mb-4"><h2 id="custom-modal-title" class="font-bold"></h2><button type="button" onclick="closeCustomModal()" aria-label="Tutup" class="text-xl leading-none">×</button></div>
-      <div id="custom-modal-body"></div>
-    </div>
-  </div>
-  <div id="sop-14-grid" class="hidden"></div><div id="faq-accordion-list" class="hidden"></div>
+function recalculateLivePrice() {
+  const svc = appState.serviceCatalog[appState.selectedServiceLine];
+  const pkg = svc.packages[appState.selectedPackage];
+  const base = appState.customPrice || pkg.price;
+  const addonPrice = Number(svc.addonPrice || 250000);
+  const isAddonChecked = Boolean(document.getElementById('field-addon-vocal')?.checked);
+  const addon = isAddonChecked ? addonPrice : 0;
+  
+  if(document.getElementById('calc-service-name')) {
+    document.getElementById('calc-service-name').textContent = svc.label;
+    document.getElementById('calc-pkg-name').textContent = appState.customPrice ? 'Harga Kesepakatan' : pkg.label;
+    document.getElementById('calc-pkg-price').textContent = formatRupiah(base);
+    document.getElementById('calc-total-price').textContent = formatRupiah(base + addon);
+    
+    const addonRow = document.getElementById('calc-addon-label')?.parentElement;
+    if (addonRow) {
+      addonRow.classList.toggle('hidden', !isAddonChecked);
+      document.getElementById('calc-addon-label').textContent = 'Tambahan Vokal / Player';
+      document.getElementById('calc-addon-price').textContent = '+ ' + formatRupiah(addonPrice);
+    }
+  }
+}
 
-  <script src="js/00-config.js"></script>
-  <script src="js/01-utils.js"></script>
-  <script src="js/02-firebase.js"></script>
-  <script src="js/03-navigation.js"></script>
-  <script src="js/04-wa-composer.js"></script>
-  <script src="js/05-auth.js"></script>
-  <script src="js/06-order.js"></script>
-  <script src="js/07-portfolio.js"></script>
-  <script src="js/08-client-portal.js"></script>
-  <script src="js/09-brief-card.js"></script>
-  <script src="js/10-contract.js"></script>
-  <script src="js/11-documents.js"></script>
-  <script src="js/12-admin.js"></script>
-  <script src="js/13-boot.js"></script>
-</body>
-</html>
+function getResolvedJenisTari() {
+  const sel = document.getElementById('field-jenis-tari')?.value || '';
+  if (sel === 'Lain-lain') {
+    return document.getElementById('field-jenis-tari-other')?.value.trim() || 'Lain-lain';
+  }
+  return sel || '(Belum diisi)';
+}
+
+/* === GENERATE SINOPSIS AI (LIMIT 2X/HARI + COOLDOWN 10 MENIT + COPY KE KOLOM SINOPSIS) === */
+async function generateAISynopsis() {
+  const judul = document.getElementById('field-judul')?.value.trim();
+  const jenis = getResolvedJenisTari();
+  const koreografer = document.getElementById('field-koreografer')?.value.trim() || '(Belum tersedia / dikosongkan)';
+  const asal = document.getElementById('field-budaya-daerah')?.value.trim() || document.getElementById('field-kota-provinsi')?.value.trim() || '(Belum tersedia / dikosongkan)';
+  
+  if (!judul) {
+    return showToast('Perhatian', 'Isi Judul Tari / Nama Karya pada Langkah 02 terlebih dahulu.', 'warning');
+  }
+
+  const quota = getUserAIQuotaState();
+  const now = Date.now();
+
+  if (quota.count >= AI_DAILY_LIMIT) {
+    updateAIQuotaBanner();
+    return showToast('Batas Tercapai', 'Batas generate AI per akun hanya 2 kali per hari. Silakan coba lagi besok.', 'error');
+  }
+
+  if (quota.lastTimestamp > 0 && (now - quota.lastTimestamp) < AI_COOLDOWN_MS) {
+    const waitSec = Math.ceil((AI_COOLDOWN_MS - (now - quota.lastTimestamp)) / 1000);
+    const min = Math.floor(waitSec / 60);
+    const sec = waitSec % 60;
+    updateAIQuotaBanner();
+    return showToast('Waktu Jeda Aktif', `Harap tunggu ${min} menit ${sec} detik lagi sebelum generate berikutnya.`, 'warning');
+  }
+
+  const btn = document.getElementById('btn-ai-synopsis');
+  const loadingNote = document.getElementById('ai-loading-note');
+  const resultBox = document.getElementById('ai-result-box');
+  const resultPreview = document.getElementById('ai-generated-preview');
+
+  btn.innerHTML = 'Memproses Generate AI...';
+  btn.disabled = true;
+  loadingNote?.classList.remove('hidden');
+
+  try {
+    let promptText = "";
+    const valOrEmpty = (id) => document.getElementById(id)?.value.trim() || '(Belum tersedia / dikosongkan)';
+
+    if (appState.selectedServiceLine === 'tari') {
+      promptText = `PROMPT PENULISAN SINOPSIS KARYA TARI
+
+Bertindaklah sebagai seorang penulis, pengkaji seni tari, dan dramaturg yang memahami koreografi, etnokoreologi, serta penulisan karya seni pertunjukan.
+
+Buatlah sinopsis karya tari berdasarkan informasi dan konsep yang saya berikan. Susun tulisan secara profesional, sistematis, komunikatif, dan memiliki kedalaman artistik tanpa menggunakan bahasa yang berlebihan atau terlalu puitis.
+
+Sinopsis harus mencakup unsur-unsur berikut:
+1. Identitas Karya: Judul tari dan nama koreografer.
+2. Tema Karya: Pokok persoalan atau gagasan utama yang diangkat.
+3. Latar Belakang Penciptaan: Sumber inspirasi, fenomena, tradisi, budaya, atau pengalaman yang melandasi penciptaan karya.
+4. Ide dan Konsep Garapan: Gagasan artistik serta pendekatan penciptaan yang digunakan.
+5. Gambaran Isi Karya: Penjelasan mengenai substansi, alur, suasana, dan perkembangan dramatik atau artistik tarian dari awal hingga akhir.
+6. Konsep Gerak: Sumber gerak, karakteristik gerak, serta pengembangan atau eksplorasi gerak yang digunakan.
+7. Konsep Musik: Karakter musik pengiring, instrumen, pola musikal, dan hubungannya dengan gerak tari.
+8. Kostum dan Tata Rias: Gambaran visual busana dan tata rias serta relevansinya dengan konsep karya.
+9. Makna dan Pesan Karya: Nilai, filosofi, refleksi, atau pesan yang ingin disampaikan kepada penonton.
+
+Ketentuan Penulisan:
+- Gunakan bahasa Indonesia yang baik dan benar.
+- Gunakan gaya penulisan profesional untuk kebutuhan proposal, festival, pertunjukan, dan katalog karya tari.
+- Susun dalam bentuk narasi yang utuh dan mengalir, bukan sekadar daftar poin.
+- Hindari pengulangan gagasan, kalimat klise, dan ungkapan puitis yang tidak diperlukan.
+- Pastikan setiap informasi saling berkaitan dan membentuk identitas karya yang jelas.
+- Jangan mengarang informasi, filosofi, simbol, sejarah, atau makna yang tidak diberikan.
+- Apabila terdapat informasi yang belum tersedia, jangan membuat asumsi. Tandai bagian tersebut sebagai informasi yang perlu dilengkapi.
+- Bedakan secara jelas antara sumber inspirasi, konsep artistik, dan makna karya.
+- Jangan memaksakan seluruh unsur masuk apabila tidak relevan dengan karya.
+
+Hasil Akhir:
+Buat satu sinopsis tari yang utuh, padat, informatif, memiliki karakter artistik, dan mampu memberikan pemahaman kepada pembaca mengenai latar belakang, gagasan, bentuk penyajian, serta substansi karya tari.
+Panjang sinopsis disesuaikan dengan kebutuhan, dengan rekomendasi sekitar 150–250 kata.
+Berikan HANYA teks sinopsisnya saja tanpa kalimat pengantar.
+
+---
+FORMULIR DATA KARYA TARI:
+A. IDENTITAS KARYA
+1. Judul karya tari: ${judul}
+2. Nama koreografer/penata tari: ${koreografer}
+3. Asal daerah/komunitas/latar budaya: ${asal}
+4. Jenis karya: ${jenis}
+
+B. KONSEP PENCIPTAAN
+5. Tema karya: ${valOrEmpty('ai-tema')}
+6. Apa yang melatarbelakangi penciptaan karya ini?: ${valOrEmpty('ai-latar')}
+7. Dari mana sumber inspirasi karya ini berasal?: ${valOrEmpty('ai-inspirasi')}
+8. Apa gagasan utama yang ingin diangkat melalui tarian ini?: ${valOrEmpty('ai-gagasan')}
+
+C. KONSEP GARAPAN
+9. Apa yang digambarkan atau diceritakan dalam tarian ini?: ${valOrEmpty('ai-gambaran')}
+10. Bagaimana perkembangan penyajian tari dari awal, tengah, hingga akhir?: ${valOrEmpty('ai-perkembangan')}
+11. Bagaimana karakter gerakan dalam tarian ini?: ${valOrEmpty('ai-karakter')}
+12. Sumber gerakan tari: ${valOrEmpty('ai-sumber-gerak')}
+13. Musik pengiring: ${valOrEmpty('ai-musik')}
+14. Alat musik/instrumen: ${valOrEmpty('ai-instrumen')}
+15. Kostum dan tata rias: ${valOrEmpty('ai-kostum')}
+
+D. MAKNA DAN PESAN KARYA
+16. Makna, filosofi, atau nilai tertentu: ${valOrEmpty('ai-makna')}
+17. Pesan untuk penonton: ${valOrEmpty('ai-pesan')}`;
+    } else {
+      promptText = `Susun sinopsis/deskripsi karya profesional (120-200 kata) dalam bahasa Indonesia untuk karya "${judul}" berdasarkan catatan berikut: ${valOrEmpty('ai-general-notes')}. Berikan hanya teks sinopsisnya saja.`;
+    }
+
+    let finalGeneratedText = '';
+    if (window.firebaseAI) {
+      const { getGenerativeModel } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-ai.js');
+      const model = getGenerativeModel(window.firebaseAI, { model: "gemini-1.5-flash" });
+      const res = await model.generateContent(promptText);
+      finalGeneratedText = (await res.response).text().trim();
+    } else {
+      throw new Error('Firebase AI offline');
+    }
+
+    saveUserAIQuotaState({
+      date: getTodayDateString(),
+      count: quota.count + 1,
+      lastTimestamp: Date.now()
+    });
+    updateAIQuotaBanner();
+
+    if (resultPreview && resultBox) {
+      resultPreview.value = finalGeneratedText;
+      resultBox.classList.remove('hidden');
+    }
+    showToast('Selesai', 'Hasil sinopsis AI siap. Silakan tinjau dan salin ke kolom Sinopsis.');
+
+  } catch (error) {
+    console.error(error);
+    const tema = document.getElementById('ai-tema')?.value.trim();
+    const fallbackDraft = `Karya tari berjudul "${judul}" oleh koreografer ${koreografer} merupakan ${jenis} yang berakar pada budaya ${asal} dengan mengangkat tema ${tema || '[tema perlu dilengkapi]'}. [Informasi latar belakang, konsep garapan, musik, dan makna karya perlu dilengkapi sesuai data penciptaan].`;
+
+    saveUserAIQuotaState({
+      date: getTodayDateString(),
+      count: quota.count + 1,
+      lastTimestamp: Date.now()
+    });
+    updateAIQuotaBanner();
+
+    if (resultPreview && resultBox) {
+      resultPreview.value = fallbackDraft;
+      resultBox.classList.remove('hidden');
+    }
+    showToast('Draf Tersedia', 'Draf disusun dalam mode cadangan. Silakan tinjau dan salin ke kolom Sinopsis.', 'warning');
+  } finally {
+    btn.innerHTML = '✦ Generate Sinopsis AI';
+    btn.disabled = false;
+    loadingNote?.classList.add('hidden');
+  }
+}
+
+function copyAIResultToClipboard() {
+  const preview = document.getElementById('ai-generated-preview');
+  const targetField = document.getElementById('field-sinopsis');
+  if (!preview || !preview.value.trim()) return;
+
+  navigator.clipboard?.writeText(preview.value).catch(() => {});
+  if (targetField && !targetField.value.trim()) {
+    targetField.value = preview.value;
+    showToast('Disalin & Ditempel', 'Hasil AI berhasil disalin dan otomatis ditempel ke kolom Sinopsis. Silakan tinjau kembali.');
+  } else {
+    showToast('Tersalin', 'Teks hasil AI disalin ke clipboard. Silakan tempel (paste) ke kolom Sinopsis dan tinjau kembali.');
+  }
+}
+
+async function handleOrderFormSubmit(e) {
+  e.preventDefault();
+  if (!appState.currentClientUser) return navigateTo('client');
+
+  const svc = appState.serviceCatalog[appState.selectedServiceLine];
+  const pkg = svc.packages[appState.selectedPackage];
+  const basePrice = appState.customPrice || pkg.price;
+  const hasVocalAddon = Boolean(document.getElementById('field-addon-vocal')?.checked);
+  const addonAmount = hasVocalAddon ? Number(svc.addonPrice || 250000) : 0;
+  const total = basePrice + addonAmount;
+  
+  const specs = [];
+  const pushIfVal = (label, id) => {
+    const v = document.getElementById(id)?.value.trim();
+    if (v) specs.push({ key: label, val: v });
+  };
+
+  const requiresContract = (appState.selectedServiceLine === 'tari' || appState.selectedServiceLine === 'digital');
+  if (requiresContract) {
+    specs.push({ key: 'Persetujuan Kontrak PrangArt Studios', val: 'Disetujui Klien' });
+  }
+
+  const sorakChoice = document.querySelector('input[name="spec-sorak"]:checked')?.value || 'Tidak Perlu Sorak';
+  const sanggarName = document.getElementById('field-sanggar')?.value.trim() || appState.currentClientUser.name;
+  const waNumber = document.getElementById('field-wa')?.value.trim() || '';
+  const contactEmail = document.getElementById('field-email')?.value.trim() || appState.currentClientUser.email;
+
+  if (appState.selectedServiceLine === 'tari') {
+    specs.push({ key: 'Sanggar / Komunitas / Instansi / Individu', val: sanggarName });
+    pushIfVal('Kota, Provinsi', 'field-kota-provinsi');
+    specs.push({ key: 'Nomor WhatsApp Aktif', val: waNumber });
+    specs.push({ key: 'Email', val: contactEmail });
+    pushIfVal('Nama Lengkap Koreografer', 'field-koreografer');
+    specs.push({ key: 'Jenis Tari', val: getResolvedJenisTari() });
+    pushIfVal('Latar Belakang Budaya / Daerah Tari', 'field-budaya-daerah');
+
+    if (appState.selectedPackage === 'dasar') {
+      const nuansaSel = document.getElementById('spec-nuansa-dasar')?.value;
+      const nuansaFinal = nuansaSel === 'Other' ? document.getElementById('spec-nuansa-other')?.value.trim() : nuansaSel;
+      if (nuansaFinal) specs.push({ key: 'Nuansa Musik', val: nuansaFinal });
+    } else if (appState.selectedPackage === 'standar') {
+      const checkedStruktur = Array.from(document.querySelectorAll('input[name="spec-struktur-check"]:checked')).map(el => el.value);
+      const manualStruktur = document.getElementById('spec-struktur-manual')?.value.trim();
+      if (manualStruktur) checkedStruktur.push(manualStruktur);
+      if (checkedStruktur.length) {
+        specs.push({ key: 'Struktur Tari Dipilih', val: checkedStruktur.join(', ') });
+      }
+
+      const segItems = Array.from(document.querySelectorAll('#standar-segments-list .standar-segment-item')).map((row, idx) => {
+        const dur = row.querySelector('.seg-durasi')?.value.trim() || '-';
+        const str = row.querySelector('.seg-struktur')?.value.trim() || '-';
+        const nua = row.querySelector('.seg-nuansa')?.value.trim() || '-';
+        const lnk = row.querySelector('.seg-link')?.value.trim();
+        return `Bagian ${idx + 1} [${dur}] ${str} → ${nua}${lnk ? ` (Link: ${lnk})` : ''}`;
+      });
+      if (segItems.length) {
+        specs.push({ key: 'Rincian Urutan Nuansa & Durasi (Standar)', val: segItems.join(' | ') });
+      }
+    } else {
+      pushIfVal('Awal Masuk Musik & Tari', 'spec-pro-intro-mode');
+      const proItems = Array.from(document.querySelectorAll('#pro-segments-list .pro-segment-item')).map((row) => {
+        const lbl = row.querySelector('.pro-label')?.value.trim() || 'Bagian';
+        const bpm = row.querySelector('.pro-bpm')?.value.trim() || '-';
+        const dur = row.querySelector('.pro-durasi')?.value.trim() || '-';
+        const lnk = row.querySelector('.pro-link')?.value.trim();
+        const dsc = row.querySelector('.pro-desc')?.value.trim() || '-';
+        return `${lbl} (${bpm}, ${dur}): ${dsc}${lnk ? ` [GDrive: ${lnk}]` : ''}`;
+      });
+      if (proItems.length) {
+        specs.push({ key: 'Rincian Video GDrive, Tempo & Nuansa (Pro)', val: proItems.join(' | ') });
+      }
+    }
+  } else if (appState.selectedServiceLine === 'digital') {
+    specs.push({ key: 'Pemesan / Instansi', val: sanggarName });
+    specs.push({ key: 'Nomor WhatsApp Aktif', val: waNumber });
+    specs.push({ key: 'Email', val: contactEmail });
+    pushIfVal('Tema', 'spec-tema');
+    pushIfVal('Genre', 'spec-gaya');
+    pushIfVal('Nuansa', 'spec-nuansa');
+  } else {
+    specs.push({ key: 'Pemesan / Instansi', val: sanggarName });
+    specs.push({ key: 'Nomor WhatsApp Aktif', val: waNumber });
+    specs.push({ key: 'Email', val: contactEmail });
+    pushIfVal('Instrumen', 'spec-instrumen');
+    pushIfVal('Format Notasi', 'spec-format');
+  }
+
+  specs.push({ key: 'Opsi Sorak', val: sorakChoice });
+  if (hasVocalAddon) {
+    specs.push({ key: 'Tambahan Vokal / Player', val: `+ ${formatRupiah(addonAmount)}` });
+  }
+
+  const videoLink = document.getElementById('field-video-link')?.value || '';
+  const videoFileInput = document.getElementById('field-video-file');
+  const videoFileName = videoFileInput?.files[0] ? videoFileInput.files[0].name : '';
+  const sinopsis = document.getElementById('field-sinopsis')?.value || '';
+
+  const newP = { 
+    id: `PAL-${Date.now()}`, 
+    clientEmail: appState.currentClientUser.email, 
+    clientName: sanggarName, 
+    contactEmail: contactEmail,
+    clientWa: waNumber,
+    judul: document.getElementById('field-judul').value, 
+    durasi: document.getElementById('field-durasi').value,
+    serviceLine: appState.selectedServiceLine, 
+    serviceLineLabel: svc.label, 
+    packageName: appState.customPrice ? 'Kustom' : pkg.label, 
+    contractAgreed: requiresContract,
+    hasVocalAddon: hasVocalAddon,
+    addonAmount: addonAmount,
+    sorakOption: sorakChoice,
+    totalPrice: total, 
+    dpAmount: total / 2, 
+    dpStatus: 'Belum Dibayar', 
+    productionStatus: TRACKER_MILESTONES[0],
+    specs: specs,
+    videoLink: videoLink,
+    videoFileName: videoFileName,
+    sinopsis: sinopsis
+  };
+  
+  appState.projects.unshift(newP); await syncProjectToCloud(newP);
+  showToast('Berhasil', 'Pesanan dibuat.'); navigateTo('client');
+}
+
+Object.assign(window, {
+  openProductionAgreementModal,
+  toggleJenisTariOther,
+  toggleNuansaOtherInput,
+  addStandarSegmentRow,
+  addProSegmentRow,
+  removeSegmentRow,
+  copyAIResultToClipboard
+});
