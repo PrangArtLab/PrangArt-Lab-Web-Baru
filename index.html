@@ -147,61 +147,92 @@
               <div class="bg-surface border border-border/80 rounded-3xl p-6 sm:p-10 space-y-6 shadow-premium">
                 <div><span class="text-xs font-mono text-primary font-bold uppercase">Langkah 01</span><h2 class="text-2xl font-display font-bold mt-1">Pilih Layanan &amp; Paket</h2></div>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <button type="button" id="svc-tab-tari" onclick="selectServiceLine('tari')" class="svc-tab-btn p-4 rounded-2xl border text-left"><span class="text-sm font-bold">Musik Tari</span></button>
-                  <button type="button" id="svc-tab-digital" onclick="selectServiceLine('digital')" class="svc-tab-btn p-4 rounded-2xl border text-left"><span class="text-sm font-bold">Musik Non-Tari</span></button>
-                  <button type="button" id="svc-tab-transkripsi" onclick="selectServiceLine('transkripsi')" class="svc-tab-btn p-4 rounded-2xl border text-left"><span class="text-sm font-bold">Transkripsi</span></button>
+                  <button type="button" id="svc-tab-tari" onclick="selectServiceLine('tari')" class="svc-tab-btn p-4 rounded-2xl border text-left">
+                    <span class="text-sm font-bold block">Musik Tari</span>
+                    <span class="text-[11px] opacity-80 block mt-0.5 leading-snug">Komposisi &amp; aransemen musik iringan pertunjukan tari</span>
+                  </button>
+                  <button type="button" id="svc-tab-digital" onclick="selectServiceLine('digital')" class="svc-tab-btn p-4 rounded-2xl border text-left">
+                    <span class="text-sm font-bold block">Musik Non-Tari</span>
+                    <span class="text-[11px] opacity-80 block mt-0.5 leading-snug">Produksi lagu, aransemen, jingle, mars &amp; scoring</span>
+                  </button>
+                  <button type="button" id="svc-tab-transkripsi" onclick="selectServiceLine('transkripsi')" class="svc-tab-btn p-4 rounded-2xl border text-left">
+                    <span class="text-sm font-bold block">Transkripsi</span>
+                    <span class="text-[11px] opacity-80 block mt-0.5 leading-snug">Penulisan ulang audio menjadi not balok &amp; not angka</span>
+                  </button>
                 </div>
-                <div id="package-cards-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2"></div>
-                <div><label class="block text-xs font-bold mb-2">Harga Kesepakatan (Rp) <span class="text-textMuted font-normal">(Opsional jika ada harga khusus)</span></label><input type="number" id="custom-price-input" oninput="handleCustomPrice(this.value)" placeholder="Contoh: 1500000" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" /></div>
+
+                <div id="package-cards-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2"></div>
+
+                <div id="custom-price-wrapper">
+                  <label class="block text-xs font-bold mb-2">Harga Kesepakatan (Rp) <span class="text-textMuted font-normal">(Isi nominal sesuai hasil diskusi jika memilih Paket Custom atau kesepakatan khusus)</span></label>
+                  <input type="number" id="custom-price-input" oninput="handleCustomPrice(this.value)" placeholder="Contoh: 2500000" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
+                </div>
               </div>
 
-              <!-- LANGKAH 02: INFORMASI & SPESIFIKASI SESUAI PAKET -->
+              <!-- LANGKAH 02: PERJANJIAN PRODUKSI, IDENTITAS & SPESIFIKASI PAKET -->
               <div class="bg-surface border border-border/80 rounded-3xl p-6 sm:p-10 space-y-6">
                 <div>
                   <span class="text-xs font-mono text-primary font-bold uppercase">Langkah 02</span>
-                  <h2 class="text-2xl font-display font-bold mt-1">Informasi &amp; Spesifikasi Paket</h2>
+                  <h2 id="step2-heading" class="text-2xl font-display font-bold mt-1">Identitas Pemesan &amp; Spesifikasi Layanan</h2>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  <div><label class="block text-xs font-bold mb-2">Nama Lengkap Pemesan *</label><input id="field-nama" required class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" /></div>
-                  <div><label class="block text-xs font-bold mb-2">Judul Karya *</label><input id="field-judul" required class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" /></div>
-                  <div><label class="block text-xs font-bold mb-2">Jenis Karya *</label><input id="field-jenis-tari" required placeholder="Tari tradisi / Tari kreasi / Tari kontemporer" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" /></div>
-                  <div><label class="block text-xs font-bold mb-2">Durasi (MM:SS) *</label><input id="field-durasi" required placeholder="05:30" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" /></div>
+                <!-- PERJANJIAN PRODUKSI MUSIK (WAJIB DI MUSIK TARI & MUSIK NON-TARI) -->
+                <div id="contract-agreement-box" class="p-5 sm:p-6 rounded-2xl bg-primary/5 border border-primary/25 space-y-4">
+                  <div class="space-y-2 text-xs sm:text-[13px] text-textMain leading-relaxed">
+                    <p>Sebelum mengisi formulir ini, mohon membaca terlebih dahulu ketentuan <strong>Perjanjian Produksi Musik PrangArt Studios</strong> pada tautan di bawah ini.</p>
+                    <div>
+                      <button type="button" onclick="openProductionAgreementModal()" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary/90 transition shadow-sm">
+                        📄 Klik untuk membaca Perjanjian Produksi Musik
+                      </button>
+                    </div>
+                    <p class="text-textMuted">Dokumen perjanjian resmi yang telah disesuaikan dengan data pemesanan Anda akan dikirimkan setelah formulir ini selesai diisi.</p>
+                  </div>
+                  <div class="pt-3 border-t border-primary/20 space-y-2">
+                    <label class="block text-xs font-bold text-textMain">Apakah Anda menyetujui bahwa proses produksi musik akan mengikuti kontrak kerja sama resmi dari PrangArt Studios? *</label>
+                    <label class="flex items-start gap-3 p-3.5 rounded-xl bg-surface border border-border cursor-pointer hover:border-primary transition">
+                      <input type="checkbox" id="field-contract-agree" required class="w-4 h-4 mt-0.5 accent-primary" />
+                      <span class="text-xs font-semibold text-textMain">Ya, saya telah membaca dan menyetujui bahwa proses produksi musik mengikuti kontrak kerja sama resmi dari PrangArt Studios.</span>
+                    </label>
+                  </div>
                 </div>
 
-                <!-- SPESIFIKASI KHUSUS PAKET (DASAR / STANDAR / PRO) + OPSI SORAK -->
+                <!-- IDENTITAS & DATA KARYA DINAMIS SESUAI LAYANAN -->
+                <div id="identity-fields-container" class="space-y-5"></div>
+
+                <!-- SPESIFIKASI KHUSUS LAYANAN & PAKET -->
                 <div id="dynamic-spec-fields" class="pt-4 border-t border-border/60 space-y-5"></div>
 
                 <div class="pt-6 border-t border-border/60">
-                  <label class="block text-xs font-bold mb-3">Referensi Video Garapan Umum (Opsional)</label>
+                  <label id="video-ref-label" class="block text-xs font-bold mb-3">Tautan / File Referensi Utama (Opsional)</label>
                   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <input type="url" id="field-video-link" placeholder="Link Video (YouTube / GDrive)" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
+                    <input type="url" id="field-video-link" placeholder="Link Google Drive / YouTube..." class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
                     <div class="relative group">
-                      <input type="file" id="field-video-file" accept="video/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onchange="document.getElementById('video-file-name').textContent = this.files[0] ? this.files[0].name : 'Pilih File Video...'" />
+                      <input type="file" id="field-video-file" accept="video/*,audio/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onchange="document.getElementById('video-file-name').textContent = this.files[0] ? this.files[0].name : 'Pilih File Audio/Video...'" />
                       <div class="w-full bg-panel border border-border border-dashed rounded-xl px-4 py-3 text-sm flex justify-between items-center group-hover:border-primary transition">
-                        <span id="video-file-name" class="text-textMuted truncate">Pilih File Video...</span>
+                        <span id="video-file-name" class="text-textMuted truncate">Pilih File Audio/Video...</span>
                         <svg class="w-5 h-5 text-textMuted group-hover:text-primary transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <label class="flex items-center justify-between p-5 rounded-2xl bg-panel border cursor-pointer mt-4">
-                  <span class="text-sm font-bold">Tambahan Vokal / Player <small class="block text-textMuted">+ Rp250.000</small></span>
+                <label id="addon-vocal-wrapper" class="flex items-center justify-between p-5 rounded-2xl bg-panel border cursor-pointer mt-4">
+                  <span class="text-sm font-bold">Tambahan Vokal / Session Player <small class="block text-textMuted">+ Rp250.000</small></span>
                   <input type="checkbox" id="field-addon-vocal" onchange="recalculateLivePrice()" class="w-5 h-5" />
                 </label>
               </div>
 
-              <!-- LANGKAH 03: SINOPSIS KARYA & FORMULIR AI -->
+              <!-- LANGKAH 03: SINOPSIS (KHUSUS MUSIK TARI) & KETENTUAN LAYANAN -->
               <div class="bg-surface border border-border/80 rounded-3xl p-6 sm:p-10 space-y-6">
                 <div>
                   <span class="text-xs font-mono text-primary font-bold uppercase">Langkah 03</span>
-                  <h2 class="text-2xl font-display font-bold mt-1">Sinopsis Karya &amp; Ketentuan</h2>
+                  <h2 id="step3-heading" class="text-2xl font-display font-bold mt-1">Sinopsis Karya &amp; Ketentuan</h2>
                 </div>
 
-                <div>
+                <!-- BLOK SINOPSIS: HANYA TAMPIL UNTUK MUSIK TARI -->
+                <div id="synopsis-section-wrapper">
                   <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
-                    <label class="text-xs font-bold">Sinopsis Karya *</label>
+                    <label class="text-xs font-bold">Sinopsis Karya Tari *</label>
                     <div class="flex bg-panel p-1 rounded-xl border border-border/60">
                       <button type="button" id="btn-mode-manual" onclick="setSynopsisMode('manual')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-surface text-textMain shadow-sm">Ketik Manual</button>
                       <button type="button" id="btn-mode-ai" onclick="setSynopsisMode('ai')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-textMuted">Bantu Susun dengan AI</button>
@@ -212,14 +243,13 @@
                   <div id="ai-action-wrapper" class="hidden mb-5 p-5 sm:p-6 rounded-2xl bg-panel/70 border border-primary/30 space-y-5">
                     <div class="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs space-y-1.5">
                       <strong class="text-amber-600 dark:text-amber-400 block">⚠️ Perhatian &amp; Ketentuan Penggunaan AI:</strong>
-                      <p class="text-textMain">• Bagaimanapun juga hasil ini disusun oleh <strong>AI (Kecerdasan Buatan)</strong>, sehingga <strong>wajib Anda tinjau dan periksa kembali</strong> kesesuaiannya sebelum dimasukkan ke dalam kolom Sinopsis.</p>
+                      <p class="text-textMain">• Hasil ini disusun oleh <strong>AI (Kecerdasan Buatan)</strong>, sehingga <strong>wajib Anda tinjau dan periksa kembali</strong> kesesuaiannya sebelum dimasukkan ke dalam kolom Sinopsis.</p>
                       <p class="text-textMain">• Batas penggunaan: Maksimal <strong>2 kali generate per akun per hari</strong> dengan <strong>waktu jeda 10 menit</strong> antar-generate.</p>
-                      <p class="text-textMain">• Setelah hasil muncul, silakan klik tombol <strong>Salin Hasil</strong> lalu tempelkan (paste) ke dalam kotak Sinopsis di bawah.</p>
+                      <p class="text-textMain">• Setelah hasil muncul, klik tombol <strong>Salin Hasil</strong> lalu tempelkan (paste) ke dalam kotak Sinopsis di bawah.</p>
                     </div>
 
                     <div id="ai-quota-status-banner" class="text-xs font-mono text-primary font-semibold bg-primary/10 px-4 py-2.5 rounded-xl border border-primary/20"></div>
 
-                    <!-- FORMULIR DETAIL DATA KARYA (17 PERTANYAAN A-D) -->
                     <div id="ai-detail-form-container"></div>
 
                     <div class="space-y-3">
@@ -231,7 +261,6 @@
                       </p>
                     </div>
 
-                    <!-- KOTAK HASIL GENERATE AI UNTUK DISALIN -->
                     <div id="ai-result-box" class="hidden space-y-2 pt-3 border-t border-border/60">
                       <div class="flex items-center justify-between">
                         <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">✓ Hasil Generate AI (Silakan tinjau &amp; salin ke kolom Sinopsis):</span>
@@ -244,15 +273,15 @@
                   </div>
 
                   <label class="block text-xs font-bold mb-2 text-textMuted">Kolom Sinopsis Final (Tempel / ketik sinopsis akhir di sini) *</label>
-                  <textarea id="field-sinopsis" rows="6" required placeholder="Ketik sinopsis karya Anda secara manual di sini, atau tempelkan (paste) hasil sinopsis dari AI setelah Anda tinjau..." class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm leading-relaxed"></textarea>
+                  <textarea id="field-sinopsis" rows="6" required placeholder="Ketik sinopsis karya tari Anda secara manual di sini, atau tempelkan (paste) hasil sinopsis dari AI setelah Anda tinjau..." class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm leading-relaxed"></textarea>
                 </div>
 
-                <div class="pt-6 border-t border-border/60">
+                <div id="terms-rules-wrapper" class="pt-6 border-t border-border/60">
                   <h3 class="text-lg font-bold text-textMain mb-4">Ketentuan &amp; Aturan Layanan</h3>
                   <div class="text-[13px] text-textMuted space-y-3 leading-relaxed bg-panel p-5 rounded-2xl border border-border/50">
-                    <p><strong class="text-textMain">1. Penyesuaian Custom:</strong> Permintaan di luar paket standar dapat dikonsultasikan terlebih dahulu sebelum kesepakatan harga dan pengerjaan.</p>
-                    <p><strong class="text-textMain">2. Instrumen Tambahan:</strong> Penambahan 1–2 instrumen khusus (session player) dapat dikoordinasikan secara fleksibel.</p>
-                    <p><strong class="text-textMain">3. Ketentuan Revisi:</strong> Paket Dasar 3x revisi. Paket Pro UNLIMITED (maks 1 bulan). Revisi ekstra Rp250.000 per sesi.</p>
+                    <p><strong class="text-textMain">1. Penyesuaian Custom:</strong> Permintaan di luar paket standar (termasuk durasi musik tari di atas 7 menit) menggunakan Paket Custom dan dikonsultasikan terlebih dahulu.</p>
+                    <p><strong class="text-textMain">2. Instrumen Tambahan:</strong> Penambahan 1–2 instrumen khusus (session player / vokal) dapat dikoordinasikan secara fleksibel.</p>
+                    <p><strong class="text-textMain">3. Ketentuan Revisi:</strong> Paket Dasar maks. 2–3x revisi minor. Paket Pro UNLIMITED (maks 1 bulan). Revisi ekstra Rp250.000 per sesi.</p>
                     <p><strong class="text-textMain">4. Respon Klien:</strong> Tanpa konfirmasi klien selama &gt;14 hari, proyek diarsipkan. Pembatalan sepihak membuat DP non-refundable.</p>
                     <p><strong class="text-textMain">5. Keterlambatan Jasa:</strong> Keterlambatan tanpa konfirmasi dikenakan potongan 1-2% per hari dari sisa pelunasan (maks 10%).</p>
                     <p><strong class="text-textMain">6. Prosedur:</strong> Proyek diawali dengan konsultasi WA sebelum kesepakatan harga final.</p>
@@ -269,11 +298,11 @@
               <div class="bg-surface border border-border/80 rounded-3xl p-8 shadow-premium space-y-5">
                 <span class="text-xs font-mono uppercase text-primary font-bold block border-b pb-3">Ringkasan Biaya</span>
                 <div class="space-y-3 text-sm">
-                  <div class="flex justify-between"><span>Layanan</span><span id="calc-service-name"></span></div>
-                  <div class="flex justify-between"><span id="calc-pkg-name"></span><span id="calc-pkg-price"></span></div>
-                  <div class="flex justify-between"><span id="calc-addon-label">Tambahan Vokal</span><span id="calc-addon-price"></span></div>
+                  <div class="flex justify-between"><span>Layanan</span><span id="calc-service-name" class="font-semibold"></span></div>
+                  <div class="flex justify-between"><span id="calc-pkg-name"></span><span id="calc-pkg-price" class="font-mono"></span></div>
+                  <div class="flex justify-between"><span id="calc-addon-label">Tambahan Vokal</span><span id="calc-addon-price" class="font-mono"></span></div>
                 </div>
-                <div class="border-t pt-4 flex justify-between"><span>Total</span><span id="calc-total-price" class="text-2xl font-bold text-primary"></span></div>
+                <div class="border-t pt-4 flex justify-between items-center"><span>Estimasi Total</span><span id="calc-total-price" class="text-2xl font-bold text-primary"></span></div>
               </div>
             </aside>
           </form>
@@ -350,8 +379,8 @@
   </div>
 
   <div id="custom-modal" class="fixed inset-0 bg-black/85 z-[65] hidden items-center justify-center p-4">
-    <div class="bg-surface border border-border rounded-2xl max-w-lg w-full p-6">
-      <div class="flex justify-between mb-4"><h2 id="custom-modal-title" class="font-bold"></h2><button type="button" onclick="closeCustomModal()" aria-label="Tutup">×</button></div>
+    <div class="bg-surface border border-border rounded-2xl max-w-2xl w-full p-6">
+      <div class="flex justify-between mb-4"><h2 id="custom-modal-title" class="font-bold"></h2><button type="button" onclick="closeCustomModal()" aria-label="Tutup" class="text-xl leading-none">×</button></div>
       <div id="custom-modal-body"></div>
     </div>
   </div>
