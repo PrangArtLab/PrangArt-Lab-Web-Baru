@@ -143,6 +143,7 @@
         <div id="order-form-container">
           <form id="prangart-order-form" onsubmit="handleOrderFormSubmit(event)" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             <div class="lg:col-span-8 space-y-8">
+              <!-- LANGKAH 01 -->
               <div class="bg-surface border border-border/80 rounded-3xl p-6 sm:p-10 space-y-6 shadow-premium">
                 <div><span class="text-xs font-mono text-primary font-bold uppercase">Langkah 01</span><h2 class="text-2xl font-display font-bold mt-1">Pilih Layanan &amp; Harga</h2></div>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -151,34 +152,54 @@
                   <button type="button" id="svc-tab-transkripsi" onclick="selectServiceLine('transkripsi')" class="svc-tab-btn p-4 rounded-2xl border text-left"><span class="text-sm font-bold">Transkripsi</span></button>
                 </div>
                 <div id="package-cards-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2"></div>
-                <div><label class="block text-xs font-bold mb-2">Harga Kesepakatan (Rp)</label><input type="number" id="custom-price-input" oninput="handleCustomPrice(this.value)" placeholder="Contoh: 1500000" class="w-full bg-panel border border-border rounded-xl px-4 py-3" /></div>
+                <div><label class="block text-xs font-bold mb-2">Harga Kesepakatan (Rp)</label><input type="number" id="custom-price-input" oninput="handleCustomPrice(this.value)" placeholder="Contoh: 1500000" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" /></div>
               </div>
 
+              <!-- LANGKAH 02 -->
               <div class="bg-surface border border-border/80 rounded-3xl p-6 sm:p-10 space-y-6">
                 <div><span class="text-xs font-mono text-primary font-bold uppercase">Langkah 02</span><h2 class="text-2xl font-display font-bold mt-1">Informasi Karya</h2></div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  <div><label class="block text-xs font-bold mb-2">Nama Lengkap *</label><input id="field-nama" required class="w-full bg-panel border rounded-xl px-4 py-3" /></div>
-                  <div><label class="block text-xs font-bold mb-2">Judul Karya *</label><input id="field-judul" required class="w-full bg-panel border rounded-xl px-4 py-3" /></div>
-                  <div><label class="block text-xs font-bold mb-2">Jenis Karya *</label><input id="field-jenis-tari" required class="w-full bg-panel border rounded-xl px-4 py-3" /></div>
-                  <div><label class="block text-xs font-bold mb-2">Durasi (MM:SS) *</label><input id="field-durasi" required placeholder="05:30" class="w-full bg-panel border rounded-xl px-4 py-3" /></div>
+                  <div><label class="block text-xs font-bold mb-2">Nama Lengkap *</label><input id="field-nama" required class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" /></div>
+                  <div><label class="block text-xs font-bold mb-2">Judul Karya *</label><input id="field-judul" required class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" /></div>
+                  <div>
+                    <label class="block text-xs font-bold mb-2">Jenis Karya *</label>
+                    <input id="field-jenis-tari" required placeholder="Cth: Tari Tradisi / Tari Kreasi / Tari Kontemporer" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
+                  </div>
+                  <div><label class="block text-xs font-bold mb-2">Durasi (MM:SS) *</label><input id="field-durasi" required placeholder="05:30" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" /></div>
                 </div>
-                <div>
-                  <div class="flex justify-between items-center mb-2">
-                    <label class="text-xs font-bold">Sinopsis *</label>
-                    <div class="flex bg-panel p-1 rounded-lg">
-                      <button type="button" id="btn-mode-manual" onclick="setSynopsisMode('manual')" class="px-3 py-1 text-xs">Ketik Manual</button>
-                      <button type="button" id="btn-mode-ai" onclick="setSynopsisMode('ai')" class="px-3 py-1 text-xs">Gunakan AI</button>
+
+                <div class="pt-4 border-t border-border/60">
+                  <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
+                    <label class="text-xs font-bold">Sinopsis Karya *</label>
+                    <div class="flex bg-panel p-1 rounded-xl border border-border/60">
+                      <button type="button" id="btn-mode-manual" onclick="setSynopsisMode('manual')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-surface text-textMain shadow-sm">Ketik Manual</button>
+                      <button type="button" id="btn-mode-ai" onclick="setSynopsisMode('ai')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-textMuted">Gunakan AI</button>
                     </div>
                   </div>
-                  <textarea id="field-sinopsis" rows="4" required class="w-full bg-panel border rounded-xl px-4 py-3"></textarea>
-                  <div id="ai-action-wrapper" class="hidden mt-2"><button type="button" id="btn-ai-synopsis" onclick="generateAISynopsis()" class="w-full py-2 rounded-lg">Generate Sinopsis AI</button></div>
+
+                  <!-- WADAH FORMULIR DATA KARYA TARI (MUNCUL SAAT KLIK GUNAKAN AI) -->
+                  <div id="ai-action-wrapper" class="hidden space-y-5 mb-4 p-5 sm:p-6 bg-panel/60 border border-primary/30 rounded-2xl">
+                    <div class="border-b border-border/60 pb-3">
+                      <span class="text-[11px] font-mono font-bold uppercase text-primary block">Formulir Data Karya (Bahan Prompt AI)</span>
+                      <p class="text-xs text-textMuted mt-1">Gunakan bahasa sederhana sesuai pemahaman Anda. Untuk pertanyaan yang tidak diketahui atau tidak relevan, boleh dikosongkan.</p>
+                    </div>
+                    
+                    <div id="ai-dynamic-prompt-fields"></div>
+
+                    <button type="button" id="btn-ai-synopsis" onclick="generateAISynopsis()" class="btn-primary w-full py-3.5 rounded-xl text-sm font-bold shadow-glow">
+                      ✦ Generate Sinopsis AI
+                    </button>
+                  </div>
+
+                  <textarea id="field-sinopsis" rows="5" required placeholder="Tulis sinopsis karya Anda secara manual di sini, atau pilih 'Gunakan AI' di atas untuk menyusunnya otomatis..." class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm leading-relaxed"></textarea>
                 </div>
               </div>
 
+              <!-- LANGKAH 03 -->
               <div class="bg-surface border border-border/80 rounded-3xl p-6 sm:p-10 space-y-6">
                 <div>
                   <span class="text-xs font-mono text-primary font-bold uppercase">Langkah 03</span>
-                  <h2 class="text-2xl font-display font-bold mt-1">Spesifikasi & Referensi</h2>
+                  <h2 class="text-2xl font-display font-bold mt-1">Spesifikasi &amp; Referensi</h2>
                 </div>
                 
                 <div id="dynamic-spec-fields" class="space-y-4"></div>
@@ -203,12 +224,12 @@
                 </label>
 
                 <div class="mt-8 pt-6 border-t border-border/60">
-                  <h3 class="text-lg font-bold text-textMain mb-4">Ketentuan & Aturan Layanan</h3>
+                  <h3 class="text-lg font-bold text-textMain mb-4">Ketentuan &amp; Aturan Layanan</h3>
                   <div class="text-[13px] text-textMuted space-y-3 leading-relaxed bg-panel p-5 rounded-2xl border border-border/50">
                     <p><strong class="text-textMain">1. Penyesuaian Custom:</strong> Permintaan di luar paket standar dapat dikonsultasikan terlebih dahulu sebelum kesepakatan harga dan pengerjaan.</p>
                     <p><strong class="text-textMain">2. Instrumen Tambahan:</strong> Penambahan 1–2 instrumen khusus (session player) dapat dikoordinasikan secara fleksibel.</p>
                     <p><strong class="text-textMain">3. Ketentuan Revisi:</strong> Paket Dasar 3x revisi. Paket Pro UNLIMITED (maks 1 bulan). Revisi ekstra Rp250.000 per sesi.</p>
-                    <p><strong class="text-textMain">4. Respon Klien:</strong> Tanpa konfirmasi klien selama >14 hari, proyek diarsipkan. Pembatalan sepihak membuat DP non-refundable.</p>
+                    <p><strong class="text-textMain">4. Respon Klien:</strong> Tanpa konfirmasi klien selama &gt;14 hari, proyek diarsipkan. Pembatalan sepihak membuat DP non-refundable.</p>
                     <p><strong class="text-textMain">5. Keterlambatan Jasa:</strong> Keterlambatan tanpa konfirmasi dikenakan potongan 1-2% per hari dari sisa pelunasan (maks 10%).</p>
                     <p><strong class="text-textMain">6. Prosedur:</strong> Proyek diawali dengan konsultasi WA sebelum kesepakatan harga final.</p>
                   </div>
@@ -226,7 +247,7 @@
                 <div class="space-y-3 text-sm">
                   <div class="flex justify-between"><span>Layanan</span><span id="calc-service-name"></span></div>
                   <div class="flex justify-between"><span id="calc-pkg-name"></span><span id="calc-pkg-price"></span></div>
-                  <div class="flex justify-between"><span id="calc-addon-label"></span><span id="calc-addon-price"></span></div>
+                  <div class="flex justify-between"><span id="calc-addon-label">Tambahan Vokal</span><span id="calc-addon-price"></span></div>
                 </div>
                 <div class="border-t pt-4 flex justify-between"><span>Total</span><span id="calc-total-price" class="text-2xl font-bold text-primary"></span></div>
               </div>
