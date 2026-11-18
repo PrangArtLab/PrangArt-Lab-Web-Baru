@@ -3,12 +3,12 @@
 (async function initPrangArtFirebase() {
   // GANTI DENGAN KONFIGURASI FIREBASE PROJECT ANDA
   const firebaseConfig = {
-    apiKey: "ISI_API_KEY_FIREBASE_ANDA",
-    authDomain: "ISI_PROJECT_ID.firebaseapp.com",
-    projectId: "ISI_PROJECT_ID",
-    storageBucket: "ISI_PROJECT_ID.firebasestorage.app",
-    messagingSenderId: "ISI_MESSAGING_SENDER_ID",
-    appId: "ISI_APP_ID"
+    apiKey: "AIzaSyDJX7Y95gJ8j3A3te5pvTONrAJBxZ5yS2s",
+    authDomain: "website-prangart-8ceeb.firebaseapp.com",
+    projectId: "website-prangart-8ceeb",
+    storageBucket: "website-prangart-8ceeb.firebasestorage.app",
+    messagingSenderId: "153873576617",
+    appId: "1:153873576617:web:34441945bc26c38d53afb8"
   };
 
   try {
