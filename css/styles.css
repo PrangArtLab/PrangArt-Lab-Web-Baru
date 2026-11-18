@@ -1,13 +1,13 @@
 /* Homepage visual refresh: studio blue-green identity + audio motif. */
 :root {
-  --base: 241 245 249; /* Slate terang bertekstur agar tidak polos */
+  --base: 248 250 252;
   --surface: 255 255 255;
-  --panel: 226 232 240;
+  --panel: 241 245 249;
   --primary: 79 70 229;
   --accent: 16 185 129;
   --text-main: 15 23 42;
   --text-muted: 71 85 105;
-  --border: 203 213 225;
+  --border: 226 232 240;
 }
 .dark {
   --base: 2 6 23;
@@ -28,13 +28,13 @@
   text-align: left;
   padding: clamp(88px, 12vh, 132px) clamp(28px, 10vw, 150px) 118px;
   
-  /* Background mode terang diperkaya dengan gradasi bluish-gold agar tidak polos */
+  /* Background dibuat lebih hidup dengan kombinasi cahaya/glow */
   background-color: rgb(var(--base));
   background-image: 
-    radial-gradient(ellipse at 85% 30%, rgba(180, 140, 60, 0.12) 0%, transparent 45%),
-    radial-gradient(ellipse at 15% 70%, rgba(var(--primary), 0.14) 0%, transparent 50%),
-    radial-gradient(circle at 50% 20%, rgba(var(--accent), 0.08) 0%, transparent 55%),
-    linear-gradient(135deg, rgb(var(--surface)) 0%, rgb(var(--base)) 100%);
+    radial-gradient(ellipse at 85% 30%, rgba(var(--accent), 0.18) 0%, transparent 40%),
+    radial-gradient(ellipse at 15% 70%, rgba(var(--primary), 0.15) 0%, transparent 45%),
+    radial-gradient(circle at 50% 50%, rgba(var(--primary), 0.05) 0%, transparent 60%),
+    linear-gradient(135deg, rgb(var(--surface)) 0%, rgba(var(--base), 1) 100%);
   position: relative;
   overflow: hidden;
 }
@@ -111,6 +111,7 @@
 #page-home > .home-hero > * { position: relative; z-index: 1; }
 
 /* ================= GLOBAL BUTTONS ================= */
+/* Memperbaiki tombol yang hilang warna/border */
 .btn-primary, .btn-outline {
   display: inline-flex;
   align-items: center;
@@ -183,7 +184,7 @@
 /* ================= SERVICES ================= */
 .home-services {
   padding: 76px 0 84px;
-  background: linear-gradient(180deg, rgb(var(--base)), rgba(var(--primary), 0.04));
+  background: linear-gradient(180deg, rgb(var(--base)), rgba(var(--primary), 0.03));
 }
 .home-service-grid {
   display: grid;
@@ -293,7 +294,7 @@
 /* ================= TESTIMONIALS ================= */
 .home-testimonials {
   padding: 76px 0 84px;
-  background: linear-gradient(180deg, rgb(var(--base)), rgba(var(--accent), 0.05));
+  background: linear-gradient(180deg, rgb(var(--base)), rgba(var(--accent), 0.04));
 }
 .testimonial-grid {
   display: grid;
@@ -375,7 +376,7 @@
 
 /* ================= HEADER & GLASSMORPHISM ================= */
 .glass-panel {
-  background-color: rgba(var(--surface), 0.88);
+  background-color: rgba(var(--surface), 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
 }
