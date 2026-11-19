@@ -1,208 +1,156 @@
-let adminActiveTab = 'projects';
+/* === DASHBOARD ADMIN & KELOLA KATALOG LAYANAN (PRANGART LAB) === */
 
-function verifyAdminPin(e) {
-  e.preventDefault();
-  const inputPin = document.getElementById('admin-pin-input').value;
-  if (inputPin === appState.settings.adminPin) {
-    appState.isAdminAuthenticated = true;
-    showToast('Berhasil', 'Masuk sebagai Admin.');
-    refreshAdminPageUI();
-    updateHeaderAuthBadge();
-  } else {
-    showToast('Gagal', 'PIN Admin salah.', 'error');
-  }
-}
+function renderAdminCatalogEditor() {
+  const container = document.getElementById('admin-catalog-editor');
+  if (!container) return;
 
-function logoutAdmin() {
-  appState.isAdminAuthenticated = false;
-  showToast('Info', 'Admin berhasil Log Out.');
-  refreshAdminPageUI();
-  updateHeaderAuthBadge();
-  navigateTo('home');
-}
-
-function refreshAdminPageUI() {
-  const pinGate = document.getElementById('admin-pin-gate');
-  const ws = document.getElementById('admin-workspace-content');
-  if (!pinGate || !ws) return;
-
-  if (!appState.isAdminAuthenticated) {
-    pinGate.classList.remove('hidden');
-    ws.classList.add('hidden');
-    const inp = document.getElementById('admin-pin-input');
-    if (inp) inp.value = '';
-  } else {
-    pinGate.classList.add('hidden');
-    ws.classList.remove('hidden');
-    renderAdminDashboard();
-  }
-}
-
-function renderAdminDashboard() {
-  const ws = document.getElementById('admin-workspace-content');
-  if (!ws) return;
-
-  const paymentMethodsListHTML = appState.settings.paymentMethods.map(m => `
-    <div class="flex items-center justify-between p-4 rounded-xl bg-panel border border-border">
+  container.innerHTML = `
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-6 pb-4 border-b border-border">
       <div>
-        <span class="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-primary/10 text-primary font-bold">${m.type}</span>
-        <strong class="block text-sm text-textMain mt-1">${m.name}</strong>
-        <span class="block text-xs text-textMuted">${m.type === 'qris' ? 'URL Gambar QRIS' : 'No. Rek: ' + m.number} • a.n. ${m.holder}</span>
+        <h3 class="text-base font-bold text-textMain">Pengaturan Tarif, Fasilitas &amp; Sistematika Layanan</h3>
+        <p class="text-xs text-textMuted">Perubahan yang disimpan di sini otomatis memperbarui kalkulator dan rincian paket pada halaman Pemesanan Klien.</p>
       </div>
-      <button type="button" onclick="deleteAdminPayment('${m.id}')" class="px-3 py-1.5 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-lg text-xs font-bold transition">
-        Hapus
-      </button>
-    </div>
-  `).join('') || '<p class="text-sm text-textMuted italic">Belum ada metode pembayaran.</p>';
-
-  ws.innerHTML = `
-    <div class="bg-surface border border-border rounded-3xl p-6 sm:p-8 shadow-premium space-y-6">
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border pb-5">
-        <div>
-          <span class="text-xs font-mono text-primary font-bold uppercase">Dashboard</span>
-          <h2 class="text-2xl font-display font-bold mt-1">Panel Pengelolaan Studio</h2>
-        </div>
-        <button onclick="logoutAdmin()" class="px-4 py-2 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-xl text-xs font-bold transition shadow-sm">
-          Log Out Admin
+      <div class="flex flex-wrap gap-2">
+        <button type="button" onclick="resetServiceCatalogToDefault()" class="px-4 py-2 rounded-xl border border-border bg-panel text-xs font-bold text-textMuted hover:text-textMain transition">
+          ↺ Reset ke Tarif &amp; Deskripsi Standar
+        </button>
+        <button type="button" onclick="saveAdminCatalogChanges()" class="btn-primary px-5 py-2 rounded-xl text-xs font-bold">
+          💾 Simpan Semua Perubahan Katalog
         </button>
       </div>
+    </div>
 
-      <div class="flex flex-wrap gap-2 border-b border-border/60 pb-4">
-        <button onclick="adminActiveTab='projects'; renderAdminDashboard();" class="px-4 py-2 rounded-xl text-xs font-bold ${adminActiveTab==='projects'?'bg-primary text-white':'bg-panel text-textMuted'}">Proyek & Klien</button>
-        <button onclick="adminActiveTab='payments'; renderAdminDashboard();" class="px-4 py-2 rounded-xl text-xs font-bold ${adminActiveTab==='payments'?'bg-primary text-white':'bg-panel text-textMuted'}">Metode Pembayaran</button>
-        <button onclick="adminActiveTab='content'; renderAdminDashboard(); if(window.renderSiteContentAdmin) renderSiteContentAdmin();" class="px-4 py-2 rounded-xl text-xs font-bold ${adminActiveTab==='content'?'bg-primary text-white':'bg-panel text-textMuted'}">Konten Beranda</button>
-        <button onclick="adminActiveTab='settings'; renderAdminDashboard();" class="px-4 py-2 rounded-xl text-xs font-bold ${adminActiveTab==='settings'?'bg-primary text-white':'bg-panel text-textMuted'}">Pengaturan Umum</button>
-      </div>
+    <div class="space-y-8">
+      ${Object.entries(appState.serviceCatalog).map(([svcKey, svc]) => `
+        <div class="p-5 sm:p-6 rounded-2xl bg-panel border border-border space-y-5">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 pb-3">
+            <span class="text-sm font-bold text-primary uppercase font-mono">${svc.label} (${svcKey})</span>
+            <div class="flex items-center gap-2">
+              <label class="text-xs text-textMuted">Add-on Vokal/Player (Rp):</label>
+              <input type="number" id="cat-addon-${svcKey}" value="${Number(svc.addonPrice || 250000)}" class="w-32 bg-surface border border-border rounded-lg px-3 py-1.5 text-xs font-mono" />
+            </div>
+          </div>
 
-      ${adminActiveTab === 'projects' ? `
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div class="p-5 rounded-2xl bg-panel border border-border/60">
-            <span class="text-xs text-textMuted font-bold uppercase block">Total Proyek Masuk</span>
-            <strong class="text-3xl font-mono text-primary mt-2 block">${appState.projects.length}</strong>
-          </div>
-          <div class="p-5 rounded-2xl bg-panel border border-border/60">
-            <span class="text-xs text-textMuted font-bold uppercase block">Klien Terdaftar</span>
-            <strong class="text-3xl font-mono text-emerald-500 mt-2 block">${appState.users.length}</strong>
-          </div>
-          <div class="p-5 rounded-2xl bg-panel border border-border/60">
-            <span class="text-xs text-textMuted font-bold uppercase block">Status Layanan</span>
-            <strong class="text-sm font-bold text-textMain mt-3 block flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Aktif
-            </strong>
-          </div>
-        </div>
-        <div class="pt-4">
-          <h3 class="text-lg font-bold mb-4">Daftar Proyek Klien</h3>
-          <div class="space-y-3">
-            ${appState.projects.length ? appState.projects.map(p => `
-              <div class="p-4 rounded-xl bg-panel border border-border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                <div>
-                  <strong class="text-base text-textMain block">${p.judul}</strong>
-                  <span class="text-xs text-textMuted">Klien: ${p.clientName} (${p.clientEmail}) • Layanan: ${p.serviceLineLabel}</span>
-                </div>
-                <div class="text-right">
-                  <span class="text-sm font-mono font-bold text-primary block">${formatRupiah(p.totalPrice)}</span>
-                  <span class="text-xs bg-surface px-2.5 py-1 rounded-full border border-border font-semibold">${p.productionStatus}</span>
-                </div>
-              </div>
-            `).join('') : '<p class="text-sm text-textMuted italic">Belum ada data proyek masuk.</p>'}
-          </div>
-        </div>
-      ` : adminActiveTab === 'payments' ? `
-        <div class="grid lg:grid-cols-2 gap-8">
-          <form onsubmit="saveAdminPayment(event)" class="space-y-4 bg-panel/40 p-6 rounded-2xl border border-border">
-            <h3 class="font-bold text-lg">Tambah Rekening / QRIS</h3>
-            <div>
-              <label class="block text-xs font-bold mb-1.5">Jenis Pembayaran</label>
-              <select id="pay-type" class="w-full bg-panel border border-border rounded-xl p-3 text-sm">
-                <option value="bank">Transfer Bank / E-Wallet</option>
-                <option value="qris">QRIS (Link Gambar QR)</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-xs font-bold mb-1.5">Nama Bank / Penyedia</label>
-              <input type="text" id="pay-name" required placeholder="Cth: Bank BCA / Dana / QRIS" class="w-full bg-panel border border-border rounded-xl p-3 text-sm" />
-            </div>
-            <div>
-              <label class="block text-xs font-bold mb-1.5">Nomor Rekening / URL Gambar QRIS</label>
-              <input type="text" id="pay-number" required placeholder="Cth: 1234567890 atau https://..." class="w-full bg-panel border border-border rounded-xl p-3 text-sm" />
-            </div>
-            <div>
-              <label class="block text-xs font-bold mb-1.5">Atas Nama (Pemilik Rekening)</label>
-              <input type="text" id="pay-holder" required placeholder="Cth: Fikri Yassaar" class="w-full bg-panel border border-border rounded-xl p-3 text-sm" />
-            </div>
-            <button type="submit" class="btn-primary w-full py-3 rounded-xl text-xs font-bold">+ Simpan Metode Pembayaran</button>
-          </form>
-
-          <div class="space-y-3">
-            <h3 class="font-bold text-lg mb-2">Daftar Metode Aktif</h3>
-            ${paymentMethodsListHTML}
-          </div>
-        </div>
-      ` : adminActiveTab === 'content' ? `
-        <div id="site-content-admin-inner"></div>
-      ` : `
-        <div class="max-w-md space-y-4">
           <div>
-            <label class="block text-xs font-bold mb-2">Nomor WhatsApp Tujuan</label>
-            <input type="text" id="admin-wa-input" value="${appState.settings.studioWhatsApp}" class="w-full bg-panel border border-border rounded-xl p-3 text-sm" />
+            <label class="block text-xs font-bold mb-1.5">Deskripsi Umum Layanan</label>
+            <textarea id="cat-overview-${svcKey}" rows="2" class="w-full bg-surface border border-border rounded-xl px-3.5 py-2 text-xs">${svc.overview || ''}</textarea>
           </div>
-          <div>
-            <label class="block text-xs font-bold mb-2">PIN Akses Admin</label>
-            <input type="text" id="admin-pin-setting" value="${appState.settings.adminPin}" class="w-full bg-panel border border-border rounded-xl p-3 text-sm" />
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            ${Object.entries(svc.packages).map(([pkgKey, pkg]) => {
+              const isCustom = pkgKey === 'custom' || Boolean(pkg.isCustom);
+              const featuresText = Array.isArray(pkg.features) ? pkg.features.join('\n') : (pkg.desc || '');
+              return `
+                <div class="p-4 rounded-xl bg-surface border ${isCustom ? 'border-primary/40' : 'border-border/80'} space-y-3">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="text-xs font-bold text-textMain">${pkg.label}</span>
+                    ${isCustom ? `<span class="text-[10px] font-mono px-2 py-0.5 rounded bg-primary/15 text-primary font-bold">Custom (Tanpa Patokan)</span>` : ''}
+                  </div>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div>
+                      <label class="block text-[11px] font-semibold text-textMuted mb-1">Label Paket</label>
+                      <input type="text" id="cat-pkg-label-${svcKey}-${pkgKey}" value="${pkg.label || ''}" class="w-full bg-panel border border-border rounded-lg px-3 py-1.5 text-xs" />
+                    </div>
+                    <div>
+                      <label class="block text-[11px] font-semibold text-textMuted mb-1">${isCustom ? 'Tarif Dasar (0 = Sesuai Kesepakatan)' : 'Harga Paket (Rp)'}</label>
+                      <input type="number" id="cat-pkg-price-${svcKey}-${pkgKey}" value="${Number(pkg.price || 0)}" ${isCustom ? 'readonly' : ''} class="w-full bg-panel border border-border rounded-lg px-3 py-1.5 text-xs font-mono ${isCustom ? 'opacity-60' : ''}" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label class="block text-[11px] font-semibold text-textMuted mb-1">Badge Singkat</label>
+                    <input type="text" id="cat-pkg-badge-${svcKey}-${pkgKey}" value="${pkg.badge || ''}" class="w-full bg-panel border border-border rounded-lg px-3 py-1.5 text-xs" />
+                  </div>
+
+                  <div>
+                    <label class="block text-[11px] font-semibold text-textMuted mb-1">Ringkasan Paket</label>
+                    <textarea id="cat-pkg-summary-${svcKey}-${pkgKey}" rows="2" class="w-full bg-panel border border-border rounded-lg px-3 py-1.5 text-xs">${pkg.summary || pkg.desc || ''}</textarea>
+                  </div>
+
+                  <div>
+                    <label class="block text-[11px] font-semibold text-textMuted mb-1">Daftar Fasilitas &amp; Kualifikasi (1 poin per baris)</label>
+                    <textarea id="cat-pkg-features-${svcKey}-${pkgKey}" rows="4" class="w-full bg-panel border border-border rounded-lg px-3 py-1.5 text-xs leading-relaxed">${featuresText}</textarea>
+                  </div>
+
+                  <div>
+                    <label class="block text-[11px] font-semibold text-textMuted mb-1">Sistematika &amp; Alur Pengerjaan</label>
+                    <textarea id="cat-pkg-workflow-${svcKey}-${pkgKey}" rows="2" class="w-full bg-panel border border-border rounded-lg px-3 py-1.5 text-xs">${pkg.workflow || ''}</textarea>
+                  </div>
+                </div>
+              `;
+            }).join('')}
           </div>
-          <button onclick="saveAdminSettings()" class="btn-primary w-full py-3 rounded-xl text-xs font-bold">Simpan Pengaturan</button>
         </div>
-      `}
+      `).join('')}
     </div>
   `;
 }
 
-function saveAdminPayment(e) {
-  if (e) e.preventDefault();
-  const type = document.getElementById('pay-type')?.value || 'bank';
-  const name = document.getElementById('pay-name')?.value.trim();
-  const number = document.getElementById('pay-number')?.value.trim();
-  const holder = document.getElementById('pay-holder')?.value.trim();
+async function saveAdminCatalogChanges() {
+  Object.entries(appState.serviceCatalog).forEach(([svcKey, svc]) => {
+    const addonInp = document.getElementById(`cat-addon-${svcKey}`);
+    const overInp = document.getElementById(`cat-overview-${svcKey}`);
+    if (addonInp) svc.addonPrice = Number(addonInp.value || 250000);
+    if (overInp) svc.overview = overInp.value.trim();
 
-  if (!name || !number || !holder) {
-    return showToast('Perhatian', 'Semua kolom metode pembayaran wajib diisi.', 'warning');
-  }
+    Object.entries(svc.packages).forEach(([pkgKey, pkg]) => {
+      const isCustom = pkgKey === 'custom' || Boolean(pkg.isCustom);
+      const lblInp = document.getElementById(`cat-pkg-label-${svcKey}-${pkgKey}`);
+      const prcInp = document.getElementById(`cat-pkg-price-${svcKey}-${pkgKey}`);
+      const bdgInp = document.getElementById(`cat-pkg-badge-${svcKey}-${pkgKey}`);
+      const sumInp = document.getElementById(`cat-pkg-summary-${svcKey}-${pkgKey}`);
+      const feaInp = document.getElementById(`cat-pkg-features-${svcKey}-${pkgKey}`);
+      const wrkInp = document.getElementById(`cat-pkg-workflow-${svcKey}-${pkgKey}`);
 
-  appState.settings.paymentMethods.push({
-    id: `pay-${Date.now()}`,
-    type,
-    name,
-    number,
-    holder
+      if (lblInp && lblInp.value.trim()) pkg.label = lblInp.value.trim();
+      if (!isCustom && prcInp) pkg.price = Number(prcInp.value || 0);
+      if (bdgInp) pkg.badge = bdgInp.value.trim();
+      if (sumInp) pkg.summary = sumInp.value.trim();
+      if (feaInp) {
+        pkg.features = feaInp.value
+          .split('\n')
+          .map(line => line.trim())
+          .filter(Boolean);
+      }
+      if (wrkInp) pkg.workflow = wrkInp.value.trim();
+    });
   });
 
-  persistLocalState();
-  showToast('Berhasil', 'Metode pembayaran baru ditambahkan.');
-  renderAdminDashboard();
+  try {
+    localStorage.setItem('prangart_service_catalog_v2', JSON.stringify(appState.serviceCatalog));
+    if (typeof syncCatalogToCloud === 'function') {
+      await syncCatalogToCloud(appState.serviceCatalog);
+    }
+  } catch (err) {
+    console.error(err);
+  }
+
+  if (typeof refreshOrderPageUI === 'function') refreshOrderPageUI();
+  if (typeof showToast === 'function') {
+    showToast('Tersimpan', 'Tarif, fasilitas, dan sistematika katalog layanan berhasil diperbarui.');
+  }
 }
 
-function deleteAdminPayment(id) {
-  appState.settings.paymentMethods = appState.settings.paymentMethods.filter(m => m.id !== id);
-  persistLocalState();
-  showToast('Info', 'Metode pembayaran dihapus.');
-  renderAdminDashboard();
-}
-
-function saveAdminSettings() {
-  const newWa = document.getElementById('admin-wa-input')?.value.trim();
-  const newPin = document.getElementById('admin-pin-setting')?.value.trim();
-  if (newWa) appState.settings.studioWhatsApp = newWa;
-  if (newPin) appState.settings.adminPin = newPin;
-  persistLocalState();
-  showToast('Berhasil', 'Pengaturan umum disimpan.');
-}
-
-function resetAdminPin() {
-  showToast('Info', 'PIN default Anda adalah 2026.', 'warning');
+async function resetServiceCatalogToDefault() {
+  appState.serviceCatalog = JSON.parse(JSON.stringify(DEFAULT_SERVICE_CATALOG));
+  try {
+    localStorage.setItem('prangart_service_catalog_v2', JSON.stringify(appState.serviceCatalog));
+    if (typeof syncCatalogToCloud === 'function') {
+      await syncCatalogToCloud(appState.serviceCatalog);
+    }
+  } catch (err) {
+    console.error(err);
+  }
+  renderAdminCatalogEditor();
+  if (typeof refreshOrderPageUI === 'function') refreshOrderPageUI();
+  if (typeof showToast === 'function') {
+    showToast('Direset', 'Katalog dikembalikan ke tarif & rincian fasilitas standar.');
+  }
 }
 
 Object.assign(window, {
-  verifyAdminPin, logoutAdmin, refreshAdminPageUI, renderAdminDashboard,
-  saveAdminSettings, saveAdminPayment, deleteAdminPayment, resetAdminPin
+  renderAdminCatalogEditor,
+  saveAdminCatalogChanges,
+  resetServiceCatalogToDefault
 });
