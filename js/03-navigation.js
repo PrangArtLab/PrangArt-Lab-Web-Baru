@@ -1,4 +1,4 @@
-/* === SISTEM NAVIGASI HALAMAN (DESKTOP, TABLET & MOBILE), PEMISAHAN ROLE & LOGOUT === */
+/* === SISTEM NAVIGASI HALAMAN (DESKTOP, TABLET & MOBILE), ROLE & PANEL PIN ADMIN === */
 
 function removeDuplicateAdminNavButtons() {
   document.querySelectorAll('#nav-btn-admin, #mobile-nav-admin').forEach((el) => el.remove());
@@ -152,6 +152,7 @@ function updateActiveNavHighlight(pageId) {
   });
 }
 
+/* === SINKRONISASI TAMPILAN LAYAR PIN ADMIN VS RUANG KERJA ADMIN === */
 function ensureAdminPageInnerState() {
   const { isAdminLoggedIn } = getActiveRoleState();
   const adminPage = document.getElementById('page-admin');
@@ -160,25 +161,102 @@ function ensureAdminPageInnerState() {
   adminPage.classList.remove('hidden', 'sm:hidden', 'md:hidden', 'lg:hidden', 'xl:hidden');
   adminPage.style.display = 'block';
 
-  const lockCandidates = adminPage.querySelectorAll('#admin-lock-screen, #admin-pin-screen, #admin-login-box, [id*="admin-pin"], [id*="admin-lock"]');
-  const contentCandidates = adminPage.querySelectorAll('#admin-dashboard-content, #admin-main-panel, #admin-panel-content, [id*="admin-dashboard"]');
+  // Cari input PIN di dalam #page-admin untuk mengenali kotak form PIN
+  const pinInput = adminPage.querySelector('input[type="password"], input[placeholder*="PIN" i], input[id*="pin" i]');
+  const lockBox =
+    adminPage.querySelector('#admin-lock-screen, #admin-pin-screen, #admin-login-box, #admin-auth-box') ||
+    (pinInput ? pinInput.closest('form, div.max-w-md, div.max-w-sm, div.rounded-2xl, div.rounded-3xl') : null);
+
+  // Cari kontainer utama dashboard admin (biasanya sibling dari lockBox atau memiliki ID admin-content / admin-workspace / admin-main)
+  const explicitContent = adminPage.querySelector(
+    '#admin-dashboard-content, #admin-main-panel, #admin-panel-content, #admin-workspace, #admin-content'
+  );
 
   if (!isAdminLoggedIn) {
-    lockCandidates.forEach((el) => {
-      el.classList.remove('hidden');
-      el.style.display = '';
-    });
-    contentCandidates.forEach((el) => {
-      el.classList.add('hidden');
-    });
+    if (lockBox) {
+      lockBox.classList.remove('hidden');
+      lockBox.style.display = '';
+    }
+    if (explicitContent && explicitContent !== lockBox) {
+      explicitContent.classList.add('hidden');
+      explicitContent.style.display = 'none';
+    }
   } else {
-    lockCandidates.forEach((el) => {
-      el.classList.add('hidden');
-    });
-    contentCandidates.forEach((el) => {
-      el.classList.remove('hidden');
-      el.style.display = '';
-    });
+    if (lockBox) {
+      lockBox.classList.add('hidden');
+      lockBox.style.display = 'none';
+    }
+    if (explicitContent) {
+      explicitContent.classList.remove('hidden');
+      explicitContent.style.display = 'block';
+    } else if (lockBox && lockBox.parentElement) {
+      // Tampilkan seluruh saudara (sibling) di sebelah lockBox
+      Array.from(lockBox.parentElement.children).forEach((child) => {
+        if (child !== lockBox) {
+          child.classList.remove('hidden');
+          child.style.display = '';
+        }
+      });
+    }
+  }
+}
+
+/* === HANDLER VERIFIKASI PIN ADMIN (FALLBACK + PENYAMBUNG KE 12-admin.js) === */
+function processAdminPinAttempt(ev) {
+  if (ev) {
+    ev.preventDefault();
+    ev.stopPropagation();
+  }
+
+  const adminPage = document.getElementById('page-admin');
+  if (!adminPage) return;
+
+  const pinInput = adminPage.querySelector('input[type="password"], input[placeholder*="PIN" i], input[id*="pin" i]');
+  const enteredPin = (pinInput?.value || '').trim();
+
+  if (!enteredPin) {
+    if (typeof showToast === 'function') {
+      showToast('PIN Kosong', 'Silakan masukkan PIN Admin terlebih dahulu.', 'warning');
+    }
+    pinInput?.focus();
+    return;
+  }
+
+  // Ambil PIN valid dari config / localStorage / default studio
+  const configuredPin =
+    (typeof ADMIN_PIN !== 'undefined' && String(ADMIN_PIN)) ||
+    (typeof DEFAULT_ADMIN_PIN !== 'undefined' && String(DEFAULT_ADMIN_PIN)) ||
+    localStorage.getItem('prangart_admin_pin') ||
+    '123456';
+
+  if (enteredPin === String(configuredPin)) {
+    if (typeof appState !== 'undefined') {
+      appState.isAdminUnlocked = true;
+    }
+    sessionStorage.setItem('prangart_admin_unlocked', 'true');
+    localStorage.setItem('prangart_admin_unlocked', 'true');
+
+    if (pinInput) pinInput.value = '';
+    ensureAdminPageInnerState();
+    syncRoleNavVisibility();
+
+    if (typeof refreshAdminDashboard === 'function') {
+      try { refreshAdminDashboard(); } catch (e) { console.error(e); }
+    }
+    if (typeof renderAdminCatalogEditor === 'function') {
+      try { renderAdminCatalogEditor(); } catch (e) { console.error(e); }
+    }
+    if (typeof showToast === 'function') {
+      showToast('Akses Admin Dibuka', 'Selamat datang di Panel Admin PrangArt Lab.');
+    }
+  } else {
+    if (typeof showToast === 'function') {
+      showToast('PIN Salah', 'PIN Admin yang Anda masukkan tidak sesuai.', 'error');
+    }
+    if (pinInput) {
+      pinInput.value = '';
+      pinInput.focus();
+    }
   }
 }
 
@@ -276,7 +354,6 @@ function goToOrderWithService(serviceKey, packageKey) {
   }
 }
 
-/* === FUNGSI LOGOUT / KELUAR BERSIH (SINKRON UNTUK TOMBOL "LOG OUT" & "KELUAR") === */
 let isLoggingOutLock = false;
 
 async function performUniversalLogout(roleHint) {
@@ -301,7 +378,6 @@ async function performUniversalLogout(roleHint) {
         sessionStorage.removeItem(k);
       });
 
-      // Jika ada tombol "Keluar" asli di header yang memiliki handler khusus auth, ikut panggil secara aman
       const headerKeluarBtn = Array.from(document.querySelectorAll('header button, header a')).find(
         (el) => (el.textContent || '').trim().toLowerCase() === 'keluar'
       );
@@ -354,9 +430,39 @@ async function performUniversalLogout(roleHint) {
   navigateTo('home');
 }
 
-/* === DETEKSI KLIK GLOBAL UNTUK TOMBOL "LOG OUT" (APAPUN TAG HTML-NYA) & "KELUAR" === */
+/* === EVENT LISTENER GLOBAL (TOMBOL MASUK PIN ADMIN, ENTER PIN, LOGOUT & NAVIGASI) === */
+document.addEventListener('submit', (ev) => {
+  if (ev.target && ev.target.closest('#page-admin')) {
+    const hasPinField = ev.target.querySelector('input[type="password"], input[placeholder*="PIN" i], input[id*="pin" i]');
+    if (hasPinField) {
+      processAdminPinAttempt(ev);
+    }
+  }
+}, true);
+
+document.addEventListener('keydown', (ev) => {
+  if (ev.key === 'Enter' && ev.target && ev.target.closest('#page-admin')) {
+    const isPinInput = ev.target.matches('input[type="password"], input[placeholder*="PIN" i], input[id*="pin" i]');
+    if (isPinInput) {
+      processAdminPinAttempt(ev);
+    }
+  }
+}, true);
+
 document.addEventListener('click', (ev) => {
-  // Cek mulai dari target terdekat (termasuk span/div/button/a) yang bertuliskan "Log Out" atau "Keluar"
+  // 1. Tangkap klik tombol "Masuk" di dalam layar PIN Admin
+  const adminPanelBtn = ev.target.closest('#page-admin button, #page-admin [type="submit"]');
+  if (adminPanelBtn) {
+    const btnTxt = (adminPanelBtn.textContent || '').trim().toLowerCase();
+    const adminPage = document.getElementById('page-admin');
+    const pinInput = adminPage?.querySelector('input[type="password"], input[placeholder*="PIN" i], input[id*="pin" i]');
+    if (btnTxt === 'masuk' && pinInput && pinInput.offsetParent !== null) {
+      processAdminPinAttempt(ev);
+      return;
+    }
+  }
+
+  // 2. Tangkap klik tombol Log Out / Keluar
   let node = ev.target;
   let matchedLogoutEl = null;
 
@@ -403,6 +509,7 @@ document.addEventListener('click', (ev) => {
     return;
   }
 
+  // 3. Tangkap klik navigasi halaman
   const navEl = ev.target.closest('[data-nav-target]');
   if (navEl) {
     ev.preventDefault();
@@ -434,7 +541,6 @@ if (document.readyState === 'loading') {
   initNavigationSystem();
 }
 
-// Ekspos semua variasi nama fungsi logout ke global window
 Object.assign(window, {
   navigateTo,
   toggleMobileMenu,
@@ -444,6 +550,11 @@ Object.assign(window, {
   ensureAdminNavButtonsVisible: syncRoleNavVisibility,
   removeDuplicateAdminNavButtons,
   ensureAdminPageInnerState,
+  processAdminPinAttempt,
+  verifyAdminPin: processAdminPinAttempt,
+  unlockAdmin: processAdminPinAttempt,
+  checkAdminPin: processAdminPinAttempt,
+  handleAdminLogin: processAdminPinAttempt,
   updateActiveNavHighlight,
   performUniversalLogout,
   logout: () => performUniversalLogout('all'),
