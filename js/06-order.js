@@ -81,17 +81,113 @@ function parseDurationToSeconds(mmss) {
   return parseInt(match[1], 10) * 60 + parseInt(match[2], 10);
 }
 
-function validateTariDurationLimit() {
-  if (appState.selectedServiceLine !== 'tari') return true;
-  if (appState.selectedPackage !== 'standar' && appState.selectedPackage !== 'pro') return true;
+function formatSecondsToMMSS(sec) {
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
+/* === HITUNG MENIT TERHARGAI TRANSKRIPSI (MINIMAL 1 MENIT; < 01:00 TETAP 1 MENIT) === */
+function getBillableTranscriptionMinutes() {
+  const durInput = document.getElementById('field-durasi');
+  const sec = parseDurationToSeconds(durInput?.value || '');
+  if (sec === null || sec <= 0) return 1;
+  return Math.max(1, Math.ceil(sec / 60));
+}
+
+function getTranscriptionInstrumentCount() {
+  const inp = document.getElementById('trans-jumlah-instrumen');
+  const val = parseInt(inp?.value || '1', 10);
+  return Number.isFinite(val) && val >= 1 ? val : 1;
+}
+
+/* === VALIDASI BATAS MAKSIMAL DURASI (MUSIK TARI & MUSIK NON-TARI) === */
+function validateDurationLimitByPackage() {
+  const svcKey = appState.selectedServiceLine;
+  const pkgKey = appState.selectedPackage;
+  const svc = appState.serviceCatalog[svcKey];
+  const pkg = svc?.packages?.[pkgKey];
   const durInput = document.getElementById('field-durasi');
   const warnEl = document.getElementById('durasi-limit-warning');
-  if (!durInput) return true;
+
+  if (svcKey === 'transkripsi') {
+    if (warnEl) warnEl.classList.add('hidden');
+    recalculateLivePrice();
+    return true;
+  }
+
+  if (!durInput || !pkg || pkgKey === 'custom' || pkg.isCustom || !pkg.maxSeconds) {
+    if (warnEl) warnEl.classList.add('hidden');
+    return true;
+  }
 
   const sec = parseDurationToSeconds(durInput.value);
-  const isOver = sec !== null && sec > 420;
-  if (warnEl) warnEl.classList.toggle('hidden', !isOver);
+  const isOver = sec !== null && sec > Number(pkg.maxSeconds);
+  if (warnEl) {
+    if (isOver) {
+      const maxStr = formatSecondsToMMSS(Number(pkg.maxSeconds));
+      const nextHint = svcKey === 'digital'
+        ? (pkgKey === 'dasar'
+            ? 'Pilih <strong>Paket Standar</strong> (maks. 05:00), <strong>Paket Pro</strong> (maks. 07:00), atau <strong>Paket Custom</strong>.'
+            : pkgKey === 'standar'
+              ? 'Pilih <strong>Paket Pro</strong> (maks. 07:00) atau <strong>Paket Custom</strong>.'
+              : 'Untuk durasi lebih dari 07:00 menit, silakan pilih <strong>Paket Custom</strong> di Langkah 01.')
+        : 'Untuk durasi lebih dari 07:00 menit, silakan pilih <strong>Paket Custom</strong> di Langkah 01.';
+      warnEl.innerHTML = `⚠️ Untuk <strong>${pkg.label} (${svc.label})</strong>, batas maksimal durasi adalah <strong>${maxStr} menit</strong>. ${nextHint}`;
+      warnEl.classList.remove('hidden');
+    } else {
+      warnEl.classList.add('hidden');
+    }
+  }
   return !isOver;
+}
+
+function calculateCurrentOrderPricing() {
+  const svcKey = appState.selectedServiceLine;
+  const pkgKey = appState.selectedPackage;
+  const svc = appState.serviceCatalog[svcKey];
+  const pkg = svc.packages[pkgKey] || Object.values(svc.packages)[0];
+  const isCustomPkg = (pkgKey === 'custom' || Boolean(pkg.isCustom));
+
+  let basePrice = 0;
+  let breakdownNote = '';
+
+  if (isCustomPkg) {
+    basePrice = Number(appState.customPrice || 0);
+  } else if (appState.customPrice && Number(appState.customPrice) > 0) {
+    basePrice = Number(appState.customPrice);
+    breakdownNote = 'Harga kesepakatan khusus';
+  } else if (svcKey === 'transkripsi') {
+    const unitRate = Number(pkg.price || 0);
+    const billableMins = getBillableTranscriptionMinutes();
+    if (pkgKey === 'komplet' || pkg.billingUnit === 'per_min_complete') {
+      basePrice = unitRate * billableMins;
+      breakdownNote = `${formatRupiah(unitRate)} × ${billableMins} mnt (min. 1 mnt, full ensemble)`;
+    } else {
+      const instCount = getTranscriptionInstrumentCount();
+      basePrice = unitRate * billableMins * instCount;
+      breakdownNote = `${formatRupiah(unitRate)} × ${billableMins} mnt × ${instCount} instrumen`;
+    }
+  } else {
+    basePrice = Number(pkg.price || 0);
+  }
+
+  const addonPrice = Number(svc.addonPrice || 250000);
+  const isAddonChecked = (svcKey !== 'transkripsi') && Boolean(document.getElementById('field-addon-vocal')?.checked);
+  const addonAmount = isAddonChecked ? addonPrice : 0;
+  const totalPrice = basePrice + addonAmount;
+
+  return {
+    svc,
+    pkg,
+    isCustomPkg,
+    basePrice,
+    addonPrice,
+    isAddonChecked,
+    addonAmount,
+    totalPrice,
+    breakdownNote
+  };
 }
 
 /* === MODAL NASKAH PERJANJIAN PRODUKSI MUSIK LENGKAP === */
@@ -101,13 +197,7 @@ function openProductionAgreementModal() {
   const bodyEl = document.getElementById('custom-modal-body');
   if (!modal || !titleEl || !bodyEl) return;
 
-  const svc = appState.serviceCatalog[appState.selectedServiceLine];
-  const pkg = svc.packages[appState.selectedPackage];
-  const isCustomPkg = appState.selectedPackage === 'custom' || Boolean(pkg.isCustom);
-  const basePrice = isCustomPkg ? Number(appState.customPrice || 0) : (appState.customPrice || Number(pkg.price || 0));
-  const hasVocalAddon = (appState.selectedServiceLine !== 'transkripsi') && Boolean(document.getElementById('field-addon-vocal')?.checked);
-  const addonAmount = hasVocalAddon ? Number(svc.addonPrice || 250000) : 0;
-  const totalPrice = basePrice + addonAmount;
+  const { svc, pkg, isCustomPkg, isAddonChecked, totalPrice } = calculateCurrentOrderPricing();
   const dpAmount = totalPrice / 2;
 
   const clientName = document.getElementById('field-sanggar')?.value.trim() || appState.currentClientUser?.name || '[Nama Sanggar / Instansi / Klien]';
@@ -156,12 +246,10 @@ function openProductionAgreementModal() {
         </div>
       </div>
 
-      <p>Kedua belah pihak sepakat untuk mengikatkan diri dalam perjanjian kerja sama produksi musik dengan syarat dan ketentuan sebagai berikut:</p>
-
       <div class="space-y-3.5 text-justify">
         <div>
           <strong class="block text-primary uppercase">PASAL 1 — OBJEK &amp; SPESIFIKASI PEKERJAAN</strong>
-          <p>1. PIHAK KEDUA memberikan pekerjaan kepada PIHAK PERTAMA untuk memproduksi karya musik dengan rincian sebagai berikut:</p>
+          <p>1. PIHAK KEDUA memberikan pekerjaan kepada PIHAK PERTAMA untuk memproduksi karya musik dengan rincian:</p>
           <ul class="list-disc pl-5 mt-1 space-y-0.5 text-xs">
             <li><strong>Jenis Layanan:</strong> ${svc.label}</li>
             <li><strong>Paket Layanan:</strong> ${isCustomPkg || appState.customPrice ? pkg.label + ' (Kesepakatan Khusus)' : pkg.label}</li>
@@ -169,63 +257,23 @@ function openProductionAgreementModal() {
             <li><strong>Estimasi Durasi:</strong> ${workDuration}</li>
             <li><strong>Ringkasan Kualifikasi:</strong> ${pkg.summary || pkg.desc || ''}</li>
           </ul>
-          <p class="mt-1">2. PIHAK PERTAMA wajib melaksanakan produksi sesuai arahan konsep, referensi, sinopsis (khusus musik tari), maupun rincian teknis yang diserahkan PIHAK KEDUA dalam formulir pemesanan.</p>
         </div>
 
         <div>
           <strong class="block text-primary uppercase">PASAL 2 — BIAYA PRODUKSI &amp; TATA CARA PEMBAYARAN</strong>
-          <p>1. Total nilai jasa produksi musik yang disepakati adalah sebesar <strong>${totalPrice > 0 ? formatRupiah(totalPrice) : 'Sesuai Kesepakatan (Belum Diisi)'}</strong>${hasVocalAddon ? ' (sudah termasuk tambahan vokal/session player)' : ''}.</p>
-          <p>2. Pembayaran dilakukan dalam 2 (dua) tahap:</p>
-          <ul class="list-disc pl-5 mt-1 space-y-0.5 text-xs">
-            <li><strong>Tahap I (Uang Muka / Down Payment 50%):</strong> Sebesar <strong>${dpAmount > 0 ? formatRupiah(dpAmount) : '50% dari nilai kesepakatan'}</strong> wajib dibayarkan setelah kesepakatan konsep/kontrak sebelum proses produksi dimulai.</li>
-            <li><strong>Tahap II (Pelunasan 50%):</strong> Sebesar <strong>${dpAmount > 0 ? formatRupiah(dpAmount) : '50% dari nilai kesepakatan'}</strong> dibayarkan setelah draf final disetujui dan sebelum penyerahan seluruh berkas master akhir.</li>
-          </ul>
-          <p class="mt-1">3. Selama pelunasan belum diterima oleh PIHAK PERTAMA, seluruh file yang dikirimkan kepada PIHAK KEDUA bersifat pratinjau (<em>preview/draft</em>) dan PIHAK PERTAMA berhak menahan berkas master kualitas penuh.</p>
+          <p>1. Total nilai jasa produksi musik yang disepakati adalah sebesar <strong>${totalPrice > 0 ? formatRupiah(totalPrice) : 'Sesuai Kesepakatan (Belum Diisi)'}</strong>${isAddonChecked ? ' (sudah termasuk tambahan vokal/session player)' : ''}.</p>
+          <p>2. Pembayaran dilakukan dalam 2 (dua) tahap: <strong>DP 50% (${dpAmount > 0 ? formatRupiah(dpAmount) : '50%'})</strong> sebelum produksi dimulai dan <strong>Pelunasan 50% (${dpAmount > 0 ? formatRupiah(dpAmount) : '50%'})</strong> sebelum penyerahan berkas master penuh.</p>
         </div>
 
         <div>
-          <strong class="block text-primary uppercase">PASAL 3 — JANGKA WAKTU &amp; TAHAPAN PENGERJAAN</strong>
-          <p>1. Pengerjaan dimulai terhitung sejak PIHAK KEDUA melunasi DP 50% dan melengkapi seluruh bahan referensi yang dibutuhkan.</p>
-          <p>2. Perkembangan pengerjaan dipantau melalui Ruang Klien PrangArt Lab mulai dari penyusunan konsep, pengiriman draf pertama, tahap revisi, hingga <em>mixing &amp; mastering</em> final.</p>
-          <p>3. Jadwal penyerahan hasil akhir disesuaikan dengan tingkat kerumitan karya dan tenggat waktu yang disepakati bersama saat konsultasi.</p>
+          <strong class="block text-primary uppercase">PASAL 3 — KETENTUAN REVISI &amp; HASIL AKHIR</strong>
+          <p>1. Hak revisi mengikuti kualifikasi paket yang dipilih dalam koridor konsep awal. Perubahan konsep total atau penambahan durasi melebihi batas paket dikenakan penyesuaian biaya.</p>
+          <p>2. Setelah pelunasan diterima penuh, PIHAK PERTAMA menyerahkan hasil produksi sesuai deliverables paket yang dipilih.</p>
         </div>
 
         <div>
-          <strong class="block text-primary uppercase">PASAL 4 — KETENTUAN REVISI</strong>
-          <p>1. Hak revisi mengikuti kualifikasi paket yang dipilih:</p>
-          <ul class="list-disc pl-5 mt-1 space-y-0.5 text-xs">
-            <li><strong>Paket Dasar:</strong> Maksimal 2–3 kali revisi minor (penyesuaian keseimbangan volume, tempo ringan, atau aksen tanpa mengubah struktur dasar).</li>
-            <li><strong>Paket Standar:</strong> Revisi penyesuaian dinamika, transisi adegan, dan keseimbangan instrumen sesuai struktur awal yang disepakati.</li>
-            <li><strong>Paket Pro:</strong> <em>Unlimited</em> revisi dalam jangka waktu maksimal 1 (satu) bulan terhitung sejak draf pertama dikirimkan.</li>
-            <li><strong>Paket Custom:</strong> Mengikuti kesepakatan khusus kedua belah pihak.</li>
-          </ul>
-          <p class="mt-1">2. Permintaan perubahan konsep total, penggantian tema besar, atau penambahan durasi signifikan di luar kesepakatan awal dihitung sebagai pekerjaan tambahan atau dikenakan biaya revisi ekstra sebesar <strong>Rp250.000 per sesi</strong>.</p>
-        </div>
-
-        <div>
-          <strong class="block text-primary uppercase">PASAL 5 — PENYERAHAN HASIL AKHIR (DELIVERABLES)</strong>
-          <p>Setelah pelunasan diterima penuh, PIHAK PERTAMA menyerahkan hasil produksi berupa file audio master format <strong>WAV (24-bit/44.1kHz atau 48kHz)</strong> dan <strong>MP3 (320kbps)</strong>, serta file tambahan (seperti <em>Stems/Multitrack</em> atau <em>Minus One</em>) apabila termasuk dalam paket yang dipilih.</p>
-        </div>
-
-        <div>
-          <strong class="block text-primary uppercase">PASAL 6 — HAK CIPTA, LISENSI &amp; PENCANTUMAN KREDIT</strong>
-          <p>1. Hak moral sebagai pencipta/penata musik tetap melekat pada PIHAK PERTAMA (PrangArt Lab) sesuai Undang-Undang Hak Cipta yang berlaku.</p>
-          <p>2. PIHAK KEDUA memperoleh hak pakai penuh atas karya musik tersebut untuk kepentingan pementasan, perlombaan, publikasi acara, maupun distribusi digital sesuai peruntukan pesanan.</p>
-          <p>3. Dalam setiap publikasi, buku acara, deskripsi video, maupun pengumuman pementasan, PIHAK KEDUA wajib mencantumkan kredit penata musik: <strong>"Music by PrangArt Lab"</strong> atau nama komposer yang bertugas (kecuali disepakati perjanjian <em>Full Buyout</em> khusus).</p>
-          <p>4. PIHAK PERTAMA berhak mendokumentasikan cuplikan karya sebagai portofolio studio dengan tetap menghormati jadwal rilis perdana PIHAK KEDUA.</p>
-        </div>
-
-        <div>
-          <strong class="block text-primary uppercase">PASAL 7 — PEMBATALAN, KETERLAMBATAN &amp; PENGARSIPAN</strong>
-          <p>1. <strong>Pembatalan Sepihak:</strong> Apabila PIHAK KEDUA membatalkan pesanan secara sepihak setelah proses produksi berjalan, uang muka (DP 50%) yang telah dibayarkan tidak dapat dikembalikan (<em>non-refundable</em>).</p>
-          <p>2. <strong>Keterlambatan Respon Klien:</strong> Apabila PIHAK KEDUA tidak memberikan tanggapan/konfirmasi revisi selama lebih dari <strong>14 (empat belas) hari kalender</strong> tanpa pemberitahuan, proyek dinyatakan selesai/diarsipkan sementara dan pengaktifan kembali menyesuaikan antrean jadwal studio.</p>
-          <p>3. <strong>Keterlambatan Penyedia Jasa:</strong> Apabila PIHAK PERTAMA terlambat menyerahkan hasil melampaui tenggat waktu yang disepakati tanpa konfirmasi atau alasan darurat (<em>force majeure</em>), PIHAK KEDUA berhak memperoleh potongan biaya sebesar <strong>1%–2% per hari</strong> dari sisa pelunasan (maksimal 10%).</p>
-        </div>
-
-        <div>
-          <strong class="block text-primary uppercase">PASAL 8 — PENYELESAIAN PERSELISIHAN &amp; PENUTUP</strong>
-          <p>1. Segala perbedaan pendapat yang timbul dalam pelaksanaan perjanjian ini akan diselesaikan terlebih dahulu secara musyawarah untuk mufakat.</p>
-          <p>2. Dengan mencentang kotak persetujuan pada formulir pemesanan online PrangArt Lab, PIHAK KEDUA menyatakan telah membaca, memahami, dan menyetujui seluruh isi Surat Perjanjian Kerja Sama Produksi Musik ini secara sah tanpa paksaan dari pihak mana pun.</p>
+          <strong class="block text-primary uppercase">PASAL 4 — HAK CIPTA &amp; PENCANTUMAN KREDIT</strong>
+          <p>Hak moral tetap melekat pada PrangArt Lab. PIHAK KEDUA memperoleh hak pakai sesuai peruntukan pesanan dengan mencantumkan kredit <strong>"Music by PrangArt Lab"</strong> (kecuali disepakati perjanjian <em>Full Buyout</em>).</p>
         </div>
       </div>
 
@@ -302,7 +350,7 @@ function updateCustomPriceFieldUI() {
   } else {
     wrap.className = 'space-y-1';
     inp.required = false;
-    inp.placeholder = 'Contoh: 2500000 (Kosongkan jika mengikuti harga paket)';
+    inp.placeholder = 'Contoh: 2500000 (Kosongkan jika mengikuti kalkulasi otomatis paket)';
     const lbl = wrap.querySelector('label');
     if (lbl) {
       lbl.innerHTML = 'Harga Kesepakatan Khusus (Rp) <span class="text-textMuted font-normal">(Opsional — isi hanya jika ada penyesuaian harga hasil diskusi)</span>';
@@ -313,6 +361,9 @@ function updateCustomPriceFieldUI() {
 function selectServiceLine(svcKey) {
   if (!appState.serviceCatalog[svcKey]) svcKey = 'tari';
   appState.selectedServiceLine = svcKey;
+  if (!appState.serviceCatalog[svcKey].packages[appState.selectedPackage]) {
+    appState.selectedPackage = 'dasar';
+  }
   appState.customPrice = null;
 
   const inp = document.getElementById('custom-price-input');
@@ -376,6 +427,7 @@ function selectServiceLine(svcKey) {
   renderPackageCards();
   updateCustomPriceFieldUI();
   renderDynamicSpecFields();
+  validateDurationLimitByPackage();
   recalculateLivePrice();
 }
 
@@ -443,11 +495,9 @@ function renderIdentityFields() {
           <input id="field-budaya-daerah" required placeholder="Cth: Budaya Kutai / Dayak Kenyah / Melayu" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
         </div>
         <div class="sm:col-span-2">
-          <label class="block text-xs font-bold mb-2">Estimasi Durasi Tari (MM:SS) * <span class="text-[11px] font-normal text-textMuted">(Paket Standar &amp; Pro maksimal 07:00 menit; di atas 7 menit wajib pilih Paket Custom)</span></label>
-          <input id="field-durasi" required oninput="validateTariDurationLimit()" placeholder="Cth: 05:30" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm font-mono" />
-          <p id="durasi-limit-warning" class="hidden text-xs text-red-500 font-semibold mt-1.5">
-            ⚠️ Untuk Paket Standar dan Pro Musik Tari, durasi maksimal adalah 07:00 menit. Jika durasi lebih dari 7 menit, silakan pilih <strong>Paket Custom</strong> di Langkah 01.
-          </p>
+          <label class="block text-xs font-bold mb-2">Estimasi Durasi Tari (MM:SS) * <span class="text-[11px] font-normal text-textMuted">(Paket Dasar, Standar &amp; Pro maksimal 07:00 menit; di atas 07:00 wajib pilih Paket Custom)</span></label>
+          <input id="field-durasi" required oninput="validateDurationLimitByPackage()" placeholder="Cth: 05:30" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm font-mono" />
+          <p id="durasi-limit-warning" class="hidden text-xs text-red-500 font-semibold mt-1.5"></p>
         </div>
       </div>
     `;
@@ -475,8 +525,9 @@ function renderIdentityFields() {
           <input id="field-judul" required placeholder="Cth: Mars Instansi / Lagu Tema / Scoring Video" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
         </div>
         <div>
-          <label class="block text-xs font-bold mb-2">Estimasi Durasi Audio (MM:SS) *</label>
-          <input id="field-durasi" required placeholder="Cth: 03:45" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm font-mono" />
+          <label class="block text-xs font-bold mb-2">Estimasi Durasi Audio (MM:SS) * <span class="text-[11px] font-normal text-textMuted">(Dasar maks. 03:30 • Standar maks. 05:00 • Pro maks. 07:00)</span></label>
+          <input id="field-durasi" required oninput="validateDurationLimitByPackage()" placeholder="Cth: 03:30" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm font-mono" />
+          <p id="durasi-limit-warning" class="hidden text-xs text-red-500 font-semibold mt-1.5"></p>
         </div>
       </div>
     `;
@@ -500,8 +551,8 @@ function renderIdentityFields() {
           <input id="field-judul" required placeholder="Judul lagu / gending / komposisi" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm" />
         </div>
         <div class="sm:col-span-2">
-          <label class="block text-xs font-bold mb-2">Durasi Audio/Video Sumber (MM:SS) *</label>
-          <input id="field-durasi" required placeholder="Cth: 04:20" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm font-mono" />
+          <label class="block text-xs font-bold mb-2">Durasi Audio/Video Sumber (MM:SS) * <span class="text-[11px] font-normal text-primary">(Minimal terhitung 1 menit; durasi di bawah 01:00 tetap dihitung 1 menit)</span></label>
+          <input id="field-durasi" required oninput="recalculateLivePrice()" placeholder="Cth: 02:45 (atau 00:40 tetap terhitung 1 menit)" class="w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm font-mono" />
         </div>
       </div>
     `;
@@ -512,16 +563,24 @@ function renderIdentityFields() {
 function renderPackageCards() {
   const grid = document.getElementById('package-cards-grid');
   if (!grid) return;
-  const svc = appState.serviceCatalog[appState.selectedServiceLine];
+  const svcKey = appState.selectedServiceLine;
+  const svc = appState.serviceCatalog[svcKey];
   const activePkgKey = appState.selectedPackage;
-  const activePkg = svc.packages[activePkgKey] || svc.packages.dasar;
+  const activePkg = svc.packages[activePkgKey] || Object.values(svc.packages)[0];
 
   const cardsHTML = Object.entries(svc.packages).map(([k, p]) => {
     const isCustomPkg = (k === 'custom' || Boolean(p.isCustom));
     const sel = activePkgKey === k;
-    const priceDisplay = isCustomPkg
-      ? (appState.customPrice && sel ? formatRupiah(appState.customPrice) : 'Sesuai Kesepakatan')
-      : formatRupiah(p.price);
+    let priceDisplay = '';
+    if (isCustomPkg) {
+      priceDisplay = appState.customPrice && sel ? formatRupiah(appState.customPrice) : 'Sesuai Kesepakatan';
+    } else if (svcKey === 'transkripsi') {
+      priceDisplay = (k === 'komplet' || p.billingUnit === 'per_min_complete')
+        ? `${formatRupiah(p.price)} <span class="text-xs font-normal text-textMuted">/ menit</span>`
+        : `${formatRupiah(p.price)} <span class="text-xs font-normal text-textMuted">/ mnt / instrumen</span>`;
+    } else {
+      priceDisplay = formatRupiah(p.price);
+    }
 
     const featList = Array.isArray(p.features)
       ? `<ul class="mt-3 pt-3 border-t border-border/60 space-y-1.5 text-[11px] text-textMuted">
@@ -540,14 +599,13 @@ function renderPackageCards() {
         ${featList}
       </div>
       <div class="mt-3 pt-2 text-[10px] font-mono uppercase tracking-wider ${sel ? 'text-primary font-bold' : 'text-textMuted'}">
-        ${sel ? '● Paket Terpilih (Lihat Detail Lengkap di Bawah)' : 'Klik untuk pilih & lihat detail →'}
+        ${sel ? '● Paket Terpilih (Detail Lengkap di Bawah)' : 'Klik untuk pilih & lihat detail →'}
       </div>
     </button>`;
   }).join('');
 
   grid.innerHTML = cardsHTML;
 
-  // Render kotak rincian lengkap paket & sistematika kerja tepat di bawah grid kartu paket
   let detailBox = document.getElementById('selected-package-full-detail');
   if (!detailBox) {
     detailBox = document.createElement('div');
@@ -564,6 +622,15 @@ function renderPackageCards() {
       `).join('')
     : `<li class="text-xs text-textMain">${activePkg.desc || ''}</li>`;
 
+  let badgePriceText = formatRupiah(activePkg.price);
+  if (activePkg.isCustom) {
+    badgePriceText = 'Tarif Fleksibel (Tanpa Harga Patokan)';
+  } else if (svcKey === 'transkripsi') {
+    badgePriceText = (activePkgKey === 'komplet' || activePkg.billingUnit === 'per_min_complete')
+      ? `${formatRupiah(activePkg.price)} / menit (Full Ensemble, min. 1 menit)`
+      : `${formatRupiah(activePkg.price)} / menit / instrumen (min. 1 menit)`;
+  }
+
   detailBox.className = 'mt-5 p-5 sm:p-6 rounded-2xl bg-panel border border-primary/30 space-y-4';
   detailBox.innerHTML = `
     <div class="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 pb-3">
@@ -572,7 +639,7 @@ function renderPackageCards() {
         <h4 class="text-base font-bold text-textMain mt-0.5">${svc.label} — ${activePkg.label}</h4>
       </div>
       <span class="px-3 py-1 rounded-full bg-primary/15 text-primary font-mono text-xs font-bold">
-        ${activePkg.isCustom ? 'Tarif Fleksibel (Tanpa Harga Patokan)' : formatRupiah(activePkg.price)}
+        ${badgePriceText}
       </span>
     </div>
 
@@ -602,7 +669,7 @@ function selectPackageTier(k) {
   renderPackageCards(); 
   updateCustomPriceFieldUI();
   renderDynamicSpecFields(); 
-  validateTariDurationLimit();
+  validateDurationLimitByPackage();
   recalculateLivePrice();
   if (k === 'custom' && inp) {
     inp.focus();
@@ -759,7 +826,7 @@ function renderDynamicSpecFields() {
       c.innerHTML = `
         <div class="space-y-5">
           <div class="p-5 bg-panel border border-border/60 rounded-2xl space-y-4">
-            <span class="text-[11px] font-mono uppercase text-primary font-bold block">Spesifikasi Musik Tari — Paket Dasar</span>
+            <span class="text-[11px] font-mono uppercase text-primary font-bold block">Spesifikasi Musik Tari — Paket Dasar (Maks. 07:00)</span>
             <div>
               <label class="block text-xs font-bold mb-2">Nuansa Musik yang Diinginkan *</label>
               <select id="spec-nuansa-dasar" required onchange="toggleNuansaOtherInput(this.value)" class="w-full bg-surface border border-border rounded-xl px-4 py-3 text-sm">
@@ -819,11 +886,6 @@ function renderDynamicSpecFields() {
                   + Tambah Bagian
                 </button>
               </div>
-
-              <div class="p-3 rounded-xl bg-surface/70 border border-border/60 text-[11px] font-mono text-textMuted">
-                <strong class="text-textMain font-sans">Contoh:</strong> 00:00–00:30 → Opening (tempo lambat) | 00:30–01:10 → Orientasi Suasana Cerita (tempo sedang) | 01:50–02:30 → Klimaks (tempo cepat)
-              </div>
-
               <div id="standar-segments-list" class="space-y-3"></div>
             </div>
           </div>
@@ -859,13 +921,6 @@ function renderDynamicSpecFields() {
                   + Tambah Bagian / Tempo
                 </button>
               </div>
-
-              <div class="p-3 rounded-xl bg-surface/70 border border-border/60 text-[11px] font-mono text-textMuted space-y-0.5">
-                <strong class="text-textMain font-sans block">Contoh per video / per tempo:</strong>
-                <div>• Video 1 / tempo 1 — 120 BPM — 00:00–00:30: Nuansa misterius, tempo lambat; 00:30–01:10: Mulai energik, ritme perkusi muncul</div>
-                <div>• Video 2 / tempo 2 — 100 BPM — 00:00–01:55: Dramatis dan tegang; 01:50–02:30: Pelan dan megah</div>
-              </div>
-
               <div id="pro-segments-list" class="space-y-3"></div>
             </div>
           </div>
@@ -879,7 +934,7 @@ function renderDynamicSpecFields() {
           <div class="p-5 bg-panel border border-primary/40 rounded-2xl space-y-5">
             <div>
               <span class="text-[11px] font-mono uppercase text-primary font-bold block">Spesifikasi Khusus Paket Custom — Musik Iringan Tari</span>
-              <p class="text-xs text-textMuted mt-1">Lengkapi detail kebutuhan garapan kustom Anda (durasi bebas &gt; 7 menit, sendratari, kolaborasi instrumen khusus, dan struktur babak).</p>
+              <p class="text-xs text-textMuted mt-1">Untuk garapan durasi bebas (&gt; 7 menit), sendratari, kolaborasi instrumen khusus, dan struktur babak.</p>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -907,7 +962,6 @@ function renderDynamicSpecFields() {
               <div class="flex flex-wrap items-center justify-between gap-2">
                 <div>
                   <label class="block text-xs font-bold">Rincian Adegan, Durasi, Tempo (BPM) &amp; Link Video per Babak *</label>
-                  <p class="text-[11px] text-textMuted">Susun rincian tiap babak/adegan tanpa batasan 7 menit.</p>
                 </div>
                 <button type="button" onclick="addProSegmentRow()" class="px-3.5 py-2 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary/90 transition shadow-sm">
                   + Tambah Babak / Bagian
@@ -928,9 +982,17 @@ function renderDynamicSpecFields() {
     }
   } else if (svc === 'digital') {
     const isCustom = (pkg === 'custom');
+    const pkgObj = appState.serviceCatalog.digital.packages[pkg];
+    const maxLimitBadge = isCustom
+      ? 'Durasi Bebas (> 07:00 Menit)'
+      : `Batas Maks. Durasi: ${formatSecondsToMMSS(Number(pkgObj.maxSeconds || 210))} Menit`;
+
     c.innerHTML = `
       <div class="p-5 bg-panel border border-border/60 rounded-2xl space-y-5">
-        <span class="text-[11px] font-mono uppercase text-primary font-bold block">Spesifikasi Detail Musik Non-Tari (${appState.serviceCatalog.digital.packages[pkg].label})</span>
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <span class="text-[11px] font-mono uppercase text-primary font-bold">Spesifikasi Detail Musik Non-Tari (${pkgObj.label})</span>
+          <span class="text-[11px] font-mono text-amber-600 dark:text-amber-400 font-semibold">${maxLimitBadge}</span>
+        </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
@@ -1015,9 +1077,37 @@ function renderDynamicSpecFields() {
     `;
   } else {
     const isCustom = (pkg === 'custom');
+    const isKomplet = (pkg === 'komplet');
+    const pkgObj = appState.serviceCatalog.transkripsi.packages[pkg];
     c.innerHTML = `
       <div class="p-5 bg-panel border border-border/60 rounded-2xl space-y-5">
-        <span class="text-[11px] font-mono uppercase text-primary font-bold block">Spesifikasi Detail Transkripsi Musik (${appState.serviceCatalog.transkripsi.packages[pkg].label})</span>
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <span class="text-[11px] font-mono uppercase text-primary font-bold">Spesifikasi Transkripsi Musik (${pkgObj.label})</span>
+          <span class="text-[11px] font-mono text-primary font-semibold">Aturan: Minimal terhitung 1 menit (durasi &lt; 01:00 tetap 1 menit)</span>
+        </div>
+
+        ${!isCustom ? `
+          <div class="p-4 rounded-xl bg-surface border border-primary/30 space-y-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+              ${!isKomplet ? `
+                <div>
+                  <label class="block text-xs font-bold mb-1.5">Jumlah Instrumen / Jalur Suara yang Ditranskripsi *</label>
+                  <input type="number" id="trans-jumlah-instrumen" min="1" max="30" value="1" required oninput="recalculateLivePrice()" class="w-full bg-panel border border-border rounded-xl px-4 py-2.5 text-sm font-mono font-bold" />
+                  <p class="text-[11px] text-textMuted mt-1">Dikalikan otomatis dengan durasi menit (minimal 1 menit).</p>
+                </div>
+              ` : `
+                <div>
+                  <span class="text-xs font-bold text-primary block">Cakupan Paket Komplet (All-In Ensemble)</span>
+                  <p class="text-xs text-textMuted mt-1">Seluruh instrumen dalam rekaman sudah termasuk dalam 1 tarif paket per menit (Full Score + Part per instrumen, minimal 1 menit).</p>
+                </div>
+              `}
+              <div class="p-3.5 rounded-xl bg-panel border border-border/80">
+                <span class="text-[10px] font-mono uppercase text-textMuted block">Ringkasan Hitungan Durasi &amp; Tarif</span>
+                <div id="trans-live-formula-box" class="text-xs font-bold text-textMain mt-1">1 menit × 1 instrumen</div>
+              </div>
+            </div>
+          </div>
+        ` : ''}
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
@@ -1042,7 +1132,7 @@ function renderDynamicSpecFields() {
         </div>
 
         <div>
-          <label class="block text-xs font-bold mb-2">Daftar Instrumen yang Harus Ditranskripsi *</label>
+          <label class="block text-xs font-bold mb-2">Nama / Daftar Instrumen yang Ditranskripsi *</label>
           <input id="trans-instrumen" required class="w-full bg-surface border border-border rounded-xl px-4 py-3 text-sm" placeholder="Cth: Vokal Soprano, Piul, Gambus, Kendang, Bass..." />
         </div>
 
@@ -1181,34 +1271,40 @@ function renderAIDetailForm() {
           <textarea id="ai-pesan" rows="2" class="w-full bg-panel border border-border rounded-xl px-3.5 py-2.5 text-sm" placeholder="Pesan untuk penonton..."></textarea>
         </div>
       </div>
-
-      <div class="p-4 bg-surface/60 border border-border/60 rounded-xl text-[11px] text-textMuted space-y-1">
-        <strong class="text-textMain block uppercase mb-1">Catatan Pengisian:</strong>
-        <p>• Gunakan bahasa sederhana sesuai pemahaman masing-masing koreografer.</p>
-        <p>• Tidak harus menggunakan istilah teknis seni tari maupun musik.</p>
-        <p>• Untuk pertanyaan yang tidak diketahui atau tidak relevan, boleh dikosongkan.</p>
-        <p>• Tidak perlu membuat jawaban panjang. Cukup jelaskan informasi sesuai konsep karya.</p>
-        <p>• Pastikan informasi yang diberikan sesuai dengan karya yang benar-benar diciptakan.</p>
-      </div>
     </div>
   `;
 }
 
 function recalculateLivePrice() {
-  const svc = appState.serviceCatalog[appState.selectedServiceLine];
-  const pkg = svc.packages[appState.selectedPackage];
-  const isCustomPkg = (appState.selectedPackage === 'custom' || Boolean(pkg.isCustom));
-  const base = isCustomPkg ? Number(appState.customPrice || 0) : (appState.customPrice || Number(pkg.price || 0));
-  const addonPrice = Number(svc.addonPrice || 250000);
-  const isAddonChecked = (appState.selectedServiceLine !== 'transkripsi') && Boolean(document.getElementById('field-addon-vocal')?.checked);
-  const addon = isAddonChecked ? addonPrice : 0;
-  const total = base + addon;
+  const {
+    svc,
+    pkg,
+    isCustomPkg,
+    basePrice,
+    addonPrice,
+    isAddonChecked,
+    totalPrice,
+    breakdownNote
+  } = calculateCurrentOrderPricing();
+
+  const formulaBox = document.getElementById('trans-live-formula-box');
+  if (formulaBox && appState.selectedServiceLine === 'transkripsi' && !isCustomPkg) {
+    const mins = getBillableTranscriptionMinutes();
+    if (appState.selectedPackage === 'komplet' || pkg.billingUnit === 'per_min_complete') {
+      formulaBox.textContent = `${mins} menit terhitung (min. 1 mnt) × ${formatRupiah(pkg.price)} = ${formatRupiah(basePrice)}`;
+    } else {
+      const inst = getTranscriptionInstrumentCount();
+      formulaBox.textContent = `${mins} menit (min. 1 mnt) × ${inst} instrumen × ${formatRupiah(pkg.price)} = ${formatRupiah(basePrice)}`;
+    }
+  }
 
   if (document.getElementById('calc-service-name')) {
     document.getElementById('calc-service-name').textContent = svc.label;
-    document.getElementById('calc-pkg-name').textContent = (isCustomPkg || appState.customPrice) ? `${pkg.label} (Kesepakatan)` : pkg.label;
-    document.getElementById('calc-pkg-price').textContent = (isCustomPkg && !appState.customPrice) ? 'Isi nominal manual' : formatRupiah(base);
-    document.getElementById('calc-total-price').textContent = (isCustomPkg && !appState.customPrice) ? 'Menunggu nominal' : formatRupiah(total);
+    document.getElementById('calc-pkg-name').textContent = breakdownNote
+      ? `${pkg.label} (${breakdownNote})`
+      : (isCustomPkg || appState.customPrice) ? `${pkg.label} (Kesepakatan)` : pkg.label;
+    document.getElementById('calc-pkg-price').textContent = (isCustomPkg && !appState.customPrice) ? 'Isi nominal manual' : formatRupiah(basePrice);
+    document.getElementById('calc-total-price').textContent = (isCustomPkg && !appState.customPrice) ? 'Menunggu nominal' : formatRupiah(totalPrice);
 
     const addonRow = document.getElementById('calc-addon-label')?.parentElement;
     if (addonRow) {
@@ -1267,38 +1363,11 @@ async function generateAISynopsis() {
   try {
     const valOrEmpty = (id) => document.getElementById(id)?.value.trim() || '(Belum tersedia / dikosongkan)';
     const promptText = `PROMPT PENULISAN SINOPSIS KARYA TARI
-
-Bertindaklah sebagai seorang penulis, pengkaji seni tari, dan dramaturg yang memahami koreografi, etnokoreologi, serta penulisan karya seni pertunjukan.
-
-Buatlah sinopsis karya tari berdasarkan informasi dan konsep yang saya berikan. Susun tulisan secara profesional, sistematis, komunikatif, dan memiliki kedalaman artistik tanpa menggunakan bahasa yang berlebihan atau terlalu puitis.
-Berikan HANYA teks sinopsisnya saja tanpa kalimat pengantar.
-
----
-FORMULIR DATA KARYA TARI:
-A. IDENTITAS KARYA
-1. Judul karya tari: ${judul}
-2. Nama koreografer/penata tari: ${koreografer}
-3. Asal daerah/komunitas/latar budaya: ${asal}
-4. Jenis karya: ${jenis}
-
-B. KONSEP PENCIPTAAN
-5. Tema karya: ${valOrEmpty('ai-tema')}
-6. Latar belakang: ${valOrEmpty('ai-latar')}
-7. Sumber inspirasi: ${valOrEmpty('ai-inspirasi')}
-8. Gagasan utama: ${valOrEmpty('ai-gagasan')}
-
-C. KONSEP GARAPAN
-9. Gambaran/cerita: ${valOrEmpty('ai-gambaran')}
-10. Perkembangan penyajian: ${valOrEmpty('ai-perkembangan')}
-11. Karakter gerak: ${valOrEmpty('ai-karakter')}
-12. Sumber gerak: ${valOrEmpty('ai-sumber-gerak')}
-13. Musik pengiring: ${valOrEmpty('ai-musik')}
-14. Alat musik: ${valOrEmpty('ai-instrumen')}
-15. Kostum & tata rias: ${valOrEmpty('ai-kostum')}
-
-D. MAKNA DAN PESAN KARYA
-16. Makna & filosofi: ${valOrEmpty('ai-makna')}
-17. Pesan untuk penonton: ${valOrEmpty('ai-pesan')}`;
+Bertindaklah sebagai seorang penulis, pengkaji seni tari, dan dramaturg. Susun sinopsis karya tari secara profesional, sistematis, komunikatif, tanpa kalimat pengantar.
+1. Judul: ${judul} | 2. Koreografer: ${koreografer} | 3. Asal/Budaya: ${asal} | 4. Jenis: ${jenis}
+5. Tema: ${valOrEmpty('ai-tema')} | 6. Latar: ${valOrEmpty('ai-latar')} | 7. Inspirasi: ${valOrEmpty('ai-inspirasi')} | 8. Gagasan: ${valOrEmpty('ai-gagasan')}
+9. Gambaran: ${valOrEmpty('ai-gambaran')} | 10. Perkembangan: ${valOrEmpty('ai-perkembangan')} | 11. Karakter gerak: ${valOrEmpty('ai-karakter')} | 12. Sumber gerak: ${valOrEmpty('ai-sumber-gerak')}
+13. Musik: ${valOrEmpty('ai-musik')} | 14. Instrumen: ${valOrEmpty('ai-instrumen')} | 15. Kostum: ${valOrEmpty('ai-kostum')} | 16. Makna: ${valOrEmpty('ai-makna')} | 17. Pesan: ${valOrEmpty('ai-pesan')}`;
 
     let finalGeneratedText = '';
     if (window.firebaseAI) {
@@ -1310,11 +1379,7 @@ D. MAKNA DAN PESAN KARYA
       throw new Error('Firebase AI offline');
     }
 
-    saveUserAIQuotaState({
-      date: getTodayDateString(),
-      count: quota.count + 1,
-      lastTimestamp: Date.now()
-    });
+    saveUserAIQuotaState({ date: getTodayDateString(), count: quota.count + 1, lastTimestamp: Date.now() });
     updateAIQuotaBanner();
 
     if (resultPreview && resultBox) {
@@ -1322,19 +1387,12 @@ D. MAKNA DAN PESAN KARYA
       resultBox.classList.remove('hidden');
     }
     if (typeof showToast === 'function') showToast('Selesai', 'Hasil sinopsis AI siap. Silakan tinjau dan salin ke kolom Sinopsis.');
-
   } catch (error) {
     console.error(error);
     const tema = document.getElementById('ai-tema')?.value.trim();
-    const fallbackDraft = `Karya tari berjudul "${judul}" oleh koreografer ${koreografer} merupakan ${jenis} yang berakar pada budaya ${asal} dengan mengangkat tema ${tema || '[tema perlu dilengkapi]'}. [Informasi latar belakang, konsep garapan, musik, dan makna karya perlu dilengkapi sesuai data penciptaan].`;
-
-    saveUserAIQuotaState({
-      date: getTodayDateString(),
-      count: quota.count + 1,
-      lastTimestamp: Date.now()
-    });
+    const fallbackDraft = `Karya tari berjudul "${judul}" oleh koreografer ${koreografer} merupakan ${jenis} yang berakar pada budaya ${asal} dengan mengangkat tema ${tema || '[tema perlu dilengkapi]'}.`;
+    saveUserAIQuotaState({ date: getTodayDateString(), count: quota.count + 1, lastTimestamp: Date.now() });
     updateAIQuotaBanner();
-
     if (resultPreview && resultBox) {
       resultPreview.value = fallbackDraft;
       resultBox.classList.remove('hidden');
@@ -1357,9 +1415,9 @@ function copyAIResultToClipboard() {
   navigator.clipboard?.writeText(preview.value).catch(() => {});
   if (targetField && !targetField.value.trim()) {
     targetField.value = preview.value;
-    if (typeof showToast === 'function') showToast('Disalin & Ditempel', 'Hasil AI berhasil disalin dan otomatis ditempel ke kolom Sinopsis. Silakan tinjau kembali.');
+    if (typeof showToast === 'function') showToast('Disalin & Ditempel', 'Hasil AI berhasil disalin dan otomatis ditempel ke kolom Sinopsis.');
   } else {
-    if (typeof showToast === 'function') showToast('Tersalin', 'Teks hasil AI disalin ke clipboard. Silakan tempel (paste) ke kolom Sinopsis dan tinjau kembali.');
+    if (typeof showToast === 'function') showToast('Tersalin', 'Teks hasil AI disalin ke clipboard.');
   }
 }
 
@@ -1367,25 +1425,28 @@ async function handleOrderFormSubmit(e) {
   e.preventDefault();
   if (!appState.currentClientUser) return typeof navigateTo === 'function' && navigateTo('client');
 
-  if (!validateTariDurationLimit()) {
+  if (!validateDurationLimitByPackage()) {
     document.getElementById('field-durasi')?.focus();
-    return typeof showToast === 'function' && showToast('Durasi Melebihi Batas', 'Paket Standar & Pro Musik Tari maksimal 07:00 menit. Silakan pilih Paket Custom untuk durasi lebih dari 7 menit.', 'error');
+    const pkgObj = appState.serviceCatalog[appState.selectedServiceLine]?.packages?.[appState.selectedPackage];
+    const maxStr = pkgObj?.maxSeconds ? formatSecondsToMMSS(Number(pkgObj.maxSeconds)) : '07:00';
+    return typeof showToast === 'function' && showToast('Durasi Melebihi Batas Paket', `Batas durasi paket terpilih adalah maksimal ${maxStr} menit. Silakan pilih paket yang sesuai atau Paket Custom.`, 'error');
   }
 
-  const svc = appState.serviceCatalog[appState.selectedServiceLine];
-  const pkg = svc.packages[appState.selectedPackage];
-  const isCustomPkg = (appState.selectedPackage === 'custom' || Boolean(pkg.isCustom));
+  const {
+    svc,
+    pkg,
+    isCustomPkg,
+    isAddonChecked,
+    addonAmount,
+    totalPrice,
+    breakdownNote
+  } = calculateCurrentOrderPricing();
 
   if (isCustomPkg && (!appState.customPrice || Number(appState.customPrice) <= 0)) {
     document.getElementById('custom-price-input')?.focus();
     return typeof showToast === 'function' && showToast('Harga Belum Diisi', 'Untuk Paket Custom, wajib mengisi nominal Harga Kesepakatan (Rp) sesuai hasil diskusi.', 'error');
   }
 
-  const basePrice = isCustomPkg ? Number(appState.customPrice) : (appState.customPrice || Number(pkg.price || 0));
-  const hasVocalAddon = (appState.selectedServiceLine !== 'transkripsi') && Boolean(document.getElementById('field-addon-vocal')?.checked);
-  const addonAmount = hasVocalAddon ? Number(svc.addonPrice || 250000) : 0;
-  const total = basePrice + addonAmount;
-  
   const specs = [];
   const pushIfVal = (label, id) => {
     const v = document.getElementById(id)?.value.trim();
@@ -1419,9 +1480,7 @@ async function handleOrderFormSubmit(e) {
       pushIfVal('Instrumen Dominan', 'spec-instrumen-tari');
     } else if (appState.selectedPackage === 'standar') {
       const checkedStruktur = Array.from(document.querySelectorAll('input[name="spec-struktur-check"]:checked')).map(el => el.value);
-      if (checkedStruktur.length) {
-        specs.push({ key: 'Struktur Tari / Suasana Dipilih', val: checkedStruktur.join(', ') });
-      }
+      if (checkedStruktur.length) specs.push({ key: 'Struktur Tari / Suasana Dipilih', val: checkedStruktur.join(', ') });
       const segItems = Array.from(document.querySelectorAll('#standar-segments-list .standar-segment-item')).map((row, idx) => {
         const dur = row.querySelector('.seg-durasi')?.value.trim() || '-';
         const str = row.querySelector('.seg-struktur')?.value.trim() || '-';
@@ -1429,9 +1488,7 @@ async function handleOrderFormSubmit(e) {
         const lnk = row.querySelector('.seg-link')?.value.trim();
         return `Bagian ${idx + 1} [${dur}] ${str} → ${nua}${lnk ? ` (Link: ${lnk})` : ''}`;
       });
-      if (segItems.length) {
-        specs.push({ key: 'Rincian Urutan Nuansa & Durasi (Standar)', val: segItems.join(' | ') });
-      }
+      if (segItems.length) specs.push({ key: 'Rincian Urutan Nuansa & Durasi (Standar)', val: segItems.join(' | ') });
     } else if (appState.selectedPackage === 'pro') {
       pushIfVal('Awal Masuk Musik & Tari', 'spec-pro-intro-mode');
       const proItems = Array.from(document.querySelectorAll('#pro-segments-list .pro-segment-item')).map((row) => {
@@ -1442,9 +1499,7 @@ async function handleOrderFormSubmit(e) {
         const dsc = row.querySelector('.pro-desc')?.value.trim() || '-';
         return `${lbl} (${bpm}, ${dur}): ${dsc}${lnk ? ` [GDrive: ${lnk}]` : ''}`;
       });
-      if (proItems.length) {
-        specs.push({ key: 'Rincian Video GDrive, Tempo & Nuansa (Pro)', val: proItems.join(' | ') });
-      }
+      if (proItems.length) specs.push({ key: 'Rincian Video GDrive, Tempo & Nuansa (Pro)', val: proItems.join(' | ') });
     } else {
       pushIfVal('Skala & Format Garapan', 'spec-custom-scale');
       pushIfVal('Kebutuhan Instrumen Khusus', 'spec-custom-instruments');
@@ -1457,9 +1512,7 @@ async function handleOrderFormSubmit(e) {
         const dsc = row.querySelector('.pro-desc')?.value.trim() || '-';
         return `${lbl} (${bpm}, ${dur}): ${dsc}${lnk ? ` [GDrive: ${lnk}]` : ''}`;
       });
-      if (proItems.length) {
-        specs.push({ key: 'Rincian Babak & Durasi (Custom)', val: proItems.join(' | ') });
-      }
+      if (proItems.length) specs.push({ key: 'Rincian Babak & Durasi (Custom)', val: proItems.join(' | ') });
       pushIfVal('Output File & Teknis Tambahan', 'spec-custom-deliverables');
     }
 
@@ -1482,12 +1535,18 @@ async function handleOrderFormSubmit(e) {
     pushIfVal('Lisensi / Hak Pakai (Custom)', 'nontari-custom-license');
     pushIfVal('Detail Khusus Paket Custom', 'nontari-custom-detail');
   } else {
+    const billableMins = getBillableTranscriptionMinutes();
     specs.push({ key: 'Pemesan / Institusi', val: sanggarName });
     specs.push({ key: 'Nomor WhatsApp Aktif', val: waNumber });
     specs.push({ key: 'Email', val: contactEmail });
+    specs.push({ key: 'Menit Terhitung (Min. 1 Menit)', val: `${billableMins} Menit` });
+    if (appState.selectedPackage !== 'komplet' && appState.selectedPackage !== 'custom') {
+      specs.push({ key: 'Jumlah Instrumen', val: `${getTranscriptionInstrumentCount()} Instrumen` });
+    }
+    if (breakdownNote) specs.push({ key: 'Rincian Kalkulasi Tarif', val: breakdownNote });
     pushIfVal('Jenis Transkripsi', 'trans-jenis');
     pushIfVal('Format Notasi', 'trans-format-notasi');
-    pushIfVal('Instrumen Ditranskripsi', 'trans-instrumen');
+    pushIfVal('Daftar Instrumen Ditranskripsi', 'trans-instrumen');
     pushIfVal('Format File Hasil', 'trans-file-output');
     pushIfVal('Bagian Audio Ditranskripsi', 'trans-bagian-waktu');
     pushIfVal('Nada Dasar & Birama', 'trans-nada-birama');
@@ -1498,7 +1557,7 @@ async function handleOrderFormSubmit(e) {
     pushIfVal('Detail Khusus Paket Custom', 'trans-custom-detail');
   }
 
-  if (hasVocalAddon) {
+  if (isAddonChecked) {
     specs.push({ key: 'Tambahan Vokal / Session Player', val: `+ ${formatRupiah(addonAmount)}` });
   }
 
@@ -1517,13 +1576,13 @@ async function handleOrderFormSubmit(e) {
     durasi: document.getElementById('field-durasi').value,
     serviceLine: appState.selectedServiceLine, 
     serviceLineLabel: svc.label, 
-    packageName: isCustomPkg || appState.customPrice ? `${pkg.label} (Kesepakatan)` : pkg.label, 
+    packageName: breakdownNote ? `${pkg.label} (${breakdownNote})` : (isCustomPkg || appState.customPrice ? `${pkg.label} (Kesepakatan)` : pkg.label), 
     contractAgreed: requiresContract,
-    hasVocalAddon: hasVocalAddon,
+    hasVocalAddon: isAddonChecked,
     addonAmount: addonAmount,
     sorakOption: sorakChoice,
-    totalPrice: total, 
-    dpAmount: total / 2, 
+    totalPrice: totalPrice, 
+    dpAmount: totalPrice / 2, 
     dpStatus: 'Belum Dibayar', 
     productionStatus: TRACKER_MILESTONES[0],
     specs: specs,
@@ -1555,7 +1614,8 @@ Object.assign(window, {
   addStandarSegmentRow,
   addProSegmentRow,
   removeSegmentRow,
-  validateTariDurationLimit,
+  validateDurationLimitByPackage,
+  validateTariDurationLimit: validateDurationLimitByPackage,
   copyAIResultToClipboard
 });
 
