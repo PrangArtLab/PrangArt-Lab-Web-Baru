@@ -1,107 +1,118 @@
-function refreshClientPageUI() {
-  const wall = document.getElementById('client-login-wall'), ws = document.getElementById('client-workspace-content');
-  if (!appState.currentClientUser) { wall?.classList.remove('hidden'); ws?.classList.add('hidden'); return; }
-  wall?.classList.add('hidden'); ws?.classList.remove('hidden'); renderClientWorkspace();
+/* === PENENTU STATUS PEMBAYARAN & HAK UNDUH DOKUMEN (TERKUNCI SEBELUM LUNAS) === */
+function getProjectPaymentAccess(project) {
+  const dpStatusLower = String(project.dpStatus || '').toLowerCase();
+  const prodStatusLower = String(project.productionStatus || '').toLowerCase();
+  const finalStatusLower = String(project.finalPaymentStatus || '').toLowerCase();
+
+  // Lunas penuh hanya jika Admin sudah memverifikasi pelunasan 100%
+  const isFullyPaid =
+    project.paymentStage === 'LUNAS' ||
+    finalStatusLower === 'lunas' ||
+    dpStatusLower.includes('lunas 100%') ||
+    dpStatusLower === 'lunas' ||
+    prodStatusLower.includes('7. pelunasan & penyerahan master');
+
+  // DP 50% sudah diverifikasi Admin (namun belum lunas 100%)
+  const isDpVerified =
+    !isFullyPaid && (
+      project.paymentStage === 'DP_TERVERIFIKASI' ||
+      dpStatusLower.includes('dp terverifikasi') ||
+      dpStatusLower.includes('dp 50% lunas') ||
+      dpStatusLower.includes('sudah bayar dp')
+    );
+
+  // Tahap awal: baru mengirim pengajuan & wajib membayar DP 50% terlebih dahulu
+  const isAwaitingDp = !isFullyPaid && !isDpVerified;
+
+  return {
+    isAwaitingDp,
+    isDpVerified,
+    isFullyPaid,
+    // Kuitansi/Bukti Lunas & Master File TERKUNCI selama isFullyPaid === false
+    canDownloadLunasDocument: isFullyPaid,
+    canDownloadMasterFile: isFullyPaid
+  };
 }
 
-function renderClientWorkspace() {
-  const ws = document.getElementById('client-workspace-content'); if (!ws) return;
-  
-  const tabs = `
-    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 pb-4 mb-6">
-      <div class="flex gap-2">
-        <button onclick="appState.clientTab='projects'; renderClientWorkspace();" class="px-4 py-2 rounded-xl text-sm font-bold ${appState.clientTab==='projects'?'bg-primary text-white':'bg-panel text-textMuted'}">Proyek Saya</button>
-        <button onclick="appState.clientTab='settings'; renderClientWorkspace();" class="px-4 py-2 rounded-xl text-sm font-bold ${appState.clientTab==='settings'?'bg-primary text-white':'bg-panel text-textMuted'}">Pengaturan Akun</button>
-      </div>
-      <button onclick="logoutClientUser()" class="px-4 py-2 rounded-xl text-sm font-bold bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition">Log Out</button>
-    </div>`;
+/* === RENDER BLOK STATUS PEMBAYARAN DI KARTU PROYEK KLIEN === */
+function renderClientPaymentBlock(project) {
+  const access = getProjectPaymentAccess(project);
+  const total = Number(project.totalPrice || 0);
+  const dp = Number(project.dpAmount || total / 2);
+  const sisa = Math.max(0, total - dp);
 
-  if (appState.clientTab === 'settings') {
-    ws.innerHTML = `<div class="bg-surface border border-border/80 p-8 rounded-3xl shadow-premium">${tabs}
-      <div class="max-w-md space-y-4">
-        <div><label class="block text-xs font-bold mb-2">Nama Lengkap</label><input type="text" id="set-name" value="${appState.currentClientUser.name}" class="w-full bg-panel border p-3 rounded-xl text-sm" /></div>
-        <div><label class="block text-xs font-bold mb-2">No. WhatsApp</label><input type="tel" id="set-wa" value="${appState.currentClientUser.wa || ''}" class="w-full bg-panel border p-3 rounded-xl text-sm" /></div>
-        <button onclick="updateProfile()" class="btn-primary w-full py-3 rounded-xl text-sm font-bold">Simpan Profil</button>
-        <hr class="my-6 border-border/60"/>
-        <div><label class="block text-xs font-bold mb-2">Sandi Baru</label><input type="password" id="set-pass" placeholder="Minimal 8 huruf & angka" class="w-full bg-panel border p-3 rounded-xl text-sm" /></div>
-        <button onclick="updatePass()" class="btn-outline w-full py-3 rounded-xl text-sm font-bold">Ganti Sandi</button>
+  if (access.isAwaitingDp) {
+    return `
+      <div class="p-4 rounded-xl bg-amber-500/10 border border-amber-500/40 space-y-2.5">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <span class="text-xs font-bold text-amber-400">⏳ Tahap 1: Menunggu Pembayaran DP 50%</span>
+          <span class="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold">
+            Wajib DP: ${formatRupiah(dp)}
+          </span>
+        </div>
+        <p class="text-xs text-textMuted leading-relaxed">
+          Pengajuan Anda telah tercatat. Silakan lakukan pembayaran <strong>DP 50% (${formatRupiah(dp)})</strong> dari total biaya <strong>${formatRupiah(total)}</strong> lalu kirimkan bukti transfer ke WhatsApp Studio agar proses produksi segera dimulai.
+        </p>
+        <div class="flex flex-wrap items-center gap-2 pt-1">
+          <a href="https://wa.me/6281234567890?text=${encodeURIComponent(`Halo PrangArt Lab, saya ingin konfirmasi pembayaran DP 50% untuk proyek "${project.judul}" (ID: ${project.id}) sebesar ${formatRupiah(dp)}.`)}"
+             target="_blank" rel="noopener"
+             class="px-4 py-2 rounded-xl bg-primary text-white text-xs font-bold hover:opacity-90 transition">
+            Konfirmasi Pembayaran DP via WA
+          </a>
+          <span class="text-[11px] text-textMuted italic">
+            * Bukti Lunas &amp; Master File terkunci hingga pelunasan 100% diverifikasi Admin.
+          </span>
+        </div>
       </div>
-    </div>`; return;
+    `;
   }
 
-  const myP = appState.projects.filter(p => p.clientEmail === appState.currentClientUser.email);
-  if (!myP.length) return ws.innerHTML = `<div class="bg-surface rounded-3xl border border-border/80 p-8">${tabs}<div class="text-center py-8"><h3 class="text-xl font-bold mb-4">Belum ada proyek</h3><button onclick="navigateTo('order')" class="btn-primary px-6 py-2.5 rounded-xl font-bold">+ Buat Pengajuan</button></div></div>`;
-  
-  ws.innerHTML = `<div class="bg-surface border border-border/80 p-8 rounded-3xl shadow-premium">${tabs}
-    <div class="flex justify-end mb-4">
-      <button onclick="navigateTo('order')" class="btn-primary px-5 py-2.5 rounded-xl text-xs font-bold">+ Ajukan Proyek Baru</button>
-    </div>
-    ${myP.map(p => `
-      <div class="border border-border/80 p-5 rounded-2xl mb-4 flex flex-col md:flex-row justify-between md:items-center gap-4 bg-panel">
-        <div>
-          <strong class="block text-lg text-textMain">${p.judul}</strong>
-          <span class="text-xs text-textMuted block">${p.id} • ${p.serviceLineLabel} (${p.packageName})${p.hasVocalAddon ? ' + Vokal/Player' : ''}</span>
-          <span class="text-[11px] text-primary font-semibold mt-1 inline-block">${p.productionStatus}</span>
+  if (access.isDpVerified) {
+    return `
+      <div class="p-4 rounded-xl bg-sky-500/10 border border-sky-500/40 space-y-2.5">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <span class="text-xs font-bold text-sky-400">⚙ Tahap 2: DP 50% Terverifikasi • Sedang Diproduksi</span>
+          <span class="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-sky-500/20 text-sky-300 font-bold">
+            Sisa Pelunasan: ${formatRupiah(sisa)}
+          </span>
         </div>
-        <div class="text-right">
-          <span class="text-primary font-bold block text-lg">${formatRupiah(p.totalPrice)}</span>
-          <div class="flex items-center gap-2 justify-end mt-1">
-            <span class="text-xs bg-surface px-2 py-1 rounded border border-border">${p.dpStatus}</span>
-            ${p.dpStatus === 'Belum Dibayar' ? `<button onclick="openPaymentModal('${p.id}')" class="text-xs bg-primary text-white px-3 py-1 rounded-lg font-bold hover:bg-primary/90 transition shadow-sm">Bayar DP</button>` : ''}
-          </div>
+        <p class="text-xs text-textMuted leading-relaxed">
+          Pembayaran DP 50% (<strong>${formatRupiah(dp)}</strong>) telah dikonfirmasi Admin. Proyek sedang dikerjakan sesuai milestone. Sisa pelunasan sebesar <strong>${formatRupiah(sisa)}</strong> dibayarkan saat karya selesai sebelum penyerahan master.
+        </p>
+        <div class="text-[11px] text-textMuted italic">
+          🔒 Dokumen Bukti Lunas &amp; Master File akan terbuka otomatis setelah pelunasan 100% diverifikasi.
         </div>
       </div>
-    `).join('')}
-  </div>`;
-}
+    `;
+  }
 
-/* === FITUR LIHAT PEMBAYARAN SESUAI INPUTAN ADMIN === */
-function openPaymentModal(projectId) {
-  const p = appState.projects.find(x => x.id === projectId);
-  if (!p) return;
-  
-  const modal = document.getElementById('custom-modal');
-  document.getElementById('custom-modal-title').textContent = 'Instruksi Pembayaran DP';
-  
-  const methods = Array.isArray(appState.settings?.paymentMethods) ? appState.settings.paymentMethods : [];
-  const methodsHTML = methods.length
-    ? methods.map(m => {
-        const isQris = m.type === 'qris';
-        return `
-          <div class="border border-border/80 rounded-xl p-4 mb-3 bg-panel flex gap-4 items-center">
-            ${isQris
-              ? `<img src="${m.number}" alt="QRIS ${m.name}" class="w-20 h-20 object-contain bg-white rounded-lg p-1 border border-border/50" />`
-              : `<div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center text-primary font-bold text-xs uppercase shrink-0">${String(m.name || 'BANK').substring(0, 4)}</div>`}
-            <div class="flex-1 min-w-0">
-              <strong class="block text-sm text-textMain">${m.name}</strong>
-              <span class="block text-xs text-textMuted mt-1 break-all">${isQris ? 'Scan QRIS di samping' : 'No. Rek / Tujuan: ' + m.number}</span>
-              <span class="block text-xs text-textMuted">a.n. ${m.holder}</span>
-            </div>
-          </div>
-        `;
-      }).join('')
-    : `<div class="p-4 rounded-xl bg-panel border border-border text-xs text-textMuted text-center">Metode pembayaran belum diatur oleh Admin. Silakan hubungi WhatsApp Admin untuk informasi rekening.</div>`;
-
-  document.getElementById('custom-modal-body').innerHTML = `
-    <div class="space-y-4 text-sm">
-      <div class="bg-primary/5 p-4 rounded-xl border border-primary/20 text-center">
-        <span class="block text-xs text-textMuted">Total Tagihan DP (50% dari ${formatRupiah(p.totalPrice)})</span>
-        <strong class="text-2xl text-primary font-bold">${formatRupiah(p.dpAmount)}</strong>
-        ${p.hasVocalAddon ? `<span class="block text-[11px] text-textMuted mt-1">*Sudah termasuk Tambahan Vokal/Player (${formatRupiah(p.addonAmount || 250000)})</span>` : ''}
+  // Tahap 3: Lunas 100% Terverifikasi Admin -> Baru tampilkan tombol unduh Bukti Lunas & Master File
+  return `
+    <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/40 space-y-3">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <span class="text-xs font-bold text-emerald-400">✓ Tahap 3: Pembayaran Lunas 100% Terverifikasi</span>
+        <span class="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold">
+          Total Lunas: ${formatRupiah(total)}
+        </span>
       </div>
-      <p class="text-textMuted text-xs">Silakan transfer sesuai nominal DP di atas ke salah satu tujuan pembayaran resmi studio berikut:</p>
-      <div class="max-h-60 overflow-y-auto pr-1">
-        ${methodsHTML}
+      <p class="text-xs text-textMuted">
+        Terima kasih. Pembayaran telah lunas 100%. Anda sekarang dapat mengunduh Bukti Lunas / Kuitansi Resmi dan Master File karya Anda.
+      </p>
+      <div class="flex flex-wrap items-center gap-2.5 pt-1">
+        <button type="button" onclick="downloadOfficialReceipt('${project.id}')"
+          class="px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-500 transition cursor-pointer">
+          ⬇ Unduh Bukti Lunas / Kuitansi
+        </button>
+        ${project.masterFileUrl ? `
+          <a href="${project.masterFileUrl}" target="_blank" rel="noopener"
+             class="px-4 py-2 rounded-xl bg-primary text-white text-xs font-bold hover:opacity-90 transition">
+            ⬇ Unduh Master File
+          </a>
+        ` : ''}
       </div>
-      <p class="text-xs text-red-500 font-semibold text-center mt-3">*Setelah transfer, harap konfirmasi bukti pembayaran ke WhatsApp Admin.</p>
-      <button onclick="openProducerWaModal('Konfirmasi DP Proyek ${p.id} - ${p.judul} sebesar ${formatRupiah(p.dpAmount)}')" class="btn-primary w-full py-3 rounded-xl font-bold mt-2">Konfirmasi ke WA</button>
     </div>
   `;
-  
-  modal.classList.remove('hidden'); modal.classList.add('flex');
 }
 
-function closeCustomModal() {
-  const modal = document.getElementById('custom-modal');
-  if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
-}
+window.getProjectPaymentAccess = getProjectPaymentAccess;
+window.renderClientPaymentBlock = renderClientPaymentBlock;
