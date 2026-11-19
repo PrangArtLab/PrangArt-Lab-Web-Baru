@@ -1,4 +1,4 @@
-/* === SISTEM NAVIGASI HALAMAN, PEMISAHAN ROLE (KLIEN VS ADMIN) & LOGOUT === */
+/* === SISTEM NAVIGASI HALAMAN (DESKTOP, TABLET & MOBILE), PEMISAHAN ROLE & LOGOUT === */
 
 function removeDuplicateAdminNavButtons() {
   document.querySelectorAll('#nav-btn-admin, #mobile-nav-admin').forEach((el) => el.remove());
@@ -25,19 +25,54 @@ function getActiveRoleState() {
   return { isClientLoggedIn, isAdminLoggedIn };
 }
 
+/* === NAVIGASI KHUSUS LAYAR MOBILE (DI BAWAH LAYAR) === */
+function ensureMobileBottomNav() {
+  if (document.getElementById('prangart-mobile-bottom-nav')) return;
+
+  const navBar = document.createElement('nav');
+  navBar.id = 'prangart-mobile-bottom-nav';
+  navBar.className =
+    'md:hidden fixed bottom-0 left-0 right-0 z-50 bg-surface/95 backdrop-blur-md border-t border-border px-2 py-2 flex items-center justify-around shadow-lg';
+
+  const items = [
+    { page: 'home', label: 'Beranda', icon: '⌂' },
+    { page: 'portfolio', label: 'Portofolio', icon: '♫' },
+    { page: 'client', label: 'Ruang Klien', icon: '👤', roleClass: 'role-client-nav' },
+    { page: 'admin', label: 'Admin', icon: '⚙', roleClass: 'role-admin-nav' }
+  ];
+
+  navBar.innerHTML = items
+    .map(
+      (item) => `
+      <button type="button"
+        data-nav-target="${item.page}"
+        class="${item.roleClass || ''} flex-1 flex flex-col items-center justify-center py-1.5 px-2 rounded-xl text-[11px] font-bold text-textMuted hover:text-primary transition cursor-pointer">
+        <span class="text-base leading-none mb-1">${item.icon}</span>
+        <span>${item.label}</span>
+      </button>
+    `
+    )
+    .join('');
+
+  document.body.appendChild(navBar);
+  document.body.style.paddingBottom = '72px';
+}
+
 function getAllAdminNavButtons() {
   const matches = new Set();
   document
-    .querySelectorAll('[data-nav-target="admin"], a[href="#admin"], header button, header a, #mobile-menu button, #mobile-menu a')
+    .querySelectorAll('[data-nav-target="admin"], .role-admin-nav, a[href="#admin"], header button, header a, #mobile-menu button, #mobile-menu a')
     .forEach((el) => {
       const onclickAttr = el.getAttribute('onclick') || '';
       const targetAttr = el.getAttribute('data-nav-target') || '';
       const label = (el.textContent || '').trim().toLowerCase();
       if (
         targetAttr === 'admin' ||
+        el.classList.contains('role-admin-nav') ||
         onclickAttr.includes("'admin'") ||
         onclickAttr.includes('"admin"') ||
-        label === 'admin'
+        label === 'admin' ||
+        label.endsWith('admin')
       ) {
         matches.add(el);
       }
@@ -48,7 +83,7 @@ function getAllAdminNavButtons() {
 function getAllClientNavButtons() {
   const matches = new Set();
   document
-    .querySelectorAll('[data-nav-target="client"], [data-nav-target="order"], header button, header a, #mobile-menu button, #mobile-menu a')
+    .querySelectorAll('[data-nav-target="client"], [data-nav-target="order"], .role-client-nav, header button, header a, #mobile-menu button, #mobile-menu a')
     .forEach((el) => {
       const onclickAttr = el.getAttribute('onclick') || '';
       const targetAttr = el.getAttribute('data-nav-target') || '';
@@ -56,11 +91,12 @@ function getAllClientNavButtons() {
       if (
         targetAttr === 'client' ||
         targetAttr === 'order' ||
+        el.classList.contains('role-client-nav') ||
         onclickAttr.includes("'client'") ||
         onclickAttr.includes('"client"') ||
         onclickAttr.includes("'order'") ||
         onclickAttr.includes('"order"') ||
-        label === 'ruang klien' ||
+        label.includes('ruang klien') ||
         label === 'pemesanan' ||
         label === 'order'
       ) {
@@ -72,15 +108,15 @@ function getAllClientNavButtons() {
 
 function syncRoleNavVisibility() {
   removeDuplicateAdminNavButtons();
+  ensureMobileBottomNav();
+
   const { isClientLoggedIn, isAdminLoggedIn } = getActiveRoleState();
 
-  // Jika Klien sedang login -> sembunyikan menu Admin
   getAllAdminNavButtons().forEach((el) => {
     el.classList.toggle('hidden', isClientLoggedIn);
     el.style.display = isClientLoggedIn ? 'none' : '';
   });
 
-  // Jika Admin sedang login -> sembunyikan menu Ruang Klien & Order
   getAllClientNavButtons().forEach((el) => {
     el.classList.toggle('hidden', isAdminLoggedIn);
     el.style.display = isAdminLoggedIn ? 'none' : '';
@@ -98,7 +134,7 @@ function toggleMobileMenu(forceState) {
 }
 
 function updateActiveNavHighlight(pageId) {
-  document.querySelectorAll('header button, header a, #mobile-menu button, #mobile-menu a, [data-nav-target]').forEach((btn) => {
+  document.querySelectorAll('header button, header a, #mobile-menu button, #mobile-menu a, #prangart-mobile-bottom-nav button, [data-nav-target]').forEach((btn) => {
     const target = btn.getAttribute('data-nav-target') || '';
     const onclickAttr = btn.getAttribute('onclick') || '';
     const isTarget =
@@ -121,11 +157,9 @@ function ensureAdminPageInnerState() {
   const adminPage = document.getElementById('page-admin');
   if (!adminPage) return;
 
-  // Pastikan section utama admin terlihat
   adminPage.classList.remove('hidden', 'sm:hidden', 'md:hidden', 'lg:hidden', 'xl:hidden');
   adminPage.style.display = 'block';
 
-  // Deteksi layar PIN / Kunci Admin vs Konten Utama Dashboard Admin
   const lockCandidates = adminPage.querySelectorAll('#admin-lock-screen, #admin-pin-screen, #admin-login-box, [id*="admin-pin"], [id*="admin-lock"]');
   const contentCandidates = adminPage.querySelectorAll('#admin-dashboard-content, #admin-main-panel, #admin-panel-content, [id*="admin-dashboard"]');
 
@@ -152,7 +186,6 @@ function navigateTo(pageId) {
   if (!pageId) pageId = 'home';
   const { isClientLoggedIn, isAdminLoggedIn } = getActiveRoleState();
 
-  // Blokir akses silang sebelum logout
   if (isClientLoggedIn && pageId === 'admin') {
     if (typeof showToast === 'function') {
       showToast(
@@ -179,13 +212,11 @@ function navigateTo(pageId) {
     appState.currentPage = pageId;
   }
 
-  // Sembunyikan seluruh section halaman
   document.querySelectorAll('.page-section, section[id^="page-"], div[id^="page-"]').forEach((sec) => {
     sec.classList.add('hidden');
     sec.style.display = 'none';
   });
 
-  // Tampilkan halaman target
   const target = document.getElementById(`page-${pageId}`);
   if (target) {
     target.classList.remove('hidden', 'sm:hidden', 'md:hidden', 'lg:hidden', 'xl:hidden');
@@ -245,10 +276,14 @@ function goToOrderWithService(serviceKey, packageKey) {
   }
 }
 
-/* === FUNGSI LOGOUT / KELUAR BERSIH (MENANGANI TOMBOL "KELUAR" MAUPUN "LOG OUT") === */
+/* === FUNGSI LOGOUT / KELUAR BERSIH (SINKRON UNTUK TOMBOL "LOG OUT" & "KELUAR") === */
+let isLoggingOutLock = false;
+
 async function performUniversalLogout(roleHint) {
+  if (isLoggingOutLock) return;
+  isLoggingOutLock = true;
+
   try {
-    // 1. Bersihkan seluruh penyimpanan sesi klien di browser
     if (!roleHint || roleHint === 'client' || roleHint === 'all') {
       if (typeof appState !== 'undefined') {
         appState.currentClientUser = null;
@@ -266,7 +301,17 @@ async function performUniversalLogout(roleHint) {
         sessionStorage.removeItem(k);
       });
 
-      // Reset tampilan tombol profil & keluar di header kanan atas
+      // Jika ada tombol "Keluar" asli di header yang memiliki handler khusus auth, ikut panggil secara aman
+      const headerKeluarBtn = Array.from(document.querySelectorAll('header button, header a')).find(
+        (el) => (el.textContent || '').trim().toLowerCase() === 'keluar'
+      );
+      if (headerKeluarBtn && headerKeluarBtn.getAttribute('onclick')) {
+        const fnCall = headerKeluarBtn.getAttribute('onclick');
+        if (!fnCall.includes('performUniversalLogout')) {
+          try { new Function(fnCall)(); } catch (_) {}
+        }
+      }
+
       const headerUserBadge = document.getElementById('header-user-name') || document.getElementById('nav-user-name');
       const headerLogoutBtn = document.getElementById('header-logout-btn') || document.getElementById('nav-logout-btn');
       const headerLoginBtn = document.getElementById('header-login-btn') || document.getElementById('nav-login-btn');
@@ -279,7 +324,6 @@ async function performUniversalLogout(roleHint) {
       }
     }
 
-    // 2. Bersihkan seluruh penyimpanan sesi admin
     if (!roleHint || roleHint === 'admin' || roleHint === 'all') {
       if (typeof appState !== 'undefined') {
         appState.isAdminUnlocked = false;
@@ -290,12 +334,12 @@ async function performUniversalLogout(roleHint) {
     }
   } catch (err) {
     console.error('Error saat logout:', err);
+  } finally {
+    setTimeout(() => { isLoggingOutLock = false; }, 300);
   }
 
-  // 3. Kembalikan visibilitas tombol navigasi (menu Admin muncul kembali)
   syncRoleNavVisibility();
 
-  // 4. Perbarui tampilan halaman klien (kembali ke form login klien)
   if (typeof refreshClientDashboard === 'function') {
     try { refreshClientDashboard(); } catch (_) {}
   }
@@ -310,37 +354,53 @@ async function performUniversalLogout(roleHint) {
   navigateTo('home');
 }
 
-// Tangkap klik pada SEMUA tombol keluar / log out di seluruh halaman (termasuk tombol merah "Log Out" di Ruang Klien)
+/* === DETEKSI KLIK GLOBAL UNTUK TOMBOL "LOG OUT" (APAPUN TAG HTML-NYA) & "KELUAR" === */
 document.addEventListener('click', (ev) => {
-  const clickedBtn = ev.target.closest('button, a');
-  if (clickedBtn) {
-    const labelText = (clickedBtn.textContent || '').trim().toLowerCase();
-    const onclickAttr = (clickedBtn.getAttribute('onclick') || '').toLowerCase();
-    const idAttr = (clickedBtn.id || '').toLowerCase();
-    const actionAttr = (clickedBtn.getAttribute('data-action') || '').toLowerCase();
+  // Cek mulai dari target terdekat (termasuk span/div/button/a) yang bertuliskan "Log Out" atau "Keluar"
+  let node = ev.target;
+  let matchedLogoutEl = null;
 
-    const isLogoutElement =
-      labelText === 'log out' ||
-      labelText === 'logout' ||
-      labelText === 'keluar' ||
-      labelText === 'keluar akun' ||
-      labelText === 'keluar admin' ||
-      onclickAttr.includes('logout') ||
-      onclickAttr.includes('keluar') ||
-      idAttr.includes('logout') ||
-      actionAttr.includes('logout') ||
-      clickedBtn.classList.contains('btn-logout');
+  while (node && node !== document.body) {
+    if (node.nodeType === 1) {
+      const txt = (node.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
+      const onclickAttr = (node.getAttribute('onclick') || '').toLowerCase();
+      const idAttr = (node.id || '').toLowerCase();
+      const actionAttr = (node.getAttribute('data-action') || '').toLowerCase();
 
-    if (isLogoutElement) {
-      ev.preventDefault();
-      ev.stopPropagation();
-      if (labelText.includes('admin') || onclickAttr.includes('admin') || idAttr.includes('admin')) {
-        performUniversalLogout('admin');
-      } else {
-        performUniversalLogout('all');
+      const isDirectTextMatch =
+        txt === 'log out' ||
+        txt === 'logout' ||
+        txt === 'keluar' ||
+        txt === 'keluar akun' ||
+        txt === 'keluar admin';
+
+      const isAttrMatch =
+        onclickAttr.includes('logout') ||
+        onclickAttr.includes('keluar') ||
+        onclickAttr.includes('signout') ||
+        idAttr.includes('logout') ||
+        idAttr.includes('keluar') ||
+        actionAttr.includes('logout') ||
+        node.classList.contains('btn-logout');
+
+      if (isDirectTextMatch || isAttrMatch) {
+        matchedLogoutEl = node;
+        break;
       }
-      return;
     }
+    node = node.parentElement;
+  }
+
+  if (matchedLogoutEl) {
+    ev.preventDefault();
+    ev.stopPropagation();
+    const fullStr = `${matchedLogoutEl.textContent || ''} ${matchedLogoutEl.id || ''} ${matchedLogoutEl.getAttribute('onclick') || ''}`.toLowerCase();
+    if (fullStr.includes('admin')) {
+      performUniversalLogout('admin');
+    } else {
+      performUniversalLogout('all');
+    }
+    return;
   }
 
   const navEl = ev.target.closest('[data-nav-target]');
@@ -355,7 +415,7 @@ document.addEventListener('click', (ev) => {
       navigateTo(pageTarget);
     }
   }
-}, true); // Gunakan capture phase (true) agar tidak tertahan event handler lain
+}, true);
 
 function initNavigationSystem() {
   syncRoleNavVisibility();
@@ -374,18 +434,25 @@ if (document.readyState === 'loading') {
   initNavigationSystem();
 }
 
-// Ekspos seluruh kemungkinan nama fungsi logout & navigasi ke window
+// Ekspos semua variasi nama fungsi logout ke global window
 Object.assign(window, {
   navigateTo,
   toggleMobileMenu,
   goToOrderWithService,
   syncRoleNavVisibility,
+  ensureMobileBottomNav,
   ensureAdminNavButtonsVisible: syncRoleNavVisibility,
   removeDuplicateAdminNavButtons,
   ensureAdminPageInnerState,
   updateActiveNavHighlight,
   performUniversalLogout,
   logout: () => performUniversalLogout('all'),
+  logOut: () => performUniversalLogout('all'),
+  doLogout: () => performUniversalLogout('all'),
+  onLogout: () => performUniversalLogout('all'),
+  logoutUser: () => performUniversalLogout('all'),
+  signOutClient: () => performUniversalLogout('client'),
+  clientSignOut: () => performUniversalLogout('client'),
   clientLogout: () => performUniversalLogout('client'),
   logoutClient: () => performUniversalLogout('client'),
   handleClientLogout: () => performUniversalLogout('client'),
