@@ -6,7 +6,7 @@ const DEFAULT_SERVICE_CATALOG = {
     packages: {
       dasar: {
         label: 'Paket Dasar',
-        price: 750000,
+        price: 1000000,
         badge: '1 Nuansa Utama',
         summary: 'Komposisi iringan tari dengan 1 nuansa suasana utama (Sakral, Ceria, Dramatis, Misterius, atau pilihan khusus).',
         features: [
@@ -34,7 +34,7 @@ const DEFAULT_SERVICE_CATALOG = {
       },
       pro: {
         label: 'Paket Pro',
-        price: 2500000,
+        price: 2000000,
         badge: 'Presisi Video & BPM • Maks. 07:00',
         summary: 'Produksi presisi tinggi mengikuti rekaman video latihan tari per bagian & BPM (Maks. durasi 07:00 menit) dengan unlimited revisi 1 bulan.',
         features: [
@@ -70,7 +70,7 @@ const DEFAULT_SERVICE_CATALOG = {
     packages: {
       dasar: {
         label: 'Paket Dasar',
-        price: 650000,
+        price: 1000000,
         badge: 'Aransemen Minimalis',
         summary: 'Aransemen musik minimalis (1–3 instrumen utama), durasi maks. 03:30 menit, mixing bersih standar, maks. 2x revisi minor.',
         features: [
@@ -84,7 +84,7 @@ const DEFAULT_SERVICE_CATALOG = {
       },
       standar: {
         label: 'Paket Standar',
-        price: 1350000,
+        price: 1750000,
         badge: 'Full Band / Pop / Scoring',
         summary: 'Aransemen penuh (4–7 instrumen) dengan dinamika intro–verse–chorus–outro, siap rilis platform digital.',
         features: [
@@ -98,7 +98,7 @@ const DEFAULT_SERVICE_CATALOG = {
       },
       pro: {
         label: 'Paket Pro',
-        price: 2300000,
+        price: 2500000,
         badge: 'Sinematik • Unlimited Revisi 1 Bln',
         summary: 'Produksi kompleks untuk scoring film/brand/jingle, layer orkestra & sound design penuh, unlimited revisi 1 bulan + stems.',
         features: [
@@ -134,7 +134,7 @@ const DEFAULT_SERVICE_CATALOG = {
     packages: {
       dasar: {
         label: 'Paket Dasar',
-        price: 250000,
+        price: 100000,
         badge: 'Melodi Utama & Akor',
         summary: 'Transkripsi melodi utama (vokal atau 1 instrumen solo) beserta simbol akor dasar dalam format partitur PDF siap cetak.',
         features: [
@@ -148,7 +148,7 @@ const DEFAULT_SERVICE_CATALOG = {
       },
       standar: {
         label: 'Paket Standar',
-        price: 550000,
+        price: 200000,
         badge: 'Piano 2 Tangan / Ensambel Kecil',
         summary: 'Transkripsi iringan piano 2 tangan (grand staff), vokal + iringan, atau ensambel kecil (2–4 instrumen) lengkap dengan audio simulasi.',
         features: [
@@ -162,7 +162,7 @@ const DEFAULT_SERVICE_CATALOG = {
       },
       pro: {
         label: 'Paket Pro',
-        price: 1100000,
+        price: 350000,
         badge: 'Full Band / Orkestra / Tradisi',
         summary: 'Transkripsi lengkap multi-instrumen, full band, paduan suara, atau ansambel musik tradisional termasuk Full Score & Partitur per instrumen.',
         features: [
