@@ -1,4 +1,4 @@
-/* === SISTEM PEMESANAN & KALKULATOR LAYANAN (PRANGART LAB) === */
+/* === SISTEM PEMESANAN, KALKULATOR LAYANAN & ALUR STATUS PEMBAYARAN (PRANGART LAB) === */
 
 if (typeof window.formatRupiah !== 'function') {
   window.formatRupiah = function (num) {
@@ -262,13 +262,13 @@ function openProductionAgreementModal() {
         <div>
           <strong class="block text-primary uppercase">PASAL 2 — BIAYA PRODUKSI &amp; TATA CARA PEMBAYARAN</strong>
           <p>1. Total nilai jasa produksi musik yang disepakati adalah sebesar <strong>${totalPrice > 0 ? formatRupiah(totalPrice) : 'Sesuai Kesepakatan (Belum Diisi)'}</strong>${isAddonChecked ? ' (sudah termasuk tambahan vokal/session player)' : ''}.</p>
-          <p>2. Pembayaran dilakukan dalam 2 (dua) tahap: <strong>DP 50% (${dpAmount > 0 ? formatRupiah(dpAmount) : '50%'})</strong> sebelum produksi dimulai dan <strong>Pelunasan 50% (${dpAmount > 0 ? formatRupiah(dpAmount) : '50%'})</strong> sebelum penyerahan berkas master penuh.</p>
+          <p>2. Pembayaran dilakukan dalam 2 (dua) tahap: <strong>DP 50% (${dpAmount > 0 ? formatRupiah(dpAmount) : '50%'})</strong> wajib dibayarkan setelah pengajuan dikirim agar produksi dimulai, dan <strong>Pelunasan 50% (${dpAmount > 0 ? formatRupiah(dpAmount) : '50%'})</strong> sebelum penyerahan master file &amp; bukti lunas resmi.</p>
         </div>
 
         <div>
           <strong class="block text-primary uppercase">PASAL 3 — KETENTUAN REVISI &amp; HASIL AKHIR</strong>
           <p>1. Hak revisi mengikuti kualifikasi paket yang dipilih dalam koridor konsep awal. Perubahan konsep total atau penambahan durasi melebihi batas paket dikenakan penyesuaian biaya.</p>
-          <p>2. Setelah pelunasan diterima penuh, PIHAK PERTAMA menyerahkan hasil produksi sesuai deliverables paket yang dipilih.</p>
+          <p>2. Bukti Lunas resmi dan Master File hanya dapat diunduh setelah PIHAK KEDUA menyelesaikan pelunasan 100% dan diverifikasi oleh Admin Studio.</p>
         </div>
 
         <div>
@@ -1421,15 +1421,107 @@ function copyAIResultToClipboard() {
   }
 }
 
-async function handleOrderFormSubmit(e) {
-  e.preventDefault();
-  if (!appState.currentClientUser) return typeof navigateTo === 'function' && navigateTo('client');
+/* === BERSIHKAN REQUIRED PADA ELEMEN TERSEMBUNYI AGAR SUBMIT TIDAK PERNAH MACET === */
+function sanitizeHiddenRequiredFields(formEl) {
+  if (!formEl) return;
+  formEl.querySelectorAll('input, select, textarea').forEach((el) => {
+    const isHidden =
+      el.offsetParent === null ||
+      el.closest('.hidden') !== null ||
+      getComputedStyle(el).display === 'none';
 
+    if (isHidden) {
+      if (el.hasAttribute('required')) {
+        el.setAttribute('data-was-required', 'true');
+        el.removeAttribute('required');
+      }
+    } else if (el.getAttribute('data-was-required') === 'true') {
+      el.setAttribute('required', 'required');
+    }
+  });
+}
+
+function resolveActiveClientUser() {
+  if (appState.currentClientUser && (appState.currentClientUser.email || appState.currentClientUser.name)) {
+    return appState.currentClientUser;
+  }
+
+  const keys = ['prangart_client_user', 'prangart_user', 'prangart_current_user', 'clientUser', 'currentClientUser'];
+  for (const k of keys) {
+    try {
+      const raw = localStorage.getItem(k) || sessionStorage.getItem(k);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && (parsed.email || parsed.name)) {
+          appState.currentClientUser = parsed;
+          return parsed;
+        }
+      }
+    } catch (_) {}
+  }
+
+  const formEmail = document.getElementById('field-email')?.value.trim();
+  const formName = document.getElementById('field-sanggar')?.value.trim();
+  const formWa = document.getElementById('field-wa')?.value.trim();
+  if (formEmail && formName) {
+    const fallbackUser = { name: formName, email: formEmail, wa: formWa || '' };
+    appState.currentClientUser = fallbackUser;
+    try {
+      localStorage.setItem('prangart_client_user', JSON.stringify(fallbackUser));
+    } catch (_) {}
+    return fallbackUser;
+  }
+
+  return null;
+}
+
+/* === PENGIRIMAN PENGAJUAN PROYEK (DENGAN KONTROL AKSES DOKUMEN LUNAS) === */
+let isSubmittingOrderLock = false;
+
+async function handleOrderFormSubmit(e) {
+  if (e && typeof e.preventDefault === 'function') {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  if (isSubmittingOrderLock) return;
+
+  const orderForm = document.getElementById('order-form') || document.querySelector('#page-order form');
+  sanitizeHiddenRequiredFields(orderForm);
+
+  // 1. Validasi kolom yang terlihat saja
+  if (orderForm && typeof orderForm.checkValidity === 'function' && !orderForm.checkValidity()) {
+    const firstInvalid = orderForm.querySelector(':invalid');
+    if (firstInvalid) {
+      firstInvalid.focus();
+      firstInvalid.reportValidity?.();
+      const labelText = firstInvalid.closest('div')?.querySelector('label')?.textContent?.replace('*', '').trim() || 'kolom wajib';
+      if (typeof showToast === 'function') {
+        showToast('Data Belum Lengkap', `Harap lengkapi bagian: ${labelText}`, 'warning');
+      }
+    }
+    return;
+  }
+
+  // 2. Pastikan klien teridentifikasi
+  const activeUser = resolveActiveClientUser();
+  if (!activeUser) {
+    if (typeof showToast === 'function') {
+      showToast('Masuk Terlebih Dahulu', 'Silakan masuk ke akun klien atau lengkapi Nama & Email Anda.', 'warning');
+    }
+    if (typeof navigateTo === 'function') navigateTo('client');
+    return;
+  }
+
+  // 3. Validasi batas durasi paket
   if (!validateDurationLimitByPackage()) {
     document.getElementById('field-durasi')?.focus();
     const pkgObj = appState.serviceCatalog[appState.selectedServiceLine]?.packages?.[appState.selectedPackage];
     const maxStr = pkgObj?.maxSeconds ? formatSecondsToMMSS(Number(pkgObj.maxSeconds)) : '07:00';
-    return typeof showToast === 'function' && showToast('Durasi Melebihi Batas Paket', `Batas durasi paket terpilih adalah maksimal ${maxStr} menit. Silakan pilih paket yang sesuai atau Paket Custom.`, 'error');
+    return typeof showToast === 'function' && showToast(
+      'Durasi Melebihi Batas Paket',
+      `Batas durasi paket terpilih adalah maksimal ${maxStr} menit. Silakan pilih paket yang sesuai atau Paket Custom.`,
+      'error'
+    );
   }
 
   const {
@@ -1444,157 +1536,218 @@ async function handleOrderFormSubmit(e) {
 
   if (isCustomPkg && (!appState.customPrice || Number(appState.customPrice) <= 0)) {
     document.getElementById('custom-price-input')?.focus();
-    return typeof showToast === 'function' && showToast('Harga Belum Diisi', 'Untuk Paket Custom, wajib mengisi nominal Harga Kesepakatan (Rp) sesuai hasil diskusi.', 'error');
+    return typeof showToast === 'function' && showToast(
+      'Harga Belum Diisi',
+      'Untuk Paket Custom, wajib mengisi nominal Harga Kesepakatan (Rp) sesuai hasil diskusi.',
+      'error'
+    );
   }
 
-  const specs = [];
-  const pushIfVal = (label, id) => {
-    const v = document.getElementById(id)?.value.trim();
-    if (v) specs.push({ key: label, val: v });
-  };
+  isSubmittingOrderLock = true;
+  const submitBtns = document.querySelectorAll('#page-order button[type="submit"], #btn-submit-order, #submit-order-btn');
+  submitBtns.forEach((b) => {
+    b.disabled = true;
+    b.dataset.origText = b.innerHTML;
+    b.innerHTML = 'Mengirim Pengajuan...';
+  });
 
-  const requiresContract = (appState.selectedServiceLine === 'tari' || appState.selectedServiceLine === 'digital');
-  if (requiresContract) {
-    specs.push({ key: 'Persetujuan Kontrak PrangArt Studios', val: 'Disetujui Klien' });
-  }
+  try {
+    const specs = [];
+    const pushIfVal = (label, id) => {
+      const v = document.getElementById(id)?.value.trim();
+      if (v) specs.push({ key: label, val: v });
+    };
 
-  const sanggarName = document.getElementById('field-sanggar')?.value.trim() || appState.currentClientUser.name;
-  const waNumber = document.getElementById('field-wa')?.value.trim() || '';
-  const contactEmail = document.getElementById('field-email')?.value.trim() || appState.currentClientUser.email;
-  let sorakChoice = null;
+    const requiresContract = (appState.selectedServiceLine === 'tari' || appState.selectedServiceLine === 'digital');
+    if (requiresContract) {
+      specs.push({ key: 'Persetujuan Kontrak PrangArt Studios', val: 'Disetujui Klien' });
+    }
 
-  if (appState.selectedServiceLine === 'tari') {
-    sorakChoice = document.querySelector('input[name="spec-sorak"]:checked')?.value || 'Tidak Perlu Sorak';
-    specs.push({ key: 'Sanggar / Komunitas / Instansi / Individu', val: sanggarName });
-    pushIfVal('Kota, Provinsi', 'field-kota-provinsi');
-    specs.push({ key: 'Nomor WhatsApp Aktif', val: waNumber });
-    specs.push({ key: 'Email', val: contactEmail });
-    pushIfVal('Nama Lengkap Koreografer', 'field-koreografer');
-    specs.push({ key: 'Jenis Tari', val: getResolvedJenisTari() });
-    pushIfVal('Latar Belakang Budaya / Daerah Tari', 'field-budaya-daerah');
+    const sanggarName = document.getElementById('field-sanggar')?.value.trim() || activeUser.name || 'Klien';
+    const waNumber = document.getElementById('field-wa')?.value.trim() || activeUser.wa || '';
+    const contactEmail = document.getElementById('field-email')?.value.trim() || activeUser.email || '';
+    let sorakChoice = null;
 
-    if (appState.selectedPackage === 'dasar') {
-      const nuansaSel = document.getElementById('spec-nuansa-dasar')?.value;
-      const nuansaFinal = nuansaSel === 'Other' ? document.getElementById('spec-nuansa-other')?.value.trim() : nuansaSel;
-      if (nuansaFinal) specs.push({ key: 'Nuansa Musik', val: nuansaFinal });
-      pushIfVal('Instrumen Dominan', 'spec-instrumen-tari');
-    } else if (appState.selectedPackage === 'standar') {
-      const checkedStruktur = Array.from(document.querySelectorAll('input[name="spec-struktur-check"]:checked')).map(el => el.value);
-      if (checkedStruktur.length) specs.push({ key: 'Struktur Tari / Suasana Dipilih', val: checkedStruktur.join(', ') });
-      const segItems = Array.from(document.querySelectorAll('#standar-segments-list .standar-segment-item')).map((row, idx) => {
-        const dur = row.querySelector('.seg-durasi')?.value.trim() || '-';
-        const str = row.querySelector('.seg-struktur')?.value.trim() || '-';
-        const nua = row.querySelector('.seg-nuansa')?.value.trim() || '-';
-        const lnk = row.querySelector('.seg-link')?.value.trim();
-        return `Bagian ${idx + 1} [${dur}] ${str} → ${nua}${lnk ? ` (Link: ${lnk})` : ''}`;
-      });
-      if (segItems.length) specs.push({ key: 'Rincian Urutan Nuansa & Durasi (Standar)', val: segItems.join(' | ') });
-    } else if (appState.selectedPackage === 'pro') {
-      pushIfVal('Awal Masuk Musik & Tari', 'spec-pro-intro-mode');
-      const proItems = Array.from(document.querySelectorAll('#pro-segments-list .pro-segment-item')).map((row) => {
-        const lbl = row.querySelector('.pro-label')?.value.trim() || 'Bagian';
-        const bpm = row.querySelector('.pro-bpm')?.value.trim() || '-';
-        const dur = row.querySelector('.pro-durasi')?.value.trim() || '-';
-        const lnk = row.querySelector('.pro-link')?.value.trim();
-        const dsc = row.querySelector('.pro-desc')?.value.trim() || '-';
-        return `${lbl} (${bpm}, ${dur}): ${dsc}${lnk ? ` [GDrive: ${lnk}]` : ''}`;
-      });
-      if (proItems.length) specs.push({ key: 'Rincian Video GDrive, Tempo & Nuansa (Pro)', val: proItems.join(' | ') });
+    if (appState.selectedServiceLine === 'tari') {
+      sorakChoice = document.querySelector('input[name="spec-sorak"]:checked')?.value || 'Tidak Perlu Sorak';
+      specs.push({ key: 'Sanggar / Komunitas / Instansi / Individu', val: sanggarName });
+      pushIfVal('Kota, Provinsi', 'field-kota-provinsi');
+      specs.push({ key: 'Nomor WhatsApp Aktif', val: waNumber });
+      specs.push({ key: 'Email', val: contactEmail });
+      pushIfVal('Nama Lengkap Koreografer', 'field-koreografer');
+      specs.push({ key: 'Jenis Tari', val: getResolvedJenisTari() });
+      pushIfVal('Latar Belakang Budaya / Daerah Tari', 'field-budaya-daerah');
+
+      if (appState.selectedPackage === 'dasar') {
+        const nuansaSel = document.getElementById('spec-nuansa-dasar')?.value;
+        const nuansaFinal = nuansaSel === 'Other' ? document.getElementById('spec-nuansa-other')?.value.trim() : nuansaSel;
+        if (nuansaFinal) specs.push({ key: 'Nuansa Musik', val: nuansaFinal });
+        pushIfVal('Instrumen Dominan', 'spec-instrumen-tari');
+      } else if (appState.selectedPackage === 'standar') {
+        const checkedStruktur = Array.from(document.querySelectorAll('input[name="spec-struktur-check"]:checked')).map(el => el.value);
+        if (checkedStruktur.length) specs.push({ key: 'Struktur Tari / Suasana Dipilih', val: checkedStruktur.join(', ') });
+        const segItems = Array.from(document.querySelectorAll('#standar-segments-list .standar-segment-item')).map((row, idx) => {
+          const dur = row.querySelector('.seg-durasi')?.value.trim() || '-';
+          const str = row.querySelector('.seg-struktur')?.value.trim() || '-';
+          const nua = row.querySelector('.seg-nuansa')?.value.trim() || '-';
+          const lnk = row.querySelector('.seg-link')?.value.trim();
+          return `Bagian ${idx + 1} [${dur}] ${str} → ${nua}${lnk ? ` (Link: ${lnk})` : ''}`;
+        });
+        if (segItems.length) specs.push({ key: 'Rincian Urutan Nuansa & Durasi (Standar)', val: segItems.join(' | ') });
+      } else if (appState.selectedPackage === 'pro') {
+        pushIfVal('Awal Masuk Musik & Tari', 'spec-pro-intro-mode');
+        const proItems = Array.from(document.querySelectorAll('#pro-segments-list .pro-segment-item')).map((row) => {
+          const lbl = row.querySelector('.pro-label')?.value.trim() || 'Bagian';
+          const bpm = row.querySelector('.pro-bpm')?.value.trim() || '-';
+          const dur = row.querySelector('.pro-durasi')?.value.trim() || '-';
+          const lnk = row.querySelector('.pro-link')?.value.trim();
+          const dsc = row.querySelector('.pro-desc')?.value.trim() || '-';
+          return `${lbl} (${bpm}, ${dur}): ${dsc}${lnk ? ` [GDrive: ${lnk}]` : ''}`;
+        });
+        if (proItems.length) specs.push({ key: 'Rincian Video GDrive, Tempo & Nuansa (Pro)', val: proItems.join(' | ') });
+      } else {
+        pushIfVal('Skala & Format Garapan', 'spec-custom-scale');
+        pushIfVal('Kebutuhan Instrumen Khusus', 'spec-custom-instruments');
+        pushIfVal('Awal Masuk Musik & Tari', 'spec-pro-intro-mode');
+        const proItems = Array.from(document.querySelectorAll('#pro-segments-list .pro-segment-item')).map((row) => {
+          const lbl = row.querySelector('.pro-label')?.value.trim() || 'Babak';
+          const bpm = row.querySelector('.pro-bpm')?.value.trim() || '-';
+          const dur = row.querySelector('.pro-durasi')?.value.trim() || '-';
+          const lnk = row.querySelector('.pro-link')?.value.trim();
+          const dsc = row.querySelector('.pro-desc')?.value.trim() || '-';
+          return `${lbl} (${bpm}, ${dur}): ${dsc}${lnk ? ` [GDrive: ${lnk}]` : ''}`;
+        });
+        if (proItems.length) specs.push({ key: 'Rincian Babak & Durasi (Custom)', val: proItems.join(' | ') });
+        pushIfVal('Output File & Teknis Tambahan', 'spec-custom-deliverables');
+      }
+
+      specs.push({ key: 'Tambahan Sorak', val: sorakChoice });
+    } else if (appState.selectedServiceLine === 'digital') {
+      specs.push({ key: 'Pemesan / Brand / Instansi', val: sanggarName });
+      pushIfVal('Kota, Provinsi', 'field-kota-provinsi');
+      specs.push({ key: 'Nomor WhatsApp Aktif', val: waNumber });
+      specs.push({ key: 'Email', val: contactEmail });
+      pushIfVal('Jenis Kebutuhan Produksi', 'nontari-jenis');
+      pushIfVal('Genre / Gaya Musik', 'nontari-genre');
+      pushIfVal('Nuansa / Mood Utama', 'nontari-nuansa');
+      pushIfVal('Tempo (BPM) & Nada Dasar', 'nontari-tempo-key');
+      pushIfVal('Susunan Instrumen', 'nontari-instrumen');
+      pushIfVal('Struktur Lagu / Alur Dinamika', 'nontari-struktur');
+      pushIfVal('Lirik / Naskah Voice Over', 'nontari-lirik');
+      pushIfVal('Target Penggunaan / Platform', 'nontari-platform');
+      pushIfVal('Format File Output', 'nontari-output');
+      pushIfVal('Jumlah Trek / Lagu (Custom)', 'nontari-custom-count');
+      pushIfVal('Lisensi / Hak Pakai (Custom)', 'nontari-custom-license');
+      pushIfVal('Detail Khusus Paket Custom', 'nontari-custom-detail');
     } else {
-      pushIfVal('Skala & Format Garapan', 'spec-custom-scale');
-      pushIfVal('Kebutuhan Instrumen Khusus', 'spec-custom-instruments');
-      pushIfVal('Awal Masuk Musik & Tari', 'spec-pro-intro-mode');
-      const proItems = Array.from(document.querySelectorAll('#pro-segments-list .pro-segment-item')).map((row) => {
-        const lbl = row.querySelector('.pro-label')?.value.trim() || 'Babak';
-        const bpm = row.querySelector('.pro-bpm')?.value.trim() || '-';
-        const dur = row.querySelector('.pro-durasi')?.value.trim() || '-';
-        const lnk = row.querySelector('.pro-link')?.value.trim();
-        const dsc = row.querySelector('.pro-desc')?.value.trim() || '-';
-        return `${lbl} (${bpm}, ${dur}): ${dsc}${lnk ? ` [GDrive: ${lnk}]` : ''}`;
-      });
-      if (proItems.length) specs.push({ key: 'Rincian Babak & Durasi (Custom)', val: proItems.join(' | ') });
-      pushIfVal('Output File & Teknis Tambahan', 'spec-custom-deliverables');
+      const billableMins = getBillableTranscriptionMinutes();
+      specs.push({ key: 'Pemesan / Institusi', val: sanggarName });
+      specs.push({ key: 'Nomor WhatsApp Aktif', val: waNumber });
+      specs.push({ key: 'Email', val: contactEmail });
+      specs.push({ key: 'Menit Terhitung (Min. 1 Menit)', val: `${billableMins} Menit` });
+      if (appState.selectedPackage !== 'komplet' && appState.selectedPackage !== 'custom') {
+        specs.push({ key: 'Jumlah Instrumen', val: `${getTranscriptionInstrumentCount()} Instrumen` });
+      }
+      if (breakdownNote) specs.push({ key: 'Rincian Kalkulasi Tarif', val: breakdownNote });
+      pushIfVal('Jenis Transkripsi', 'trans-jenis');
+      pushIfVal('Format Notasi', 'trans-format-notasi');
+      pushIfVal('Daftar Instrumen Ditranskripsi', 'trans-instrumen');
+      pushIfVal('Format File Hasil', 'trans-file-output');
+      pushIfVal('Bagian Audio Ditranskripsi', 'trans-bagian-waktu');
+      pushIfVal('Nada Dasar & Birama', 'trans-nada-birama');
+      pushIfVal('Tujuan Penggunaan Partitur', 'trans-tujuan');
+      pushIfVal('Catatan Teknis Khusus', 'trans-catatan');
+      pushIfVal('Jumlah Repertoar (Custom)', 'trans-custom-count');
+      pushIfVal('Standar Penulisan / Analisis (Custom)', 'trans-custom-standard');
+      pushIfVal('Detail Khusus Paket Custom', 'trans-custom-detail');
     }
 
-    specs.push({ key: 'Tambahan Sorak', val: sorakChoice });
-  } else if (appState.selectedServiceLine === 'digital') {
-    specs.push({ key: 'Pemesan / Brand / Instansi', val: sanggarName });
-    pushIfVal('Kota, Provinsi', 'field-kota-provinsi');
-    specs.push({ key: 'Nomor WhatsApp Aktif', val: waNumber });
-    specs.push({ key: 'Email', val: contactEmail });
-    pushIfVal('Jenis Kebutuhan Produksi', 'nontari-jenis');
-    pushIfVal('Genre / Gaya Musik', 'nontari-genre');
-    pushIfVal('Nuansa / Mood Utama', 'nontari-nuansa');
-    pushIfVal('Tempo (BPM) & Nada Dasar', 'nontari-tempo-key');
-    pushIfVal('Susunan Instrumen', 'nontari-instrumen');
-    pushIfVal('Struktur Lagu / Alur Dinamika', 'nontari-struktur');
-    pushIfVal('Lirik / Naskah Voice Over', 'nontari-lirik');
-    pushIfVal('Target Penggunaan / Platform', 'nontari-platform');
-    pushIfVal('Format File Output', 'nontari-output');
-    pushIfVal('Jumlah Trek / Lagu (Custom)', 'nontari-custom-count');
-    pushIfVal('Lisensi / Hak Pakai (Custom)', 'nontari-custom-license');
-    pushIfVal('Detail Khusus Paket Custom', 'nontari-custom-detail');
-  } else {
-    const billableMins = getBillableTranscriptionMinutes();
-    specs.push({ key: 'Pemesan / Institusi', val: sanggarName });
-    specs.push({ key: 'Nomor WhatsApp Aktif', val: waNumber });
-    specs.push({ key: 'Email', val: contactEmail });
-    specs.push({ key: 'Menit Terhitung (Min. 1 Menit)', val: `${billableMins} Menit` });
-    if (appState.selectedPackage !== 'komplet' && appState.selectedPackage !== 'custom') {
-      specs.push({ key: 'Jumlah Instrumen', val: `${getTranscriptionInstrumentCount()} Instrumen` });
+    if (isAddonChecked) {
+      specs.push({ key: 'Tambahan Vokal / Session Player', val: `+ ${formatRupiah(addonAmount)}` });
     }
-    if (breakdownNote) specs.push({ key: 'Rincian Kalkulasi Tarif', val: breakdownNote });
-    pushIfVal('Jenis Transkripsi', 'trans-jenis');
-    pushIfVal('Format Notasi', 'trans-format-notasi');
-    pushIfVal('Daftar Instrumen Ditranskripsi', 'trans-instrumen');
-    pushIfVal('Format File Hasil', 'trans-file-output');
-    pushIfVal('Bagian Audio Ditranskripsi', 'trans-bagian-waktu');
-    pushIfVal('Nada Dasar & Birama', 'trans-nada-birama');
-    pushIfVal('Tujuan Penggunaan Partitur', 'trans-tujuan');
-    pushIfVal('Catatan Teknis Khusus', 'trans-catatan');
-    pushIfVal('Jumlah Repertoar (Custom)', 'trans-custom-count');
-    pushIfVal('Standar Penulisan / Analisis (Custom)', 'trans-custom-standard');
-    pushIfVal('Detail Khusus Paket Custom', 'trans-custom-detail');
+
+    const videoLink = document.getElementById('field-video-link')?.value || '';
+    const videoFileInput = document.getElementById('field-video-file');
+    const videoFileName = videoFileInput?.files?.[0] ? videoFileInput.files[0].name : '';
+    const sinopsis = (appState.selectedServiceLine === 'tari') ? (document.getElementById('field-sinopsis')?.value || '') : '';
+
+    // Status pembayaran terkunci ketat:
+    // canDownloadReceipt & canDownloadMaster bernilai false sampai Admin memverifikasi pelunasan 100%
+    const newP = {
+      id: `PAL-${Date.now()}`,
+      clientEmail: contactEmail || activeUser.email,
+      clientName: sanggarName,
+      contactEmail: contactEmail,
+      clientWa: waNumber,
+      judul: document.getElementById('field-judul')?.value.trim() || 'Proyek Tanpa Judul',
+      durasi: document.getElementById('field-durasi')?.value.trim() || '01:00',
+      serviceLine: appState.selectedServiceLine,
+      serviceLineLabel: svc.label,
+      packageName: breakdownNote ? `${pkg.label} (${breakdownNote})` : (isCustomPkg || appState.customPrice ? `${pkg.label} (Kesepakatan)` : pkg.label),
+      contractAgreed: requiresContract,
+      hasVocalAddon: isAddonChecked,
+      addonAmount: addonAmount,
+      sorakOption: sorakChoice,
+      totalPrice: totalPrice,
+      dpAmount: totalPrice / 2,
+      remainingAmount: totalPrice / 2,
+      paymentStage: 'MENUNGGU_DP',
+      dpStatus: 'Menunggu Pembayaran DP 50%',
+      finalPaymentStatus: 'Belum Lunas',
+      canDownloadReceipt: false,
+      canDownloadMaster: false,
+      productionStatus: TRACKER_MILESTONES[0],
+      specs: specs,
+      videoLink: videoLink,
+      videoFileName: videoFileName,
+      sinopsis: sinopsis,
+      createdAt: new Date().toISOString()
+    };
+
+    if (!Array.isArray(appState.projects)) appState.projects = [];
+    appState.projects.unshift(newP);
+
+    // 1. Simpan langsung ke localStorage agar proyek muncul seketika di Ruang Klien
+    try {
+      localStorage.setItem('prangart_projects_cache', JSON.stringify(appState.projects));
+    } catch (_) {}
+
+    // 2. Sinkronisasi ke Cloud Firestore tanpa memblokir UI jika koneksi lambat (timeout 4 detik)
+    if (typeof syncProjectToCloud === 'function') {
+      await Promise.race([
+        syncProjectToCloud(newP),
+        new Promise((resolve) => setTimeout(resolve, 4000))
+      ]).catch((err) => console.warn('Sync cloud berjalan di latar belakang:', err));
+    }
+
+    if (orderForm) orderForm.reset();
+
+    if (typeof showToast === 'function') {
+      showToast(
+        'Pengajuan Berhasil Terkirim!',
+        'Silakan lakukan pembayaran DP 50% pada kartu proyek Anda agar produksi dapat segera dimulai.'
+      );
+    }
+
+    // 3. Arahkan ke Ruang Klien & muat ulang daftar proyek
+    if (typeof navigateTo === 'function') {
+      navigateTo('client');
+    }
+    if (typeof refreshClientDashboard === 'function') {
+      refreshClientDashboard();
+    }
+  } catch (err) {
+    console.error('Gagal mengirim pengajuan:', err);
+    if (typeof showToast === 'function') {
+      showToast('Gagal Mengirim', 'Terjadi kendala saat menyimpan pengajuan. Silakan coba kembali.', 'error');
+    }
+  } finally {
+    isSubmittingOrderLock = false;
+    submitBtns.forEach((b) => {
+      b.disabled = false;
+      if (b.dataset.origText) b.innerHTML = b.dataset.origText;
+    });
   }
-
-  if (isAddonChecked) {
-    specs.push({ key: 'Tambahan Vokal / Session Player', val: `+ ${formatRupiah(addonAmount)}` });
-  }
-
-  const videoLink = document.getElementById('field-video-link')?.value || '';
-  const videoFileInput = document.getElementById('field-video-file');
-  const videoFileName = videoFileInput?.files[0] ? videoFileInput.files[0].name : '';
-  const sinopsis = (appState.selectedServiceLine === 'tari') ? (document.getElementById('field-sinopsis')?.value || '') : '';
-
-  const newP = { 
-    id: `PAL-${Date.now()}`, 
-    clientEmail: appState.currentClientUser.email, 
-    clientName: sanggarName, 
-    contactEmail: contactEmail,
-    clientWa: waNumber,
-    judul: document.getElementById('field-judul').value, 
-    durasi: document.getElementById('field-durasi').value,
-    serviceLine: appState.selectedServiceLine, 
-    serviceLineLabel: svc.label, 
-    packageName: breakdownNote ? `${pkg.label} (${breakdownNote})` : (isCustomPkg || appState.customPrice ? `${pkg.label} (Kesepakatan)` : pkg.label), 
-    contractAgreed: requiresContract,
-    hasVocalAddon: isAddonChecked,
-    addonAmount: addonAmount,
-    sorakOption: sorakChoice,
-    totalPrice: totalPrice, 
-    dpAmount: totalPrice / 2, 
-    dpStatus: 'Belum Dibayar', 
-    productionStatus: TRACKER_MILESTONES[0],
-    specs: specs,
-    videoLink: videoLink,
-    videoFileName: videoFileName,
-    sinopsis: sinopsis
-  };
-  
-  appState.projects.unshift(newP);
-  if (typeof syncProjectToCloud === 'function') await syncProjectToCloud(newP);
-  if (typeof showToast === 'function') showToast('Berhasil', 'Pesanan dibuat.');
-  if (typeof navigateTo === 'function') navigateTo('client');
 }
 
 Object.assign(window, {
@@ -1606,6 +1759,9 @@ Object.assign(window, {
   setSynopsisMode,
   generateAISynopsis,
   handleOrderFormSubmit,
+  submitOrder: handleOrderFormSubmit,
+  submitOrderForm: handleOrderFormSubmit,
+  sanitizeHiddenRequiredFields,
   openProductionAgreementModal,
   acceptAgreementAndClose,
   toggleJenisTariOther,
@@ -1619,6 +1775,12 @@ Object.assign(window, {
   copyAIResultToClipboard
 });
 
+document.addEventListener('submit', function (ev) {
+  if (ev.target && ev.target.closest('#page-order')) {
+    handleOrderFormSubmit(ev);
+  }
+}, true);
+
 document.addEventListener('click', function (ev) {
   const tabBtn = ev.target.closest('.svc-tab-btn, [id^="svc-tab-"]');
   if (tabBtn) {
@@ -1627,8 +1789,25 @@ document.addEventListener('click', function (ev) {
     if (id.includes('tari')) selectServiceLine('tari');
     else if (id.includes('digital')) selectServiceLine('digital');
     else if (id.includes('transkripsi')) selectServiceLine('transkripsi');
+    return;
   }
-});
+
+  const orderBtn = ev.target.closest('#page-order button, #page-order [type="submit"], #btn-submit-order');
+  if (orderBtn) {
+    const txt = (orderBtn.textContent || '').trim().toLowerCase();
+    const isSubmitLike =
+      orderBtn.type === 'submit' ||
+      orderBtn.id === 'btn-submit-order' ||
+      txt.includes('kirim pengajuan') ||
+      txt.includes('ajukan pesanan') ||
+      txt.includes('kirim pesanan') ||
+      txt.includes('submit pengajuan');
+
+    if (isSubmitLike) {
+      handleOrderFormSubmit(ev);
+    }
+  }
+}, true);
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
