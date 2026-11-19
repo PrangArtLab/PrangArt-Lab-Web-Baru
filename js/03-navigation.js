@@ -1,78 +1,190 @@
-function navigateTo(page) {
-  if (page === 'order' && !appState.currentClientUser) {
-    showToast('Perhatian', 'Silakan masuk atau daftar akun terlebih dahulu untuk mengajukan layanan.', 'warning');
-    page = 'client';
-  }
+/* === SISTEM NAVIGASI HALAMAN & AKSES DASHBOARD (DESKTOP, TABLET & MOBILE) === */
 
-  if (page === 'home') {
-    const cleanUrl = `${location.pathname}${location.search}`;
-    if (location.href !== cleanUrl) {
-      window.history.replaceState(null, '', cleanUrl);
+function ensureAdminNavButtonsVisible() {
+  // 1. Cari bilah navigasi utama untuk Desktop & Tablet
+  const desktopNavCandidates = document.querySelectorAll(
+    'header nav, nav .hidden.md\\:flex, nav .hidden.sm\\:flex, nav .hidden.lg\\:flex, #desktop-nav-links, #main-nav-links'
+  );
+
+  desktopNavCandidates.forEach((nav) => {
+    // Hindari menyuntikkan ke dalam drawer mobile
+    if (nav.id === 'mobile-menu' || nav.closest('#mobile-menu')) return;
+
+    if (!nav.querySelector('[data-nav-target="admin"], #nav-btn-admin')) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.id = 'nav-btn-admin';
+      btn.setAttribute('data-nav-target', 'admin');
+      btn.onclick = (e) => {
+        e.preventDefault();
+        navigateTo('admin');
+      };
+      btn.className =
+        'nav-link-btn px-3 py-2 rounded-xl text-xs font-bold text-textMuted hover:text-primary hover:bg-primary/10 transition cursor-pointer inline-flex items-center gap-1.5 shrink-0';
+      btn.innerHTML = '<span>⚙</span><span>Admin Studio</span>';
+      nav.appendChild(btn);
     }
-  } else if (window.location.hash !== `#${page}`) {
-    window.location.hash = page;
+  });
+
+  // 2. Pastikan juga tersedia di menu mobile drawer jika belum ada
+  const mobileMenu = document.getElementById('mobile-menu');
+  if (mobileMenu && !mobileMenu.querySelector('[data-nav-target="admin"], #mobile-nav-admin')) {
+    const mBtn = document.createElement('button');
+    mBtn.type = 'button';
+    mBtn.id = 'mobile-nav-admin';
+    mBtn.setAttribute('data-nav-target', 'admin');
+    mBtn.onclick = (e) => {
+      e.preventDefault();
+      navigateTo('admin');
+    };
+    mBtn.className =
+      'nav-link-btn w-full text-left px-4 py-3 rounded-xl text-sm font-bold text-textMuted hover:text-primary hover:bg-primary/10 transition flex items-center gap-2';
+    mBtn.innerHTML = '<span>⚙</span><span>Admin Studio</span>';
+    mobileMenu.appendChild(mBtn);
+  }
+}
+
+function toggleMobileMenu(forceState) {
+  const menu = document.getElementById('mobile-menu');
+  if (!menu) return;
+  if (typeof forceState === 'boolean') {
+    menu.classList.toggle('hidden', !forceState);
+  } else {
+    menu.classList.toggle('hidden');
+  }
+}
+
+function updateActiveNavHighlight(pageId) {
+  document.querySelectorAll('.nav-link-btn, [data-nav-target]').forEach((btn) => {
+    const target = btn.getAttribute('data-nav-target');
+    const isTarget =
+      target === pageId ||
+      btn.id === `nav-btn-${pageId}` ||
+      btn.id === `mobile-nav-${pageId}`;
+
+    if (isTarget) {
+      btn.classList.add('text-primary', 'bg-primary/10', 'font-bold');
+      btn.classList.remove('text-textMuted');
+    } else {
+      btn.classList.remove('text-primary', 'bg-primary/10');
+      btn.classList.add('text-textMuted');
+    }
+  });
+}
+
+function navigateTo(pageId) {
+  if (!pageId) pageId = 'home';
+  if (typeof appState !== 'undefined') {
+    appState.currentPage = pageId;
   }
 
-  appState.currentPage = page;
-  
-  document.querySelectorAll('.page-section').forEach(sec => sec.classList.add('hidden'));
-  const target = document.getElementById(`page-${page}`);
-  if (target) { target.classList.remove('hidden'); target.classList.remove('page-dissolve'); void target.offsetWidth; target.classList.add('page-dissolve'); }
+  // Sembunyikan seluruh section halaman secara konsisten
+  document.querySelectorAll('.page-section, section[id^="page-"], div[id^="page-"]').forEach((sec) => {
+    sec.classList.add('hidden');
+    sec.style.display = 'none';
+  });
 
-  document.querySelectorAll('.nav-pill, .mnav-pill').forEach(btn => btn.classList.remove('bg-primary', 'text-white'));
-  const activeNav = document.getElementById(`nav-${page}`) || document.getElementById(`mnav-${page}`);
-  if (activeNav) activeNav.classList.add('bg-primary', 'text-white');
+  // Tampilkan halaman target & hapus segala class responsif yang menahan visibilitas di desktop/tablet
+  const target = document.getElementById(`page-${pageId}`);
+  if (target) {
+    target.classList.remove('hidden', 'sm:hidden', 'md:hidden', 'lg:hidden', 'xl:hidden');
+    target.style.display = 'block';
+  }
 
-  if (page === 'portfolio') renderPortfolioGrid();
-  if (page === 'order') refreshOrderPageUI();
-  if (page === 'client') refreshClientPageUI();
-  if (page === 'admin') refreshAdminPageUI();
+  // Perbarui status aktif tombol navigasi
+  updateActiveNavHighlight(pageId);
 
-  updateHeaderAuthBadge();
+  // Tutup menu mobile otomatis setelah berpindah halaman
+  toggleMobileMenu(false);
+
+  // Jalankan inisialisasi / render ulang konten sesuai halaman tujuan
+  try {
+    if (pageId === 'home') {
+      if (typeof renderHomePortfolioPreview === 'function') renderHomePortfolioPreview();
+    } else if (pageId === 'portfolio') {
+      if (typeof renderPortfolioPage === 'function') renderPortfolioPage();
+    } else if (pageId === 'order') {
+      if (typeof refreshOrderPageUI === 'function') refreshOrderPageUI();
+    } else if (pageId === 'client') {
+      if (typeof refreshClientDashboard === 'function') refreshClientDashboard();
+    } else if (pageId === 'admin') {
+      if (typeof refreshAdminDashboard === 'function') refreshAdminDashboard();
+      if (typeof renderAdminCatalogEditor === 'function') renderAdminCatalogEditor();
+    }
+  } catch (err) {
+    console.error(`Gagal merender halaman ${pageId}:`, err);
+  }
+
+  // Simpan hash URL ringan agar mudah dilacak
+  try {
+    if (history.replaceState) {
+      history.replaceState(null, '', `#${pageId}`);
+    }
+  } catch (_) {}
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-window.addEventListener('hashchange', () => {
-  const page = window.location.hash.replace('#', '') || 'home';
-  if (appState.currentPage !== page) navigateTo(page);
-});
+function goToOrderWithService(serviceKey, packageKey) {
+  if (typeof appState !== 'undefined') {
+    if (serviceKey) appState.selectedServiceLine = serviceKey;
+    if (packageKey) appState.selectedPackage = packageKey;
+  }
+  navigateTo('order');
+  if (typeof selectServiceLine === 'function' && serviceKey) {
+    selectServiceLine(serviceKey);
+  }
+  if (typeof selectPackageTier === 'function' && packageKey) {
+    selectPackageTier(packageKey);
+  }
+}
 
-function updateHeaderAuthBadge() {
-  const box = document.getElementById('header-auth-status');
-  if (!box) return;
-  
-  // Jika berada di halaman admin: tampilkan hanya status & tombol Log Out Admin (sembunyikan login klien)
-  if (appState.currentPage === 'admin') {
-    if (appState.isAdminAuthenticated) {
-      box.innerHTML = `
-        <div class="flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-xl px-3 py-1.5 text-xs">
-          <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-          <span class="font-bold text-primary">Admin Aktif</span>
-          <button onclick="logoutAdmin()" class="px-2.5 py-1 bg-red-500/10 text-red-500 rounded-lg font-bold hover:bg-red-500 hover:text-white transition ml-1">Log Out</button>
-        </div>`;
+// Event delegation global untuk seluruh tombol navigasi (Desktop, Tablet, Mobile & Kartu Layanan)
+document.addEventListener('click', (ev) => {
+  const navEl = ev.target.closest('[data-nav-target]');
+  if (navEl) {
+    ev.preventDefault();
+    const pageTarget = navEl.getAttribute('data-nav-target');
+    const preService = navEl.getAttribute('data-service');
+    const prePackage = navEl.getAttribute('data-package');
+    if (pageTarget === 'order' && (preService || prePackage)) {
+      goToOrderWithService(preService, prePackage);
     } else {
-      box.innerHTML = `<span class="text-xs text-textMuted font-mono px-3 py-1.5 bg-panel rounded-xl border border-border">Panel Admin</span>`;
+      navigateTo(pageTarget);
     }
     return;
   }
 
-  // Jika berada di halaman publik / ruang klien: tampilkan status klien & tombol Log Out Klien
-  if (appState.currentClientUser) {
-    box.innerHTML = `
-      <div class="flex items-center gap-2 bg-surface border border-border rounded-xl px-3 py-1.5 text-xs shadow-sm">
-        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-        <span class="font-bold text-textMain">${appState.currentClientUser.name}</span>
-        <button onclick="logoutClientUser()" class="px-3 py-1 bg-red-500/10 text-red-500 rounded-lg font-bold hover:bg-red-500 hover:text-white transition ml-1">Log Out</button>
-      </div>`;
+  const adminTrigger = ev.target.closest('#nav-btn-admin, #mobile-nav-admin, a[href="#admin"]');
+  if (adminTrigger) {
+    ev.preventDefault();
+    navigateTo('admin');
+  }
+});
+
+// Inisialisasi saat DOM siap
+function initNavigationSystem() {
+  ensureAdminNavButtonsVisible();
+  const initialHash = (window.location.hash || '').replace('#', '').trim();
+  const validPages = ['home', 'services', 'portfolio', 'order', 'client', 'admin'];
+  if (validPages.includes(initialHash)) {
+    navigateTo(initialHash);
   } else {
-    box.innerHTML = `<button onclick="navigateTo('client')" class="px-4 py-2 rounded-xl bg-surface border border-border text-xs font-bold text-textMain hover:border-primary transition shadow-sm">Masuk Klien</button>`;
+    updateActiveNavHighlight((typeof appState !== 'undefined' && appState.currentPage) || 'home');
   }
 }
 
-function selectServiceAndGoOrder(svcKey) {
-  appState.selectedServiceLine = svcKey;
-  appState.selectedPackage = 'standar';
-  navigateTo('order'); 
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initNavigationSystem);
+} else {
+  initNavigationSystem();
 }
-function renderSop14Grid() { const el = document.getElementById('sop-14-grid'); if(el) el.innerHTML = `<div class="p-4 bg-surface border rounded-xl">SOP 14 Tahap</div>`; }
+
+// Ekspos fungsi navigasi ke global window
+Object.assign(window, {
+  navigateTo,
+  toggleMobileMenu,
+  goToOrderWithService,
+  ensureAdminNavButtonsVisible,
+  updateActiveNavHighlight
+});
