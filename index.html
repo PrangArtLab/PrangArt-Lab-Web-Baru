@@ -404,3 +404,100 @@
   <script src="js/13-boot.js"></script>
 </body>
 </html>
+/* === CLOUD FUNCTIONS ADMIN (PRANGART LAB) — PIN DIVERIFIKASI DI SERVER === */
+const { onCall, HttpsError } = require('firebase-functions/v2/https');
+const { defineSecret } = require('firebase-functions/params');
+const { initializeApp } = require('firebase-admin/app');
+const { getFirestore } = require('firebase-admin/firestore');
+const crypto = require('crypto');
+
+initializeApp();
+const db = getFirestore();
+
+const ADMIN_PIN = defineSecret('ADMIN_PIN');
+const ADMIN_TOKEN_SECRET = defineSecret('ADMIN_TOKEN_SECRET');
+
+const SESSION_MS = 8 * 60 * 60 * 1000; // sesi admin 8 jam
+const MAX_FAILS = 5;                   // kunci setelah 5 PIN salah
+const LOCK_MS = 5 * 60 * 1000;         // kunci 5 menit
+
+// Hanya field ini yang boleh diubah admin lewat fungsi
+const EDITABLE_FIELDS = new Set([
+  'paymentStage', 'dpStatus', 'finalPaymentStatus', 'productionStatus',
+  'canDownloadReceipt', 'canDownloadMaster', 'masterFileUrl'
+]);
+
+const stateRef = db.collection('adminAuth').doc('state');
+
+function sign(payload) {
+  return crypto.createHmac('sha256', ADMIN_TOKEN_SECRET.value()).update(payload).digest('hex');
+}
+
+function makeToken() {
+  const payload = String(Date.now() + SESSION_MS);
+  return `${payload}.${sign(payload)}`;
+}
+
+function isValidToken(token) {
+  if (typeof token !== 'string' || token.indexOf('.') < 0) return false;
+  const [payload, sig] = token.split('.');
+  if (!(Number(payload) > Date.now())) return false;
+  const expected = sign(payload);
+  return sig.length === expected.length && crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected));
+}
+
+function requireAdmin(token) {
+  if (!isValidToken(token)) {
+    throw new HttpsError('unauthenticated', 'Sesi admin habis. Masuk ulang dengan PIN.');
+  }
+}
+
+exports.adminLogin = onCall({ secrets: [ADMIN_PIN, ADMIN_TOKEN_SECRET] }, async (req) => {
+  const pin = String(req.data?.pin || '');
+  const now = Date.now();
+  const snap = await stateRef.get();
+  const st = snap.exists ? snap.data() : {};
+
+  if (st.lockedUntil && st.lockedUntil > now) {
+    throw new HttpsError('resource-exhausted', 'Terlalu banyak percobaan. Coba lagi beberapa menit lagi.');
+  }
+
+  const real = ADMIN_PIN.value();
+  const ok = pin.length === real.length && crypto.timingSafeEqual(Buffer.from(pin), Buffer.from(real));
+
+  if (!ok) {
+    const fails = (st.fails || 0) + 1;
+    const lock = fails >= MAX_FAILS;
+    await stateRef.set({ fails: lock ? 0 : fails, lockedUntil: lock ? now + LOCK_MS : 0 }, { merge: true });
+    throw new HttpsError('permission-denied', lock ? 'Terlalu banyak PIN salah. Dikunci 5 menit.' : 'PIN salah.');
+  }
+
+  await stateRef.set({ fails: 0, lockedUntil: 0 }, { merge: true });
+  return { token: makeToken() };
+});
+
+exports.adminListProjects = onCall({ secrets: [ADMIN_TOKEN_SECRET] }, async (req) => {
+  requireAdmin(req.data?.token);
+  const snap = await db.collection('projects').get();
+  return { projects: snap.docs.map((d) => ({ id: d.id, ...d.data() })) };
+});
+
+exports.adminUpdateProject = onCall({ secrets: [ADMIN_TOKEN_SECRET] }, async (req) => {
+  requireAdmin(req.data?.token);
+  const id = String(req.data?.id || '').trim();
+  if (!id) throw new HttpsError('invalid-argument', 'ID proyek kosong.');
+
+  const patch = {};
+  Object.entries(req.data?.patch || {}).forEach(([k, v]) => {
+    if (EDITABLE_FIELDS.has(k)) patch[k] = v;
+  });
+  if (Object.keys(patch).length === 0) {
+    throw new HttpsError('invalid-argument', 'Tidak ada field yang boleh diubah.');
+  }
+  if (patch.masterFileUrl && !/^https?:\/\//i.test(patch.masterFileUrl)) {
+    throw new HttpsError('invalid-argument', 'Tautan Master File harus diawali https://');
+  }
+
+  await db.collection('projects').doc(id).update(patch);
+  return { ok: true };
+});
