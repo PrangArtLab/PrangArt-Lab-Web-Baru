@@ -46,16 +46,138 @@ function renderClientPortal() {
   if (!user) { box.innerHTML = ''; return; }
   const projects = getClientProjects();
   box.innerHTML = `
-    <div class="bg-surface border border-border/80 rounded-3xl p-6 sm:p-8">
-      <span class="text-xs font-mono text-primary font-bold uppercase">Ruang Klien</span>
-      <h2 class="text-2xl font-display font-bold mt-1">Halo, ${escHtml(user.name)}</h2>
-      <p class="text-sm text-textMuted mt-1">Pantau status proyek dan pembayaran Anda di sini.</p>
+    <div class="bg-surface border border-border/80 rounded-3xl p-6 sm:p-8 flex flex-wrap items-center justify-between gap-4">
+      <div>
+        <span class="text-xs font-mono text-primary font-bold uppercase">Ruang Klien</span>
+        <h2 class="text-2xl font-display font-bold mt-1">Halo, ${escHtml(user.name)}</h2>
+        <p class="text-sm text-textMuted mt-1">Pantau status proyek dan pembayaran Anda di sini.</p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <button type="button" onclick="navigateTo('order')" class="btn-primary px-5 py-2.5 rounded-xl text-xs font-bold">+ Ajukan Pesanan</button>
+        <button type="button" onclick="document.getElementById('account-settings').scrollIntoView({behavior:'smooth'})" class="btn-outline px-5 py-2.5 rounded-xl text-xs font-bold">Pengaturan Akun</button>
+      </div>
     </div>
     <div class="space-y-5">
       ${projects.length
         ? projects.map((p) => renderClientProjectCard(p)).join('')
-        : '<div class="bg-surface border border-dashed border-border rounded-3xl p-10 text-center text-sm text-textMuted">Belum ada proyek. Ajukan pesanan melalui menu Pemesanan.</div>'}
-    </div>`;
+        : '<div class="bg-surface border border-dashed border-border rounded-3xl p-10 text-center text-sm text-textMuted">Belum ada proyek. <button type="button" onclick="navigateTo(\'order\')" class="text-primary font-bold underline">Ajukan pesanan sekarang</button></div>'}
+    </div>
+    ${renderAccountSettingsCard(user)}`;
+}
+
+function renderAccountSettingsCard(user) {
+  const inputCls = 'w-full bg-panel border border-border rounded-xl px-4 py-3 text-sm';
+  return `
+    <section id="account-settings" class="bg-surface border border-border/80 rounded-3xl p-6 sm:p-8 space-y-8">
+      <div>
+        <span class="text-xs font-mono text-primary font-bold uppercase">Akun</span>
+        <h3 class="text-xl font-bold mt-1">Pengaturan Akun</h3>
+      </div>
+      <form id="form-account-profile" onsubmit="saveAccountProfile(event)" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-bold mb-2">Nama Lengkap</label>
+          <input id="acc-name" required value="${escHtml(user.name)}" class="${inputCls}" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold mb-2">No. WhatsApp</label>
+          <input id="acc-wa" type="tel" value="${escHtml(user.wa || '')}" class="${inputCls}" />
+        </div>
+        <div class="sm:col-span-2">
+          <label class="block text-xs font-bold mb-2">Email (tidak dapat diubah)</label>
+          <input value="${escHtml(user.email || '')}" disabled class="${inputCls} opacity-60" />
+        </div>
+        <div class="sm:col-span-2">
+          <button type="submit" class="btn-primary px-6 py-3 rounded-xl text-sm font-bold">Simpan Profil</button>
+        </div>
+      </form>
+      <div class="pt-6 border-t border-border/60">
+        <h4 class="font-bold mb-4">Ganti Kata Sandi</h4>
+        <form id="form-account-pass" onsubmit="changeAccountPassword(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <input id="acc-pass-old" type="password" required placeholder="Kata sandi lama" class="${inputCls}" />
+          <input id="acc-pass-new" type="password" required minlength="6" placeholder="Kata sandi baru (min. 6)" class="${inputCls}" />
+          <input id="acc-pass-confirm" type="password" required minlength="6" placeholder="Ulangi kata sandi baru" class="${inputCls}" />
+          <div class="sm:col-span-3">
+            <button type="submit" class="btn-primary px-6 py-3 rounded-xl text-sm font-bold">Ubah Kata Sandi</button>
+          </div>
+        </form>
+      </div>
+    </section>`;
+}
+
+async function saveAccountProfile(event) {
+  event.preventDefault();
+  const user = appState.currentClientUser;
+  if (!user) return;
+  const name = document.getElementById('acc-name').value.trim();
+  const wa = document.getElementById('acc-wa').value.trim();
+  if (!name) {
+    showToast('Data Kurang', 'Nama wajib diisi.', 'warning');
+    return;
+  }
+  const updated = { ...user, name, wa };
+  appState.currentClientUser = updated;
+  saveLocalAccount(updated);
+  try { localStorage.setItem('prangart_active_client', JSON.stringify(updated)); } catch (_) {}
+
+  const fbUser = window.firebaseAuth?.currentUser;
+  if (fbUser && typeof window.updateProfile === 'function') {
+    try { await window.updateProfile(fbUser, { displayName: name }); } catch (_) {}
+  }
+  renderHeaderAuth();
+  renderClientPortal();
+  showToast('Profil Tersimpan', 'Perubahan profil berhasil disimpan.');
+}
+
+async function changeAccountPassword(event) {
+  event.preventDefault();
+  const user = appState.currentClientUser;
+  if (!user) return;
+  const oldPass = document.getElementById('acc-pass-old').value;
+  const newPass = document.getElementById('acc-pass-new').value;
+  const confirmPass = document.getElementById('acc-pass-confirm').value;
+
+  if (newPass.length < 6) {
+    showToast('Kata Sandi Terlalu Pendek', 'Minimal 6 karakter.', 'warning');
+    return;
+  }
+  if (newPass !== confirmPass) {
+    showToast('Tidak Cocok', 'Konfirmasi kata sandi berbeda.', 'warning');
+    return;
+  }
+  if (newPass === oldPass) {
+    showToast('Kata Sandi Sama', 'Gunakan kata sandi yang berbeda dari sebelumnya.', 'warning');
+    return;
+  }
+
+  const email = String(user.email || '').toLowerCase();
+  const localAccount = getAllLocalAccounts()[email];
+  const fbUser = window.firebaseAuth?.currentUser;
+
+  try {
+    if (fbUser && typeof window.updatePassword === 'function') {
+      // Firebase mewajibkan verifikasi ulang kata sandi lama sebelum mengganti
+      const cred = await window.signInWithEmailAndPassword(window.firebaseAuth, email, oldPass);
+      await window.updatePassword(cred.user, newPass);
+    } else {
+      if (!localAccount || localAccount.password !== oldPass) {
+        throw Object.assign(new Error('wrong password'), { code: 'local/wrong-password' });
+      }
+    }
+    if (localAccount) saveLocalAccount({ ...localAccount, password: newPass });
+    document.getElementById('form-account-pass')?.reset();
+    showToast('Kata Sandi Diubah', 'Gunakan kata sandi baru saat masuk berikutnya.');
+  } catch (err) {
+    console.error('Ubah kata sandi gagal:', err);
+    let msg = 'Gagal mengubah kata sandi. Coba lagi.';
+    if (['auth/invalid-credential', 'auth/wrong-password', 'local/wrong-password'].includes(err?.code)) {
+      msg = 'Kata sandi lama tidak sesuai.';
+    } else if (err?.code === 'auth/requires-recent-login') {
+      msg = 'Silakan keluar lalu masuk lagi, kemudian ulangi perubahan kata sandi.';
+    } else if (err?.code === 'auth/weak-password') {
+      msg = 'Kata sandi terlalu lemah (minimal 6 karakter).';
+    }
+    showToast('Gagal', msg, 'error');
+  }
 }
 
 function downloadOfficialReceipt(projectId) {
@@ -247,5 +369,7 @@ Object.assign(window, {
   adminSaveMaster,
   renderPortfolioPage,
   renderHomePortfolioPreview,
-  updateHeaderAuthUI
+  updateHeaderAuthUI,
+  saveAccountProfile,
+  changeAccountPassword
 });
