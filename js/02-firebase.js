@@ -34,7 +34,8 @@
         getDocs,
         deleteDoc,
         query,
-        orderBy
+        orderBy,
+        where
       }
     ] = await Promise.all([
       import('https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js'),
@@ -42,12 +43,13 @@
       import('https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js')
     ]);
 
-    // Inisialisasi App (hindari duplikasi jika sudah ada)
     const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
+    const { getFunctions, httpsCallable } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-functions.js');
+    const fnInstance = getFunctions(app); // ganti region di sini jika Cloud Functions tidak di us-central1
+    window.callFn = async (name, data) => (await httpsCallable(fnInstance, name)(data)).data;
 
-    // Ekspos seluruh fungsi Auth ke window agar terbaca oleh js/05-auth.js
     window.firebaseApp = app;
     window.firebaseAuth = auth;
     window.auth = auth;
@@ -62,7 +64,6 @@
     window.sendPasswordResetEmail = sendPasswordResetEmail;
     window.signOut = signOut;
 
-    // Helper Firestore untuk Admin / Klien
     window.firestoreHelpers = {
       doc,
       setDoc,
@@ -70,10 +71,10 @@
       deleteDoc,
       collection,
       query,
-      orderBy
+      orderBy,
+      where
     };
 
-    // Inisialisasi Firebase AI (Gemini) untuk fitur Sinopsis AI di js/06-order.js
     try {
       const { getAI, GoogleAIBackend } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-ai.js');
       window.firebaseAI = getAI(app, { backend: new GoogleAIBackend() });
@@ -81,7 +82,6 @@
       console.warn('Firebase AI belum aktif atau tidak didukung pada konfigurasi ini:', aiErr?.message || aiErr);
     }
 
-    // Pantau perubahan status login Firebase Auth
     onAuthStateChanged(auth, (user) => {
       if (user) {
         const email = (user.email || '').toLowerCase();
@@ -106,23 +106,40 @@
       }
     });
 
-    // Muat data proyek & katalog dari Firestore saat startup
-    await loadCloudDataIfAvailable(db, { collection, getDocs });
+    await syncCloudProjects();
 
   } catch (err) {
     console.warn('Mode lokal aktif (Firebase belum dikonfigurasi/offline):', err?.message || err);
     loadLocalProjectsFallback();
+    window.cloudSyncStatus = { ok: false, reason: 'Firebase tidak dapat dimuat (mode offline).', at: Date.now() };
   }
 })();
 
-/* === SINKRONISASI PROYEK KE CLOUD & FALLBACK LOCALSTORAGE === */
+/* === PENYIMPANAN PROYEK: LOKAL (CADANGAN) + CLOUD (FIRESTORE) === */
+
+function humanizeFirestoreError(err) {
+  const code = err?.code || '';
+  if (code === 'permission-denied') return 'Akses ditolak oleh aturan Firestore. Periksa Firestore Rules dan status login.';
+  if (code === 'unavailable') return 'Koneksi ke database bermasalah. Coba lagi nanti.';
+  if (code === 'unauthenticated') return 'Belum masuk dengan akun Firebase.';
+  return err?.message || 'Terjadi kesalahan tidak diketahui.';
+}
+
+// Gabungkan dua daftar proyek berdasarkan id; data dari "b" (cloud) menimpa data lokal
+function mergeProjects(a, b) {
+  const map = new Map();
+  [...(a || []), ...(b || [])].forEach((p) => {
+    if (p && p.id) map.set(p.id, { ...(map.get(p.id) || {}), ...p });
+  });
+  return Array.from(map.values()).sort((x, y) =>
+    String(y.createdAt || y.id).localeCompare(String(x.createdAt || x.id))
+  );
+}
 
 function loadLocalProjectsFallback() {
   try {
-    const localProjects = JSON.parse(localStorage.getItem('prangart_projects_backup') || '[]');
-    if (Array.isArray(localProjects) && localProjects.length > 0) {
-      appState.projects = localProjects;
-    }
+    const local = JSON.parse(localStorage.getItem('prangart_projects_backup') || '[]');
+    if (Array.isArray(local)) appState.projects = mergeProjects(appState.projects || [], local);
   } catch (_) {}
 }
 
@@ -132,40 +149,101 @@ function saveLocalProjectsBackup() {
   } catch (_) {}
 }
 
-async function loadCloudDataIfAvailable(db, { collection, getDocs }) {
+function refreshViews() {
+  if (typeof renderClientPortal === 'function' && appState.currentClientUser) renderClientPortal();
+  const adminOn = Boolean(sessionStorage.getItem('prangart_admin_token'));
+  if (typeof renderAdminDashboard === 'function' && adminOn) renderAdminDashboard();
+}
+
+// Admin: semua proyek lewat Cloud Function. Klien: hanya proyek miliknya lewat Firestore.
+async function syncCloudProjects() {
   loadLocalProjectsFallback();
-  if (!db) return;
+  const adminToken = sessionStorage.getItem('prangart_admin_token') || '';
 
-  try {
-    const snap = await getDocs(collection(db, 'projects'));
-    if (!snap.empty) {
-      const cloudList = [];
-      snap.forEach((d) => cloudList.push({ id: d.id, ...d.data() }));
-      cloudList.sort((a, b) => String(b.id).localeCompare(String(a.id)));
-      appState.projects = cloudList;
-      saveLocalProjectsBackup();
-
-      if (typeof renderClientPortal === 'function') renderClientPortal();
-      if (typeof renderClientWorkspace === 'function') renderClientWorkspace();
-      if (typeof renderAdminWorkspace === 'function' && appState.isAdminUnlocked) renderAdminWorkspace();
+  // ADMIN: data dibaca lewat Cloud Function (token PIN), bukan langsung ke Firestore
+  if (adminToken) {
+    if (typeof window.callFn !== 'function') {
+      window.cloudSyncStatus = { ok: false, reason: 'Layanan admin belum siap.', at: Date.now() };
+      return { ok: false };
     }
+    try {
+      const res = await window.callFn('adminListProjects', { token: adminToken });
+      const cloudList = Array.isArray(res?.projects) ? res.projects : [];
+      appState.projects = mergeProjects(appState.projects || [], cloudList);
+      saveLocalProjectsBackup();
+      window.cloudSyncStatus = { ok: true, count: cloudList.length, pending: 0, at: Date.now() };
+      return { ok: true };
+    } catch (err) {
+      console.warn('Gagal memuat proyek (admin):', err?.message || err);
+      if (err?.code === 'functions/unauthenticated') sessionStorage.removeItem('prangart_admin_token');
+      window.cloudSyncStatus = { ok: false, reason: err?.message || 'Gagal memuat dari server.', at: Date.now() };
+      return { ok: false };
+    }
+  }
+
+  // KLIEN: hanya proyek miliknya (sesuai firestore.rules)
+  const email = String(appState.currentClientUser?.email || '').toLowerCase();
+  if (!email) {
+    window.cloudSyncStatus = { ok: false, reason: 'Belum ada sesi masuk.', at: Date.now() };
+    return { ok: false };
+  }
+  const db = window.firebaseDb;
+  const helpers = window.firestoreHelpers;
+  if (!db || !helpers) {
+    window.cloudSyncStatus = { ok: false, reason: 'Firebase belum tersambung.', at: Date.now() };
+    return { ok: false };
+  }
+  try {
+    const { collection, getDocs, query, where } = helpers;
+    const snap = await getDocs(query(collection(db, 'projects'), where('clientEmail', '==', email)));
+    const cloudList = [];
+    snap.forEach((d) => cloudList.push({ id: d.id, ...d.data() }));
+
+    const cloudIds = new Set(cloudList.map((p) => p.id));
+    const pending = (appState.projects || []).filter((p) =>
+      p && p.id && !cloudIds.has(p.id) && String(p.clientEmail || '').toLowerCase() === email
+    );
+
+    appState.projects = mergeProjects(appState.projects || [], cloudList);
+    saveLocalProjectsBackup();
+    pending.forEach((p) => syncProjectToCloud(p));
+
+    window.cloudSyncStatus = { ok: true, count: cloudList.length, pending: pending.length, at: Date.now() };
+    return { ok: true };
   } catch (err) {
-    console.warn('Gagal memuat koleksi projects dari Firestore, menggunakan data lokal:', err?.message || err);
+    console.warn('Gagal memuat proyek dari Firestore:', err?.message || err);
+    window.cloudSyncStatus = { ok: false, reason: humanizeFirestoreError(err), at: Date.now() };
+    return { ok: false };
   }
 }
 
-async function syncProjectToCloud(projectObj) {
-  if (!projectObj || !projectObj.id) return;
+async function refreshProjectsFromCloud() {
+  const r = await syncCloudProjects();
+  if (r.ok) {
+    showToast('Data Diperbarui', `${window.cloudSyncStatus.count} proyek dimuat dari cloud.`);
+  } else {
+    showToast('Gagal Memuat Cloud', window.cloudSyncStatus?.reason || 'Periksa koneksi dan aturan Firestore.', 'error');
+  }
+  refreshViews();
+}
 
-  // Selalu simpan cadangan lokal terlebih dahulu agar data tidak pernah hilang
+async function syncProjectToCloud(projectObj) {
+  if (!projectObj || !projectObj.id) return { ok: false, reason: 'Data proyek tidak valid.' };
+
+  // Selalu simpan cadangan lokal terlebih dahulu
   saveLocalProjectsBackup();
 
-  if (!window.firebaseDb || !window.firestoreHelpers) return;
+  if (!window.firebaseDb || !window.firestoreHelpers) {
+    return { ok: false, reason: 'Firebase belum tersambung.' };
+  }
   try {
     const { doc, setDoc } = window.firestoreHelpers;
-    await setDoc(doc(window.firebaseDb, 'projects', projectObj.id), projectObj, { merge: true });
+    const clean = JSON.parse(JSON.stringify(projectObj)); // buang nilai undefined
+    await setDoc(doc(window.firebaseDb, 'projects', projectObj.id), clean, { merge: true });
+    return { ok: true };
   } catch (err) {
-    console.warn('Sinkronisasi proyek ke Firestore tertunda (tersimpan di lokal):', err?.message || err);
+    console.warn('Sinkronisasi proyek ke Firestore gagal:', err?.message || err);
+    return { ok: false, reason: humanizeFirestoreError(err) };
   }
 }
 
@@ -185,6 +263,8 @@ async function deleteProjectFromCloud(projectId) {
 
 Object.assign(window, {
   syncProjectToCloud,
+  syncCloudProjects,
+  refreshProjectsFromCloud,
   deleteProjectFromCloud,
   loadLocalProjectsFallback,
   saveLocalProjectsBackup
