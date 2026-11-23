@@ -28,6 +28,7 @@ function getActiveRoleState() {
 /* === NAVIGASI KHUSUS LAYAR MOBILE (DI BAWAH LAYAR) === */
 function ensureMobileBottomNav() {
   if (document.getElementById('prangart-mobile-bottom-nav')) return;
+  
 
   const navBar = document.createElement('nav');
   navBar.id = 'prangart-mobile-bottom-nav';
@@ -37,6 +38,7 @@ function ensureMobileBottomNav() {
   const items = [
     { page: 'home', label: 'Beranda', icon: '⌂' },
     { page: 'portfolio', label: 'Portofolio', icon: '♫' },
+    { page: 'order', label: 'Pesan', icon: '✎' },
     { page: 'client', label: 'Ruang Klien', icon: '👤', roleClass: 'role-client-nav' },
     { page: 'admin', label: 'Admin', icon: '⚙', roleClass: 'role-admin-nav' }
   ];
