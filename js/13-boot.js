@@ -1,16 +1,5 @@
-Object.assign(window, {
-  appState, initFirebaseSync, showToast, formatRupiah,
-  initTheme, setTheme, toggleThemeDropdown, navigateTo, updateHeaderAuthBadge,
-  selectServiceAndGoOrder, renderSop14Grid, openProducerWaModal, closeProducerWaModal,
-  submitProducerWaMessage, updateWaComposerPreview, openClientAuthModal, closeClientAuthModal,
-  handleQuickClientRegister, handleClientPortalLogin, handleGoogleLogin, handleForgotPassword,
-  logoutClientUser, refreshOrderPageUI, setSynopsisMode, selectServiceLine, selectPackageTier,
-  handleCustomPrice, recalculateLivePrice, generateAISynopsis, handleOrderFormSubmit,
-  renderPortfolioGrid, filterPortfolio, renderFaqAccordion, refreshClientPageUI, renderClientWorkspace,
-  updateProfile, updatePass, verifyAdminPin, refreshAdminPageUI, renderAdminDashboard, syncProjectToCloud,
-  closeCustomModal, openContractDocModal, closeContractDocModal, openOfficialDocModal, closeOfficialDocModal,
-  saveAdminPayment, deleteAdminPayment, saveAdminSettings, openPaymentModal
-});
+/* === BOOT: INISIALISASI SETELAH DOM SIAP (PRANGART LAB) === */
+/* Fungsi global sudah di-expose oleh masing-masing file, jadi tidak perlu daftar Object.assign di sini. */
 
 const SITE_CONTENT_KEY = 'prangart_public_site_content_v1';
 let editableSiteContent = { portfolio: [], testimonials: [] };
@@ -21,10 +10,11 @@ try {
 } catch (_) {}
 
 function escapeSiteText(value) {
-  return String(value || '').replace(/[&<>"']/g, char => ({
+  return String(value || '').replace(/[&<>"']/g, (char) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
   })[char]);
 }
+
 function persistEditableSiteContent() {
   localStorage.setItem(SITE_CONTENT_KEY, JSON.stringify(editableSiteContent));
 }
@@ -35,22 +25,21 @@ function renderEditableHomeContent() {
 
   if (portfolioGrid) {
     portfolioGrid.innerHTML = editableSiteContent.portfolio.length
-      ? editableSiteContent.portfolio.map(item => `<article class="portfolio-card">${item.image ? `<div class="portfolio-thumb" style="background-image:linear-gradient(135deg,rgba(17,24,39,.12),rgba(17,24,39,.18)),url('${escapeSiteText(item.image)}')"></div>` : '<div class="portfolio-thumb thumb-one"></div>'}<div class="portfolio-body"><span class="mini-label">${escapeSiteText(item.category)}</span><h3>${escapeSiteText(item.title)}</h3><p>${escapeSiteText(item.description)}</p></div></article>`).join('')
+      ? editableSiteContent.portfolio.map((item) => `<article class="portfolio-card">${item.image ? `<div class="portfolio-thumb" style="background-image:linear-gradient(135deg,rgba(17,24,39,.12),rgba(17,24,39,.18)),url('${escapeSiteText(item.image)}')"></div>` : '<div class="portfolio-thumb thumb-one"></div>'}<div class="portfolio-body"><span class="mini-label">${escapeSiteText(item.category)}</span><h3>${escapeSiteText(item.title)}</h3><p>${escapeSiteText(item.description)}</p></div></article>`).join('')
       : '<p class="site-content-empty">Portofolio akan tampil di sini setelah ditambahkan melalui panel admin.</p>';
   }
 
   if (testimonialGrid) {
     testimonialGrid.innerHTML = editableSiteContent.testimonials.length
-      ? editableSiteContent.testimonials.map(item => `<article class="testimonial-card"><p>“${escapeSiteText(item.quote)}”</p><div class="testimonial-meta"><strong>${escapeSiteText(item.name)}</strong><span>${escapeSiteText(item.role)}</span></div></article>`).join('')
+      ? editableSiteContent.testimonials.map((item) => `<article class="testimonial-card"><p>“${escapeSiteText(item.quote)}”</p><div class="testimonial-meta"><strong>${escapeSiteText(item.name)}</strong><span>${escapeSiteText(item.role)}</span></div></article>`).join('')
       : '<p class="site-content-empty">Testimoni akan tampil di sini setelah ditambahkan melalui panel admin.</p>';
   }
 }
 
-// Render form untuk Tab Konten di Admin
 function renderSiteContentAdmin() {
   const container = document.getElementById('site-content-admin-inner');
   if (!container) return;
-  
+
   container.innerHTML = `
     <div class="grid lg:grid-cols-2 gap-8">
       <form id="site-portfolio-form" class="space-y-3"><h3 class="font-bold text-lg">Tambah portofolio</h3>
@@ -69,40 +58,65 @@ function renderSiteContentAdmin() {
     </div>
   `;
 
-  container.querySelector('#site-portfolio-form').addEventListener('submit', event => {
+  container.querySelector('#site-portfolio-form').addEventListener('submit', (event) => {
     event.preventDefault();
     const form = event.currentTarget;
-    editableSiteContent.portfolio.push({ title: form.elements.title.value.trim(), category: form.elements.category.value.trim(), image: form.elements.image.value.trim(), description: form.elements.description.value.trim() });
-    persistEditableSiteContent(); form.reset(); renderEditableHomeContent(); 
-    adminActiveTab = 'content'; renderAdminDashboard();
+    editableSiteContent.portfolio.push({
+      title: form.elements.title.value.trim(),
+      category: form.elements.category.value.trim(),
+      image: form.elements.image.value.trim(),
+      description: form.elements.description.value.trim()
+    });
+    persistEditableSiteContent();
+    form.reset();
+    renderEditableHomeContent();
+    adminActiveTab = 'content';
+    renderAdminDashboard();
   });
-  
-  container.querySelector('#site-testimonial-form').addEventListener('submit', event => {
+
+  container.querySelector('#site-testimonial-form').addEventListener('submit', (event) => {
     event.preventDefault();
     const form = event.currentTarget;
-    editableSiteContent.testimonials.push({ name: form.elements.name.value.trim(), role: form.elements.role.value.trim(), quote: form.elements.quote.value.trim() });
-    persistEditableSiteContent(); form.reset(); renderEditableHomeContent();
-    adminActiveTab = 'content'; renderAdminDashboard();
+    editableSiteContent.testimonials.push({
+      name: form.elements.name.value.trim(),
+      role: form.elements.role.value.trim(),
+      quote: form.elements.quote.value.trim()
+    });
+    persistEditableSiteContent();
+    form.reset();
+    renderEditableHomeContent();
+    adminActiveTab = 'content';
+    renderAdminDashboard();
   });
-  
+
   renderSiteContentLists();
 }
 
 function renderSiteContentLists() {
   const portfolioList = document.getElementById('site-portfolio-list');
   const testimonialList = document.getElementById('site-testimonial-list');
-  if (portfolioList) portfolioList.innerHTML = editableSiteContent.portfolio.map((item, index) => `<div class="site-admin-row"><span>${escapeSiteText(item.title)}</span><button type="button" onclick="removeSiteContent('portfolio',${index})" class="text-red-500 font-bold ml-2">Hapus</button></div>`).join('') || '<p class="text-sm text-textMuted">Belum ada portofolio.</p>';
-  if (testimonialList) testimonialList.innerHTML = editableSiteContent.testimonials.map((item, index) => `<div class="site-admin-row"><span>${escapeSiteText(item.name)} — ${escapeSiteText(item.role)}</span><button type="button" onclick="removeSiteContent('testimonials',${index})" class="text-red-500 font-bold ml-2">Hapus</button></div>`).join('') || '<p class="text-sm text-textMuted">Belum ada testimoni.</p>';
+  if (portfolioList) {
+    portfolioList.innerHTML = editableSiteContent.portfolio
+      .map((item, index) => `<div class="site-admin-row"><span>${escapeSiteText(item.title)}</span><button type="button" onclick="removeSiteContent('portfolio',${index})" class="text-red-500 font-bold ml-2">Hapus</button></div>`)
+      .join('') || '<p class="text-sm text-textMuted">Belum ada portofolio.</p>';
+  }
+  if (testimonialList) {
+    testimonialList.innerHTML = editableSiteContent.testimonials
+      .map((item, index) => `<div class="site-admin-row"><span>${escapeSiteText(item.name)} — ${escapeSiteText(item.role)}</span><button type="button" onclick="removeSiteContent('testimonials',${index})" class="text-red-500 font-bold ml-2">Hapus</button></div>`)
+      .join('') || '<p class="text-sm text-textMuted">Belum ada testimoni.</p>';
+  }
 }
 
 function removeSiteContent(type, index) {
   if (!['portfolio', 'testimonials'].includes(type)) return;
   editableSiteContent[type].splice(index, 1);
-  persistEditableSiteContent(); renderEditableHomeContent();
-  adminActiveTab = 'content'; renderAdminDashboard();
+  persistEditableSiteContent();
+  renderEditableHomeContent();
+  adminActiveTab = 'content';
+  renderAdminDashboard();
 }
 
-Object.assign(window, { renderSiteContentAdmin, removeSiteContent });
+Object.assign(window, { renderSiteContentAdmin, removeSiteContent, renderEditableHomeContent });
 
 function addHomeLandingSections() {
   const home = document.getElementById('page-home');
@@ -120,31 +134,23 @@ function addHomeLandingSections() {
 }
 
 function applyNonTraditionalCopyAndStyle() {
+  if (document.getElementById('prangart-extra-style')) return;
   const style = document.createElement('style');
+  style.id = 'prangart-extra-style';
   style.textContent = `
     .home-service-card::before{background:linear-gradient(90deg,rgb(var(--primary)),rgb(var(--accent)))}
     .card-tari,.card-digital,.card-transkripsi{background:linear-gradient(180deg,rgba(var(--primary),.035),rgba(var(--surface),.94))}
     .service-tag,.mini-label{color:rgb(var(--primary));border-color:rgba(var(--border),.8)}
   `;
   document.head.appendChild(style);
-  document.querySelectorAll('#page-home .card-tari h3').forEach(heading => { heading.textContent = 'Komposisi untuk pertunjukan'; });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
-  updateHeaderAuthBadge();
-  renderSop14Grid();
   renderFaqAccordion();
   renderPortfolioGrid();
   addHomeLandingSections();
   renderEditableHomeContent();
   applyNonTraditionalCopyAndStyle();
-  
-  if (window.location.hash) {
-    history.replaceState(null, '', window.location.pathname + window.location.search);
-  }
-  navigateTo('home');
-  
   setSynopsisMode('manual');
-  initFirebaseSync();
 });
