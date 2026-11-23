@@ -19,6 +19,7 @@
         signInWithEmailAndPassword,
         createUserWithEmailAndPassword,
         updateProfile,
+        updatePassword,
         GoogleAuthProvider,
         signInWithPopup,
         sendPasswordResetEmail,
@@ -55,6 +56,7 @@
     window.signInWithEmailAndPassword = signInWithEmailAndPassword;
     window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
     window.updateProfile = updateProfile;
+    window.updatePassword = updatePassword;
     window.GoogleAuthProvider = GoogleAuthProvider;
     window.signInWithPopup = signInWithPopup;
     window.sendPasswordResetEmail = sendPasswordResetEmail;
